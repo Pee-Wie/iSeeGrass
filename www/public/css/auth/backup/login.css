@@ -1,0 +1,314 @@
+:root {
+  --bg-dark: #041005;
+  --panel: rgba(6, 20, 9, 0.92);
+  --panel-soft: rgba(15, 48, 18, 0.95);
+  --surface: rgba(13, 34, 15, 0.98);
+  --text: #eef7eb;
+  --muted: #b8d7b1;
+  --accent: #7ccd4f;
+  --accent-strong: #4b7b28;
+  --border: rgba(124, 203, 77, 0.3);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  background: linear-gradient(180deg, rgba(8, 17, 8, 0.75), rgba(4, 8, 4, 0.92)), url('../../../../public/icons/iSeeGrass.png') center/cover no-repeat fixed;
+  color: var(--text);
+  overflow: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+#signup-map-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(8, 20, 10, 0.72);
+  z-index: 0;
+}
+
+.wrapper {
+  position: relative;
+  width: 920px;
+  max-width: calc(100vw - 2rem);
+  height: 560px;
+  margin: 100px auto;
+  border-radius: 30px;
+  overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.4);
+  z-index: 1;
+}
+
+.form-section,
+.info-section {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transition: all 0.6s ease;
+  padding: 50px;
+}
+
+.form-section {
+  background: var(--panel);
+  z-index: 2;
+  clip-path: polygon(0 0, 60% 0, 40% 100%, 0 100%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+
+.wrapper.active .form-section {
+  clip-path: polygon(40% 0, 100% 0, 100% 100%, 60% 100%);
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+
+.info-section {
+  background: rgba(3, 13, 4, 0.9);
+  color: var(--text);
+  z-index: 1;
+  clip-path: polygon(60% 0, 100% 0, 100% 100%, 40% 100%);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 60px;
+  text-align: right;
+}
+
+.wrapper.active .info-section {
+  clip-path: polygon(0 0, 40% 0, 60% 100%, 0 100%);
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.form-box {
+  width: 100%;
+  max-width: 320px;
+  max-height: 100%;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.form-box h2 {
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+.input-box {
+  margin-bottom: 18px;
+}
+
+.input-box label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.input-box input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid rgba(124, 203, 77, 0.18);
+  border-radius: 12px;
+  background: rgba(14, 34, 15, 0.9);
+  color: var(--text);
+}
+
+.input-box input::placeholder {
+  color: rgba(238, 247, 235, 0.6);
+}
+
+.input-box small {
+  display: block;
+  margin-top: 6px;
+  color: rgba(238, 247, 235, 0.65);
+}
+
+.btn {
+  width: 100%;
+  padding: 14px 18px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #7ccc4f, #3a731c);
+  color: #081908;
+  box-shadow: 0 18px 35px rgba(69, 121, 55, 0.28);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 22px 42px rgba(69, 121, 55, 0.34);
+}
+
+.text {
+  margin-top: 18px;
+  text-align: center;
+}
+
+.text a {
+  color: #a6e4a2;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.info-section h2 {
+  margin-top: 100px;
+  font-size: 30px;
+  margin-bottom: 18px;
+  color: var(--accent);
+}
+
+.info-section p {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+
+.info-section a {
+  color: #b8e3ac;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+/* Signup Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-content {
+  background: var(--panel);
+  border-radius: 20px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 100vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border);
+  animation: slideUp 0.4s ease;
+  padding: 40px;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.modal-header h2 {
+  color: var(--text);
+  font-size: 24px;
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 28px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  color: var(--accent);
+}
+
+.modal-body {
+  width: 100%;
+}
+
+.modal-body .input-box {
+  margin-bottom: 16px;
+}
+
+.modal-body .btn {
+  margin-top: 8px;
+}
+
+.modal-body .text {
+  margin-top: 16px;
+}
+
+@media (max-width: 900px) {
+  .wrapper {
+    width: 100%;
+    height: auto;
+    margin: 20px;
+  }
+
+  .form-section,
+  .info-section {
+    position: relative;
+    width: 100%;
+    height: auto;
+    clip-path: none;
+    padding: 30px;
+  }
+
+  .info-section {
+    text-align: left;
+  }
+
+  .modal-content {
+    width: 95%;
+    max-width: 100%;
+    padding: 30px 20px;
+  }
+}

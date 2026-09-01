@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - iSeeGrass</title>
+  <link rel="icon" type="image/png" href="../../public/icons/favicon.png" />
+  <link rel="stylesheet" href="../../public/css/auth/login.css" />
+</head>
+
+<body>
+  <div id="signup-map-bg"></div>
+  <div class="wrapper" id="wrapper">
+    <!-- Login Form -->
+    <div class="form-section" id="formSection">
+      <div class="form-box" id="loginForm">
+        <div style="display: flex; align-items: left; margin-bottom: 1.3em;">
+        </div>
+        <h2>Login</h2>
+        <form id="loginFormElem" method="POST" autocomplete="off">
+          <div class="input-box">
+            <label for="username">Username:</label>
+            <input type="text" name="username" id="username" placeholder="e.g. JM Reyes" required />
+          </div>
+          <div class="input-box" id="loginPasswordBox">
+            <label for="password">Password:</label>
+            <input type="password" name="password" id="password" placeholder="Type your Password here!" required />
+            <div class="text">
+                <p>Forgot your password? <a href="#" onclick="toggleForm(); return false;">Reset Password</a></p>
+            </div>
+          </div>
+          <!-- for now thsi button auto,atically redirect to users/index.html -->
+          <button class="btn btn-primary" type="submit" name="login_submit" onclick="window.location.href='../../views/users/index.html'">Sign in</button>
+        </form>
+        <div class="text">
+          <p>Don't have an account? <a href="#" onclick="requestForm(); return false;">Sign Up</a></p>
+        </div>
+      </div>
+
+      <!-- Register Form -->
+      <div class="form-box" id="registerForm" style="display: none;">
+        <h2>Reset Password</h2>
+        <form method="POST" autocomplete="off">
+          <div class="input-box">
+            <label for="reset-email">Email:</label>
+            <input type="email" name="email" id="reset-email" placeholder="e.g. jmreyes@example.com" required />
+            <small>Enter the email linked to your account.</small>
+          </div>
+          <div class="input-box">
+            <label for="reset-username">Username</label>
+            <input type="text" name="username" id="reset-username" placeholder="Username associated with the email" required />
+            <small>Use the username connected to that email.</small>
+          </div>
+          <button class="btn btn-primary" type="submit" name="request_reset">Request Reset</button>
+        </form>
+        <div class="text">
+          <p>Remembered it? <a href="#" onclick="toggleForm(); return false;">Sign in</a></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Diagonal Info Panel -->
+    <div class="info-section" id="infoPanel">
+      <div>
+        <h2 class="none" id="infoTitle">“See It."<br>"Identify It."<br>"Understand It.”</h2>
+        <p class="none" id="infoText">Welcome back to iSeeGrass.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Signup Modal - Content loaded dynamically -->
+  <div class="modal-overlay" id="signupModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Request Account Creation</h3>
+        <button class="modal-close" onclick="closeSignupModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="signupFormContainer">
+        <!-- Form will be loaded here dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <script src="../../public/js/auth/login.js"></script>
+</body>
+</html>

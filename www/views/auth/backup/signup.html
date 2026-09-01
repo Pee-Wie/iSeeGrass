@@ -1,0 +1,40 @@
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up - iSeeGrass</title>
+  <link rel="stylesheet" href="../../public/css/auth/login.css" />
+
+  <div class="form-container">
+    <form id="signupFormElem" method="POST" autocomplete="off">
+      <div class="input-box">
+        <label for="signup-fullname">Full Name:</label>
+        <input type="text" name="fullname" id="signup-fullname" placeholder="e.g. Jan Mark Reyes" required />
+        <small>Enter your full name</small>
+      </div>
+      <div class="input-box">
+        <label for="signup-username">Username:</label>
+        <input type="text" name="username" id="signup-username" placeholder="e.g. JM Reyes" required />
+        <small>Choose a unique username</small>
+      </div>
+      <div class="input-box">
+        <label for="signup-email">Email:</label>
+        <input type="email" name="email" id="signup-email" placeholder="e.g. jmreyes@example.com" required />
+        <small>Enter a valid email address</small>
+      </div>
+      <div class="input-box">
+        <label for="signup-password">Password:</label>
+        <input type="password" name="password" id="signup-password" placeholder="Create a strong password" required />
+        <small>Minimum 8 characters recommended</small>
+      </div>
+      <div class="input-box">
+        <label for="signup-confirm-password">Confirm Password:</label>
+        <input type="password" name="confirm-password" id="signup-confirm-password" placeholder="Confirm your password" required />
+        <small>Passwords must match</small>
+      </div>
+      <button class="btn btn-primary" type="submit" name="signup_submit">Create Account</button>
+    </form>
+    <div class="text">
+        <p>"Start Exploring the Seagrass Beneath the Surface."</p><br>
+        <p>Create your iSeeGrass account and turn observations into insights.</p><br>
+      <p>Already have an account? <a href="#" onclick="closeSignupModal(); return false;">Sign In</a></p>
+    </div>
+  </div>
