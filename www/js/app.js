@@ -28,21 +28,21 @@ export function getNavHref(targetKey) {
   const navMap = {
     root: {
       home: 'index.html',
-      explore: 'index.html',
+      // explore: 'public/explore.html',
       about: 'public/about.html',
       contact: 'public/contacts.html',
       login: 'views/auth/login.html'
     },
     public: {
       home: '../index.html',
-      explore: '../index.html',
+      // explore: '../public/explore.html',
       about: 'about.html',
       contact: 'contacts.html',
       login: '../views/auth/login.html'
     },
     views: {
       home: '../../index.html',
-      explore: '../../index.html',
+      // explore: '../../public/explore.html',
       about: '../../public/about.html',
       contact: '../../public/contacts.html',
       login: '../auth/login.html'
@@ -54,7 +54,8 @@ export function getNavHref(targetKey) {
 
 export function getLinkConfig() {
   return [
-    { label: 'Explore Seagrass', href: getNavHref('explore') },
+    { label: 'Home', href: getNavHref('home') },
+    // { label: 'Explore Seagrass', href: getNavHref('explore') },
     { label: 'About us', href: getNavHref('about') },
     { label: 'Contact', href: getNavHref('contact') },
     { label: 'Sign In', href: getNavHref('login'), className: 'btn btn-secondary nav-cta' }

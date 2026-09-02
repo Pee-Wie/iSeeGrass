@@ -66,13 +66,13 @@ Installed plugins:
   @capacitor/core
 ```
 
-### Copy web assets into Android
+### Copy web assets into Android  ================================================
 ```bash
 npx cap copy android
 ```
 Copies latest frontend files from `www/` into the native Android project.
 
-### Sync the project
+### Sync the project ==========================================================
 ```bash
 npx cap sync android
 ```
@@ -145,7 +145,7 @@ From the Android project folder:
 cd android
 ```
 
-### Build debug APK
+### Build debug APK ====================================================================
 ```bash
 ./gradlew assembleDebug
 ```
@@ -154,7 +154,7 @@ APK path:
 
 ### Build release APK
 ```bash
-./gradlew assembleRelease
+./gradlew assembleRelease =========================================================
 ```
 
 ### Clean build files
@@ -167,7 +167,7 @@ cd ..
 npx cap sync android
 ```
 
-## 5. Web Testing
+## 5. Web Testing ===================================================================
 
 Serve the frontend locally:
 ```bash
