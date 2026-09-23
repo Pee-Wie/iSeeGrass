@@ -17,7 +17,14 @@
       <div class="form-box" id="loginForm">
         <div style="display: flex; align-items: left; margin-bottom: 1.3em;">
         </div>
-        <h2>Login</h2>
+        <div class="row row-deck row-cards">
+          <div class="col-sm-6 col-lg-3">
+            <h2>Login</h2>
+          </div>
+          <div class="col-sm-4 col-lg-2">
+            <a href="../../index.html">Home</a>
+          </div>
+        </div>
         <form id="loginFormElem" method="POST" autocomplete="off">
           <div class="input-box">
             <label for="username">Username:</label>
@@ -40,7 +47,14 @@
 
       <!-- Register Form -->
       <div class="form-box" id="registerForm" style="display: none;">
-        <h2>Reset Password</h2>
+        <div class="row row-deck row-cards">
+          <div class="col-sm-6 col-lg-3">
+            <h5>Reset Password</h5>
+          </div>
+          <div class="col-sm-4 col-lg-2">
+            <a href="../../index.html">Home</a>
+          </div>
+        </div>
         <form method="POST" autocomplete="off">
           <div class="input-box">
             <label for="reset-email">Email:</label>
@@ -63,7 +77,6 @@
     <!-- Diagonal Info Panel -->
     <div class="info-section" id="infoPanel">
       <div>
-        <h1><a href="../../index.html">Home</a></h1>
         <h2 class="none" id="infoTitle">“See It."<br>"Identify It."<br>"Understand It.”</h2>
         <p class="none" id="infoText">Welcome back to iSeeGrass.</p>
       </div>

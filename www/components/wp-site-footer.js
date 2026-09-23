@@ -15,4 +15,4 @@ class ISeeFooter extends HTMLElement {
   }
 }
 
-customElements.define('isee-footer', ISeeFooter);
+customElements.define('isee-wp-site-footer', ISeeFooter);

@@ -207,6 +207,96 @@ body {
   box-shadow: 0 28px 55px rgba(0, 0, 0, 0.22);
 }
 
+.card.transparent {
+  background: rgba(34, 112, 48, 0.22);
+  border: 1px solid rgba(124, 203, 77, 0.4);
+  box-shadow: 0 18px 40px rgba(10, 54, 18, 0.2);
+  backdrop-filter: blur(14px);
+}
+
+.card.transparent:hover {
+  background: rgba(52, 139, 61, 0.3);
+  border-color: rgba(157, 231, 113, 0.7);
+  box-shadow: 0 28px 55px rgba(10, 54, 18, 0.32);
+}
+
+.dashboard-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dashboard-actions li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.dashboard-actions .btn {
+  width: 100%;
+  border-radius: 0.5rem;
+  padding: 0.7rem 0.85rem;
+  font-size: 0.9rem;
+}
+
+.user-navigation {
+  min-height: 100vh;
+}
+
+.user-navigation-links {
+  gap: 0.35rem;
+}
+
+@media (max-width: 767.98px) {
+  .page {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .page > isee-navbar-user {
+    display: block;
+    position: relative;
+    z-index: 20;
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  .user-navigation {
+    position: relative !important;
+    width: 100%;
+    min-height: auto;
+  }
+
+  .page > .page-wrapper {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .user-navigation .container-fluid {
+    align-items: center;
+  }
+
+  .user-navigation .navbar-collapse {
+    width: 100%;
+  }
+
+  .user-navigation-links {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.25rem;
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.5rem;
+    overflow-x: auto;
+  }
+
+  .user-navigation-links .nav-link {
+    white-space: nowrap;
+  }
+}
+
 .card h3 {
   margin-top: 0;
   margin-bottom: 0.75rem;
