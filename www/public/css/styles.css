@@ -1,18 +1,24 @@
 /* iSeeGrass landing page theme */
 :root {
   color-scheme: dark;
-  --bg: #081908;
-  --surface: rgba(18, 54, 18, 0.88);
-  --surface-strong: rgba(10, 30, 10, 0.96);
-  --text: #eef7eb;
-  --muted: #b5d4b1;
-  --accent: #7ccb4d;
-  --accent-dark: #4a8c2b;
-  --border: rgba(255, 255, 255, 0.08);
+  --bg: #122614;
+  --surface: rgba(30, 72, 34, 0.82);
+  --surface-strong: rgba(20, 52, 24, 0.94);
+  --text: #f0f9ed;
+  --muted: #c4ddc0;
+  --accent: #8ed655;
+  --accent-dark: #5aaa33;
+  --green: rgba(32, 72, 36, 0.80);
+  --dark-green: rgba(18, 48, 22, 0.86);
+  --border: rgba(255, 255, 255, 0.11);
 }
 
 * {
   box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
 }
 
 html, body {
@@ -20,29 +26,50 @@ html, body {
   min-height: 100%;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--text);
-  background: linear-gradient(180deg, rgba(8, 17, 8, 0.75), rgba(4, 8, 4, 0.92)), url('/public/icons/iSeeGrass.png') center/cover no-repeat fixed;
+  background: linear-gradient(180deg, rgba(14, 30, 14, 0.60), rgba(10, 20, 10, 0.80))center / cover no-repeat fixed, url('/public/icons/iSeeGrass.png') center/cover no-repeat fixed;
 }
 
 body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(12, 34, 14, 0.28), transparent 55%, rgba(2, 5, 2, 0.55));
+  background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(20, 52, 24, 0.20), transparent 55%, rgba(8, 18, 8, 0.40));
   background-size: 18px 18px, cover;
   pointer-events: none;
-  opacity: 0.96;
+  opacity: 0.90;
 }
 
 body {
   position: relative;
   overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* ── Custom element host constraints ─────────────────────────────── */
+isee-header,
+isee-wp-site-footer {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* isee-navbar sits inside the header flex row — let it size naturally
+   and push to the right via margin-left: auto */
+isee-navbar {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  box-sizing: border-box;
 }
 
 .container {
   width: min(1120px, calc(100% - 2rem));
   margin: 0 auto;
   padding: 4rem 0 6rem;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .site-header {
@@ -54,11 +81,15 @@ body {
   justify-content: space-between;
   gap: 1rem;
   width: 100%;
+  max-width: 100vw;
   padding: 1rem 1.5rem;
-  background: rgba(8, 22, 10, 0.85);
+  background: var(--dark-green);
   border-bottom: 1px solid rgba(124, 203, 77, 0.16);
   backdrop-filter: blur(16px);
+  box-sizing: border-box;
 }
+
+/* isee-navbar alignment is handled by the isee-navbar host rule above */
 
 .brand {
   color: #d8f0b9;
@@ -169,18 +200,31 @@ body {
 }
 
 .section {
-  background: rgba(8, 32, 12, 0.88);
-  border: 1px solid rgba(124, 203, 77, 0.18);
+  background: var(--green);
+  border: 1px solid rgba(142, 214, 85, 0.22);
   border-radius: 28px;
   padding: 2.5rem;
   margin-top: 2rem;
   backdrop-filter: blur(18px);
 }
 
+@media (max-width: 640px) {
+  .section {
+    padding: 1.1rem;
+    border-radius: 18px;
+    margin-top: 1.25rem;
+  }
+
+  .container {
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+  }
+}
+
 .section h2 {
   margin-top: 0;
   margin-bottom: 0.85rem;
-  color: #f2f7e9;
+  color: #f5faf2;
 }
 
 .grid {
@@ -195,29 +239,29 @@ body {
 .card {
   padding: 1.5rem;
   border-radius: 24px;
-  background: rgba(7, 29, 11, 0.76);
-  border: 1px solid rgba(124, 203, 77, 0.18);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.16);
+  background: rgba(18, 56, 24, 0.70);
+  border: 1px solid rgba(142, 214, 85, 0.22);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
 
 .card:hover {
   transform: translateY(-4px);
-  border-color: rgba(124, 203, 77, 0.35);
-  box-shadow: 0 28px 55px rgba(0, 0, 0, 0.22);
+  border-color: rgba(142, 214, 85, 0.42);
+  box-shadow: 0 28px 55px rgba(0, 0, 0, 0.18);
 }
 
 .card.transparent {
-  background: rgba(34, 112, 48, 0.22);
-  border: 1px solid rgba(124, 203, 77, 0.4);
-  box-shadow: 0 18px 40px rgba(10, 54, 18, 0.2);
+  background: rgba(52, 130, 60, 0.28);
+  border: 1px solid rgba(142, 214, 85, 0.38);
+  box-shadow: 0 18px 40px rgba(20, 70, 28, 0.16);
   backdrop-filter: blur(14px);
 }
 
 .card.transparent:hover {
-  background: rgba(52, 139, 61, 0.3);
-  border-color: rgba(157, 231, 113, 0.7);
-  box-shadow: 0 28px 55px rgba(10, 54, 18, 0.32);
+  background: rgba(68, 150, 76, 0.36);
+  border-color: rgba(170, 240, 120, 0.65);
+  box-shadow: 0 28px 55px rgba(20, 70, 28, 0.28);
 }
 
 .dashboard-actions {
@@ -335,5 +379,66 @@ footer p {
   .hero-actions {
     flex-direction: column;
     align-items: stretch;
+  }
+}
+
+/* ── Prevent any horizontal scroll on any viewport width ─────────── */
+@media (max-width: 767px) {
+  html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  /* Clamp the header and its contents */
+  .site-header {
+    padding: 0.75rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  /* Tighten the nav so it doesn't push past the screen edge */
+  .nav-links {
+    gap: 0.75rem;
+    font-size: 0.88rem;
+  }
+
+  /* Prevent the large hero headline from blowing out width */
+  .hero h1 {
+    font-size: clamp(1.75rem, 8vw, 3rem);
+    max-width: 100%;
+    word-break: break-word;
+  }
+
+  .hero p.lead {
+    font-size: 0.98rem;
+    max-width: 100%;
+  }
+
+  /* Sections must stay inside viewport */
+  .section {
+    border-radius: 14px;
+    padding: 1rem;
+    /* Backdrop-filter on a compositing layer sometimes creates a fractional
+       pixel overflow — contain it */
+    contain: paint;
+  }
+
+  /* Cards in a grid must not overflow */
+  .card {
+    min-width: 0;
+    word-break: break-word;
+  }
+
+  /* Grid: single column only, no min-width fighting the viewport */
+  .features {
+    grid-template-columns: 1fr;
+  }
+
+  /* Container: full width, no room for side gaps to cause overflow */
+  .container {
+    width: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 }

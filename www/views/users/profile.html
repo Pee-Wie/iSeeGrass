@@ -1,159 +1,388 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="../../public/icons/favicon.png">
-    <link rel="stylesheet" href="../../public/css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="iSeeGrass — manage your profile, update personal details and change your password.">
+  <title>Profile | iSeeGrass</title>
 
-    <link rel="stylesheet" href="../../resources/tabler/css/tabler.css">
-    <link rel="stylesheet" href="../../resources/tabler/css/tabler.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.min.css" />
+  <link rel="icon" type="image/png" href="../../public/icons/favicon.png">
 
-    <title></title>
+  <!-- Tabler (load first so iSeeGrass styles can override) -->
+  <link rel="stylesheet" href="../../resources/tabler/css/tabler.css">
+  <link rel="stylesheet" href="../../resources/tabler/css/tabler.min.css">
+
+  <!-- Tabler Icons webfont -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/tabler-icons.min.css">
+
+  <!-- iSeeGrass shared theme -->
+  <link rel="stylesheet" href="../../public/css/users/styles-users.css">
+
+  <!-- Profile page styles -->
+  <link rel="stylesheet" href="../../public/css/users/profile/styles-users-profile.css">
 </head>
 
 <body>
-    <!-- 
-    <div class="container" style="margin-top: 2rem; text-align: center;">
-        <h2>User Quick Links</h2>
-        
-    </div>
-    <div class="container" style="margin-top: 2rem; text-align: center;">
-        <h2>About iSeeGrass</h2>
-        <p>iSeeGrass is a web and mobile application designed for seagrass species identification and assessment using image recognition and CNN classification.</p>
-        <p>It aims to support researchers, students, and marine practitioners in accurately identifying seagrass species and improving data collection efficiency.</p>
-    </div>
-    <div class="container" style="margin-top: 2rem; text-align: center;">
-        <h2>Contact Us</h2>
-        <p>If you have any questions or need assistance, please reach out to our support team at <a href="mailto:support@iseegrass.com">support@iseegrass.com</a>.</p>
-    </div> -->
+  <div class="page">
 
-    <!-- <main class="container"> -->
-    <div class="page">
-        <!-- Sidebar -->
-        <isee-navbar-user></isee-navbar-user>
-        <div class="page-wrapper">
-            <div class="page-header d-print-none">
-                <div class="container-xl">
-                    <div class="row g-2 align-items-center">
-                        <div class="col">
-                            <h2 class="page-title text-primary">>Users/Profile</h2>
-                        </div>
-                    </div>
-                </div>
+    <!-- Sidebar -->
+    <isee-navbar-user></isee-navbar-user>
+
+    <div class="page-wrapper">
+
+      <!-- ── Page header ───────────────────────────────────────── -->
+      <div class="page-header d-print-none">
+        <div class="container-xl">
+          <div class="row g-2 align-items-center">
+            <div class="col">
+              <h2 class="page-title text-primary">&gt; Profile</h2>
             </div>
-            <div class="page-body">
-                <div class="container-xl">
-                    <div class="row row-deck row-cards">
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 10rem">
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 10rem">
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 10rem">
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 10rem">
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 20rem">
-                                    <ul class="dashboard-actions">
-                                        <li>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/users/dashboard.html'">Dashboard</button>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/users/identify.html'">Identify
-                                                Grass</button>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/users/editor.html'">My
-                                                Observations</button>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/users/profile.html'">Profile</button>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/auth/login.html'">Signout</button>
-                                            <a href="../../index.html" class="btn">Back to Home Page</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-8">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 20rem">
-                                    <div class="container">
-                                        <h1>Welcome to iSeeGrass</h1>
-                                        <p>This is the user dashboard.</p>
-                                        <p>From here, you can access various features and functionalities of the
-                                            iSeeGrass application.</p>
-                                        <p>Use the navigation menu to explore different sections.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                        <!-- <div class="col-12">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div>
-                        <div class="col-md-12 col-lg-8">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div>
-                        <div class="col-md-12 col-lg-8">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div> -->
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
-    </div>
-    <!-- </main> -->
+      </div>
 
-    <!-- <isee-footer></isee-footer> -->    
-    <script type="module" src="../../components/navbar-user.js"></script>
-    <script type="module" src="../../resources/tabler/js/tabler.min.js"></script>
-    <script type="module" src="../../resources/tabler/js/tabler.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
+      <!-- ── Page body ─────────────────────────────────────────── -->
+      <div class="page-body">
+        <div class="container-xl">
+
+          <!-- Toast notification -->
+          <div class="profile-toast" id="profileToast" aria-live="polite" aria-atomic="true" hidden>
+            <i class="ti ti-circle-check profile-toast__icon"></i>
+            <span class="profile-toast__msg" id="profileToastMsg">Saved successfully.</span>
+          </div>
+
+          <div class="profile-layout">
+
+            <!-- ══════════════════════════════════════════════════
+                 LEFT COLUMN — avatar card + stats
+                 ══════════════════════════════════════════════════ -->
+            <aside class="profile-aside">
+
+              <!-- Avatar card -->
+              <div class="profile-card">
+                <div class="profile-card__avatar-wrap">
+                  <div class="profile-card__avatar" id="avatarPreview" aria-label="Profile picture">
+                    <img id="avatarImg" src="" alt="Profile picture" hidden>
+                    <span class="profile-card__avatar-initials" id="avatarInitials">U</span>
+                  </div>
+                  <label class="profile-card__avatar-upload" for="avatarInput"
+                    title="Change profile picture" aria-label="Upload profile picture">
+                    <i class="ti ti-camera"></i>
+                  </label>
+                  <input type="file" id="avatarInput" accept="image/*" class="sr-only"
+                    aria-label="Upload profile picture">
+                </div>
+
+                <div class="profile-card__info">
+                  <p class="profile-card__name" id="cardDisplayName">User</p>
+                  <p class="profile-card__role" id="cardDisplayRole">Researcher</p>
+                  <p class="profile-card__email" id="cardDisplayEmail">—</p>
+                </div>
+
+                <hr class="profile-card__divider">
+
+                <!-- Stat chips -->
+                <div class="profile-stats">
+                  <div class="profile-stat">
+                    <span class="profile-stat__value" id="statIdentifications">—</span>
+                    <span class="profile-stat__label">Identifications</span>
+                  </div>
+                  <div class="profile-stat">
+                    <span class="profile-stat__value" id="statObservations">—</span>
+                    <span class="profile-stat__label">Observations</span>
+                  </div>
+                  <div class="profile-stat">
+                    <span class="profile-stat__value" id="statSpecies">—</span>
+                    <span class="profile-stat__label">Species found</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick links -->
+              <div class="profile-quicklinks">
+                <a href="/views/users/dashboard.html" class="pql-btn">
+                  <i class="ti ti-layout-dashboard"></i> Dashboard
+                </a>
+                <a href="/views/users/identify.html" class="pql-btn">
+                  <i class="ti ti-microscope"></i> Identify
+                </a>
+                <a href="/views/users/editor.html" class="pql-btn">
+                  <i class="ti ti-clipboard-list"></i> Observations
+                </a>
+              </div>
+            </aside>
+
+            <!-- ══════════════════════════════════════════════════
+                 RIGHT COLUMN — edit forms
+                 ══════════════════════════════════════════════════ -->
+            <main class="profile-main">
+
+              <!-- ── Personal Information ────────────────────── -->
+              <section class="prof-section" aria-labelledby="section-personal">
+                <div class="prof-section__header">
+                  <span class="prof-section__icon"><i class="ti ti-user-circle"></i></span>
+                  <h3 id="section-personal">Personal Information</h3>
+                </div>
+
+                <form id="formPersonal" class="prof-form" novalidate autocomplete="off">
+
+                  <!-- Avatar upload hint (visible in mobile stacked layout) -->
+                  <div class="prof-form__avatar-row">
+                    <div class="prof-form__avatar-thumb" id="avatarThumbMobile" aria-hidden="true">
+                      <img id="avatarThumbImg" src="" alt="" hidden>
+                      <span id="avatarThumbInitials">U</span>
+                    </div>
+                    <div class="prof-form__avatar-actions">
+                      <label class="prof-btn prof-btn--outline" for="avatarInput">
+                        <i class="ti ti-upload"></i> Upload Photo
+                      </label>
+                      <button type="button" id="btnRemoveAvatar" class="prof-btn prof-btn--ghost">
+                        <i class="ti ti-trash"></i> Remove
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Name row — First / Middle / Last -->
+                  <div class="prof-form__row prof-form__row--3">
+                     <div class="prof-form__group">
+                      <label class="prof-form__label" for="fieldLastName">Last Name</label>
+                      <input class="prof-form__input" type="text" id="fieldLastName"
+                        name="lastName" placeholder="e.g. Santos" maxlength="60"
+                        autocomplete="family-name" required>
+                      <span class="prof-form__error" id="errLastName" role="alert" hidden>
+                        Last name is required.
+                      </span>
+                    </div>
+                    <div class="prof-form__group">
+                      <label class="prof-form__label" for="fieldFirstName">First Name</label>
+                      <input class="prof-form__input" type="text" id="fieldFirstName"
+                        name="firstName" placeholder="e.g. Maria" maxlength="60"
+                        autocomplete="given-name" required>
+                      <span class="prof-form__error" id="errFirstName" role="alert" hidden>
+                        First name is required.
+                      </span>
+                    </div>
+                    <div class="prof-form__group">
+                      <label class="prof-form__label" for="fieldMiddleName">
+                        Middle / Maiden Name
+                        <span class="prof-form__hint">Optional</span>
+                      </label>
+                      <input class="prof-form__input" type="text" id="fieldMiddleName"
+                        name="middleName" placeholder="e.g. Cruz" maxlength="60"
+                        autocomplete="additional-name">
+                    </div>
+                  </div>
+
+                  <!-- Email + Phone (contact info) -->
+                  <div class="prof-form__row">
+                    <div class="prof-form__group">
+                      <label class="prof-form__label" for="fieldEmail">Email Address</label>
+                      <input class="prof-form__input" type="email" id="fieldEmail"
+                        name="email" placeholder="e.g. maria@example.com" maxlength="120"
+                        autocomplete="email" required>
+                      <span class="prof-form__error" id="errEmail" role="alert" hidden>
+                        A valid email address is required.
+                      </span>
+                    </div>
+                    <div class="prof-form__group">
+                      <label class="prof-form__label" for="fieldPhone">
+                        Phone Number
+                        <span class="prof-form__hint">Optional</span>
+                      </label>
+                      <input class="prof-form__input" type="tel" id="fieldPhone"
+                        name="phone" placeholder="e.g. +63 912 345 6789" maxlength="30"
+                        autocomplete="tel">
+                      <span class="prof-form__error" id="errPhone" role="alert" hidden>
+                        Enter a valid phone number.
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Username -->
+                  <div class="prof-form__group">
+                    <label class="prof-form__label" for="fieldUsername">
+                      Username
+                      <span class="prof-form__hint">Used as your display handle</span>
+                    </label>
+                    <input class="prof-form__input" type="text" id="fieldUsername"
+                      name="username" placeholder="e.g. mariasantos" maxlength="40"
+                      autocomplete="username" pattern="[A-Za-z0-9_\-]{3,40}" required>
+                    <span class="prof-form__error" id="errUsername" role="alert" hidden>
+                      3–40 characters; letters, numbers, _ and - only.
+                    </span>
+                  </div>
+
+                  <!-- Role -->
+                  <div class="prof-form__group">
+                    <label class="prof-form__label" for="fieldRole">Role / Affiliation</label>
+                    <select class="prof-form__input prof-form__select" id="fieldRole" name="role">
+                      <option value="Researcher">Researcher</option>
+                      <option value="Student">Student</option>
+                      <option value="Class Instructor">Class Instructor</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+
+                  <!-- Institution -->
+                  <div class="prof-form__group">
+                    <label class="prof-form__label" for="fieldInstitution">
+                      Institution / Organization
+                      <span class="prof-form__hint">Optional</span>
+                    </label>
+                    <input class="prof-form__input" type="text" id="fieldInstitution"
+                      name="institution" placeholder="e.g. Silliman University" maxlength="120">
+                  </div>
+
+                  <!-- Bio -->
+                  <div class="prof-form__group">
+                    <label class="prof-form__label" for="fieldBio">
+                      Bio
+                      <span class="prof-form__hint">Brief description — shown on shared observations</span>
+                    </label>
+                    <textarea class="prof-form__input prof-form__textarea" id="fieldBio"
+                      name="bio" rows="3" maxlength="280"
+                      placeholder="Tell others a little about your background or interest in seagrass…"></textarea>
+                    <span class="prof-form__char-count">
+                      <span id="bioCharCount">0</span> / 280
+                    </span>
+                  </div>
+
+                  <div class="prof-form__actions">
+                    <button type="submit" class="prof-btn prof-btn--primary" id="btnSavePersonal">
+                      <i class="ti ti-device-floppy"></i>
+                      <span>Save Changes</span>
+                    </button>
+                    <button type="button" class="prof-btn prof-btn--ghost" id="btnResetPersonal">
+                      <i class="ti ti-refresh"></i> Discard
+                    </button>
+                  </div>
+
+                </form>
+              </section>
+
+              <!-- ── Joined Since (read-only) ────────────────── -->
+              <section class="prof-section prof-section--readonly" aria-labelledby="section-joined">
+                <div class="prof-section__header">
+                  <span class="prof-section__icon"><i class="ti ti-calendar-event"></i></span>
+                  <h3 id="section-joined">Account Information</h3>
+                </div>
+                <div class="prof-readonly-row">
+                  <div class="prof-readonly-field">
+                    <span class="prof-readonly-field__label">Joined Since</span>
+                    <span class="prof-readonly-field__value" id="fieldJoinedSince">—</span>
+                  </div>
+                  <div class="prof-readonly-lock">
+                    <i class="ti ti-lock"></i>
+                    <span>This information is set at registration and cannot be changed.</span>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ── Change Password ─────────────────────────── -->
+              <section class="prof-section" aria-labelledby="section-password">
+                <div class="prof-section__header">
+                  <span class="prof-section__icon"><i class="ti ti-lock"></i></span>
+                  <h3 id="section-password">Change Password</h3>
+                </div>
+
+                <form id="formPassword" class="prof-form" novalidate autocomplete="off">
+
+                  <div class="prof-form__group">
+                    <label class="prof-form__label" for="fieldCurrentPw">Current Password</label>
+                    <div class="prof-form__pw-wrap">
+                      <input class="prof-form__input" type="password" id="fieldCurrentPw"
+                        name="currentPassword" placeholder="Enter your current password"
+                        autocomplete="current-password" required>
+                      <button type="button" class="prof-pw-toggle" aria-label="Show / hide password"
+                        data-target="fieldCurrentPw">
+                        <i class="ti ti-eye"></i>
+                      </button>
+                    </div>
+                    <span class="prof-form__error" id="errCurrentPw" role="alert" hidden>
+                      Current password is required.
+                    </span>
+                  </div>
+
+                  <div class="prof-form__group">
+                    <label class="prof-form__label" for="fieldNewPw">New Password</label>
+                    <div class="prof-form__pw-wrap">
+                      <input class="prof-form__input" type="password" id="fieldNewPw"
+                        name="newPassword" placeholder="Min 8 characters"
+                        autocomplete="new-password" minlength="8" required>
+                      <button type="button" class="prof-pw-toggle" aria-label="Show / hide password"
+                        data-target="fieldNewPw">
+                        <i class="ti ti-eye"></i>
+                      </button>
+                    </div>
+                    <!-- Strength bar -->
+                    <div class="pw-strength" id="pwStrengthWrap" hidden>
+                      <div class="pw-strength__bar">
+                        <div class="pw-strength__fill" id="pwStrengthFill"></div>
+                      </div>
+                      <span class="pw-strength__label" id="pwStrengthLabel"></span>
+                    </div>
+                    <span class="prof-form__error" id="errNewPw" role="alert" hidden>
+                      New password must be at least 8 characters.
+                    </span>
+                  </div>
+
+                  <div class="prof-form__group">
+                    <label class="prof-form__label" for="fieldConfirmPw">Confirm New Password</label>
+                    <div class="prof-form__pw-wrap">
+                      <input class="prof-form__input" type="password" id="fieldConfirmPw"
+                        name="confirmPassword" placeholder="Re-enter new password"
+                        autocomplete="new-password" required>
+                      <button type="button" class="prof-pw-toggle" aria-label="Show / hide password"
+                        data-target="fieldConfirmPw">
+                        <i class="ti ti-eye"></i>
+                      </button>
+                    </div>
+                    <span class="prof-form__error" id="errConfirmPw" role="alert" hidden>
+                      Passwords do not match.
+                    </span>
+                  </div>
+
+                  <div class="prof-form__actions">
+                    <button type="submit" class="prof-btn prof-btn--primary" id="btnSavePassword">
+                      <i class="ti ti-lock-check"></i>
+                      <span>Update Password</span>
+                    </button>
+                    <button type="button" class="prof-btn prof-btn--ghost" id="btnResetPassword">
+                      <i class="ti ti-refresh"></i> Clear
+                    </button>
+                  </div>
+
+                </form>
+              </section>
+
+              <!-- ── Danger Zone ────────────────────────────── -->
+              <section class="prof-section prof-section--danger" aria-labelledby="section-danger">
+                <div class="prof-section__header">
+                  <span class="prof-section__icon"><i class="ti ti-alert-triangle"></i></span>
+                  <h3 id="section-danger">Account</h3>
+                </div>
+                <p class="prof-danger-desc">
+                  Logging out will end your current session. You can log back in at any time.
+                </p>
+                <div class="prof-form__actions">
+                  <a href="/views/auth/login.html" class="prof-btn prof-btn--danger">
+                    <i class="ti ti-logout"></i> Log Out
+                  </a>
+                </div>
+              </section>
+
+            </main>
+          </div><!-- /profile-layout -->
+
+        </div><!-- /container-xl -->
+      </div><!-- /page-body -->
+    </div><!-- /page-wrapper -->
+  </div><!-- /page -->
+
+  <script type="module" src="../../components/navbar-user.js"></script>
+  <script type="module" src="../../public/js/users/profile/script-users-profile.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
+  <!-- Android back-button handler (no-op on web) -->
+  <script src="/js/back-handler.js"></script>
 </body>
-
 </html>

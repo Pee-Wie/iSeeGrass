@@ -1,14 +1,14 @@
 /* iSeeGrass landing page theme */
 :root {
   color-scheme: dark;
-  --bg: #081908;
-  --surface: rgba(18, 54, 18, 0.88);
-  --surface-strong: rgba(10, 30, 10, 0.96);
-  --text: #eef7eb;
-  --muted: #b5d4b1;
-  --accent: #7ccb4d;
-  --accent-dark: #4a8c2b;
-  --border: rgba(255, 255, 255, 0.08);
+  --bg: #122614;
+  --surface: rgba(30, 72, 34, 0.82);
+  --surface-strong: rgba(20, 52, 24, 0.94);
+  --text: #f0f9ed;
+  --muted: #c4ddc0;
+  --accent: #8ed655;
+  --accent-dark: #5aaa33;
+  --border: rgba(255, 255, 255, 0.11);
 }
 
 * {
@@ -20,18 +20,18 @@ html, body {
   min-height: 100%;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--text);
-  background: linear-gradient(180deg, rgba(8, 17, 8, 0.75), rgba(4, 8, 4, 0.92)), url('/public/icons/iSeeGrass.png') center/cover no-repeat fixed;
+  background: linear-gradient(180deg, rgba(14, 30, 14, 0.60), rgba(10, 20, 10, 0.80))center/cover no-repeat fixed, url('/public/icons/iSeeGrass.png') center/cover no-repeat fixed;
 }
 
 body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(12, 34, 14, 0.28), transparent 55%, rgba(2, 5, 2, 0.55));
+  background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(20, 52, 24, 0.20), transparent 55%, rgba(8, 18, 8, 0.40));
   background-size: 18px 18px, cover;
   pointer-events: none;
-  opacity: 0.96;
+  opacity: 0.90;
 }
 
 body {
@@ -55,8 +55,8 @@ body {
   gap: 1rem;
   width: 100%;
   padding: 1rem 1.5rem;
-  background: rgba(8, 22, 10, 0.85);
-  border-bottom: 1px solid rgba(124, 203, 77, 0.16);
+  background: rgba(18, 48, 22, 0.88);
+  border-bottom: 1px solid rgba(142, 214, 85, 0.18);
   backdrop-filter: blur(16px);
 }
 
@@ -169,8 +169,8 @@ body {
 }
 
 .section {
-  background: rgba(8, 32, 12, 0.88);
-  border: 1px solid rgba(124, 203, 77, 0.18);
+  background: rgba(18, 55, 22, 0.82);
+  border: 1px solid rgba(142, 214, 85, 0.22);
   border-radius: 28px;
   padding: 2.5rem;
   margin-top: 2rem;
@@ -180,7 +180,7 @@ body {
 .section h2 {
   margin-top: 0;
   margin-bottom: 0.85rem;
-  color: #f2f7e9;
+  color: #f5faf2;
 }
 
 .grid {
@@ -195,29 +195,29 @@ body {
 .card {
   padding: 1.5rem;
   border-radius: 24px;
-  background: rgba(7, 29, 11, 0.76);
-  border: 1px solid rgba(124, 203, 77, 0.18);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.16);
+  background: rgba(18, 56, 24, 0.70);
+  border: 1px solid rgba(142, 214, 85, 0.22);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
 
 .card:hover {
   transform: translateY(-4px);
-  border-color: rgba(124, 203, 77, 0.35);
-  box-shadow: 0 28px 55px rgba(0, 0, 0, 0.22);
+  border-color: rgba(142, 214, 85, 0.42);
+  box-shadow: 0 28px 55px rgba(0, 0, 0, 0.18);
 }
 
 .card.transparent {
-  background: rgba(34, 112, 48, 0.22);
-  border: 1px solid rgba(124, 203, 77, 0.4);
-  box-shadow: 0 18px 40px rgba(10, 54, 18, 0.2);
+  background: rgba(52, 130, 60, 0.28);
+  border: 1px solid rgba(142, 214, 85, 0.38);
+  box-shadow: 0 18px 40px rgba(20, 70, 28, 0.16);
   backdrop-filter: blur(14px);
 }
 
 .card.transparent:hover {
-  background: rgba(52, 139, 61, 0.3);
-  border-color: rgba(157, 231, 113, 0.7);
-  box-shadow: 0 28px 55px rgba(10, 54, 18, 0.32);
+  background: rgba(68, 150, 76, 0.36);
+  border-color: rgba(170, 240, 120, 0.65);
+  box-shadow: 0 28px 55px rgba(20, 70, 28, 0.28);
 }
 
 .dashboard-actions {
@@ -251,49 +251,121 @@ body {
 }
 
 @media (max-width: 767.98px) {
+  /* Stack page vertically: topbar then content */
   .page {
-    display: flex;
-    flex-direction: column;
+    display: flex !important;
+    flex-direction: column !important;
   }
 
   .page > isee-navbar-user {
     display: block;
     position: relative;
-    z-index: 20;
+    z-index: 100;
     flex: 0 0 auto;
     width: 100%;
   }
 
-  .user-navigation {
+  /* Force navbar out of absolute/fixed positioning into normal flow */
+  .user-navigation,
+  .user-navigation.position-absolute,
+  .isee-navbar,
+  .isee-navbar.position-absolute {
     position: relative !important;
-    width: 100%;
-    min-height: auto;
+    width: 100% !important;
+    min-height: auto !important;
+    height: auto !important;
+    top: auto !important;
+    left: auto !important;
   }
 
-  .page > .page-wrapper {
-    width: 100%;
-    margin-left: 0;
-  }
-
-  .user-navigation .container-fluid {
+  .isee-navbar .container-fluid {
+    display: grid !important;
+    grid-template-areas:
+      "toggler brand"
+      "collapse collapse"
+      "footer footer";
+    grid-template-columns: auto 1fr;
     align-items: center;
+    gap: 0;
+    padding: 0 !important;
   }
 
-  .user-navigation .navbar-collapse {
-    width: 100%;
-  }
-
-  .user-navigation-links {
-    flex-direction: row;
+  .isee-navbar__toggler {
+    grid-area: toggler;
+    margin: 0.6rem 0 0.6rem 0.75rem;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
     align-items: center;
-    gap: 0.25rem;
-    padding-top: 0.75rem !important;
-    padding-bottom: 0.5rem;
-    overflow-x: auto;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: #d6f0b8;
   }
 
-  .user-navigation-links .nav-link {
-    white-space: nowrap;
+  /* Hide Tabler's default toggler-icon span */
+  .isee-navbar__toggler .navbar-toggler-icon {
+    display: none;
+  }
+
+  .isee-toggler-icon {
+    font-size: 1.25rem;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .isee-navbar__brand {
+    grid-area: brand;
+    padding: 0.6rem 0.75rem;
+    border-bottom: none;
+  }
+
+  .collapse.navbar-collapse {
+    grid-area: collapse;
+  }
+
+  .collapse.navbar-collapse.show {
+    display: block !important;
+    border-top: 1px solid rgba(124, 203, 77, 0.1);
+    border-bottom: 1px solid rgba(124, 203, 77, 0.1);
+  }
+
+  .collapse.navbar-collapse:not(.show) {
+    display: none !important;
+  }
+
+  .isee-navbar__links {
+    flex-direction: column !important;
+    align-items: flex-start !important;  /* left-align links, not centered */
+    padding: 0.4rem 0.5rem !important;
+    gap: 0.1rem !important;
+    width: 100% !important;
+  }
+
+  .isee-nav-link {
+    padding: 0.6rem 0.9rem !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  .isee-navbar__links .nav-item {
+    width: 100% !important;
+  }
+
+  .isee-navbar__footer {
+    grid-area: footer;
+    padding: 0.5rem 0.75rem;
+    border-top: 1px solid rgba(124, 203, 77, 0.1);
+  }
+
+  /* Page wrapper fills full width, no left margin from Tabler sidebar */
+  .page > .page-wrapper,
+  .page-wrapper {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    min-width: 0 !important;
   }
 }
 
@@ -336,4 +408,302 @@ footer p {
     flex-direction: column;
     align-items: stretch;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   iSeeGrass Navbar – themed override
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Outer nav shell ───────────────────────────────────────────── */
+
+.isee-navbar {
+  background: rgba(22, 58, 26, 0.97) !important;
+  border-right: 1px solid rgba(142, 214, 85, 0.25) !important;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.22) !important;
+  backdrop-filter: blur(18px) !important;
+}
+
+/* ─── Brand ─────────────────────────────────────────────────────── */
+
+.isee-navbar__brand {
+  padding: 1.1rem 1rem 0.9rem;
+  border-bottom: 1px solid rgba(142, 214, 85, 0.14);
+  width: 100%;
+}
+
+.isee-navbar__brand-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+}
+
+.isee-navbar__brand-img {
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.isee-navbar__brand-name {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #d8f0b9;
+  white-space: nowrap;
+}
+
+/* ─── Nav links ─────────────────────────────────────────────────── */
+
+.isee-navbar__links {
+  padding: 0.5rem 0 !important;
+  gap: 0.15rem !important;
+}
+
+.isee-nav-link {
+  display: flex !important;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 1rem !important;
+  border-radius: 10px;
+  margin: 0 0.5rem;
+  color: #c4ddc0 !important;
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: background 160ms ease, color 160ms ease !important;
+  text-decoration: none;
+}
+
+.isee-nav-link:hover {
+  background: rgba(142, 214, 85, 0.13) !important;
+  color: #f0f9ed !important;
+}
+
+.isee-nav-link.active {
+  background: rgba(142, 214, 85, 0.20) !important;
+  color: var(--accent) !important;
+  font-weight: 700;
+}
+
+.isee-nav-link.active .isee-nav-link__icon {
+  color: var(--accent);
+}
+
+/* Icon */
+.isee-nav-link__icon {
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.1rem;
+  color: rgba(196, 221, 192, 0.75);
+  transition: color 160ms ease;
+}
+
+.isee-nav-link:hover .isee-nav-link__icon {
+  color: var(--accent);
+}
+
+/* Label */
+.isee-nav-link__label {
+  line-height: 1;
+}
+
+/* ─── Active left-border accent ─────────────────────────────────── */
+
+.isee-nav-link.active {
+  position: relative;
+}
+
+.isee-nav-link.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--accent);
+}
+
+/* ─── Mobile toggler ────────────────────────────────────────────── */
+
+.isee-navbar__toggler {
+  border-color: rgba(124, 203, 77, 0.3) !important;
+  color: var(--muted) !important;
+}
+
+.isee-navbar__toggler:focus {
+  box-shadow: 0 0 0 3px rgba(124, 203, 77, 0.2) !important;
+}
+
+/* ─── Footer / logout ───────────────────────────────────────────── */
+
+.isee-navbar__footer {
+  padding: 0.75rem 1rem 1rem;
+  border-top: 1px solid rgba(142, 214, 85, 0.14);
+  width: 100%;
+}
+
+/* .isee-navbar__logout replaced by .isee-user-btn + .isee-user-menu */
+
+/* ─── Dark scrollbar ────────────────────────────────────────────── */
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(142, 214, 85, 0.30) #0e1f10;
+}
+
+/* Chromium */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0e1f10;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(142, 214, 85, 0.30);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(142, 214, 85, 0.55);
+}
+
+::-webkit-scrollbar-corner {
+  background: #0e1f10;
+}
+
+/* ─── Navbar footer – user account button ──────────────────────── */
+
+.isee-user-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(142, 214, 85, 0.20);
+  background: rgba(142, 214, 85, 0.09);
+  color: #c4ddc0;
+  font-size: 0.84rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+  text-align: left;
+}
+
+.isee-user-btn:hover,
+.isee-user-btn.is-open {
+  background: rgba(142, 214, 85, 0.18);
+  border-color: rgba(142, 214, 85, 0.42);
+  color: #f0f9ed;
+}
+
+.isee-user-btn:focus-visible {
+  outline: 2px solid rgba(124, 203, 77, 0.7);
+  outline-offset: 2px;
+}
+
+/* Avatar circle */
+.isee-user-btn__avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(142, 214, 85, 0.20);
+  border: 1px solid rgba(142, 214, 85, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1rem;
+  color: #dff5c8;
+}
+
+.isee-user-btn__label {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Chevron flips when open */
+.isee-user-btn__chevron {
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  transition: transform 200ms ease;
+  color: rgba(181, 212, 177, 0.5);
+}
+
+.isee-user-btn.is-open .isee-user-btn__chevron {
+  transform: rotate(180deg);
+}
+
+/* ─── Pop-up menu ───────────────────────────────────────────────── */
+
+.isee-user-menu {
+  margin-bottom: 0.4rem;
+  padding: 0.3rem;
+  border-radius: 10px;
+  border: 1px solid rgba(142, 214, 85, 0.22);
+  background: rgba(20, 52, 24, 0.97);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  animation: usermenu-in 160ms ease;
+}
+
+.isee-user-menu[hidden] {
+  display: none;
+}
+
+@keyframes usermenu-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.isee-user-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 7px;
+  color: #c4ddc0;
+  font-size: 0.84rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.isee-user-menu__item:hover,
+.isee-user-menu__item.active {
+  background: rgba(142, 214, 85, 0.14);
+  color: #f0f9ed;
+}
+
+.isee-user-menu__item.active {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.isee-user-menu__item i {
+  font-size: 1rem;
+  width: 18px;
+  flex-shrink: 0;
+}
+
+/* Danger — logout */
+.isee-user-menu__item--danger {
+  color: rgba(255, 160, 160, 0.6);
+}
+
+.isee-user-menu__item--danger:hover {
+  background: rgba(220, 55, 55, 0.12);
+  color: #ffa0a0;
 }

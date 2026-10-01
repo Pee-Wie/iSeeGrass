@@ -1,26 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About iSeeGrass</title>
+  <title>Explore Seagrass Species | iSeeGrass</title>
+  
+  <!-- iSeeGrass Default Theme -->
+  <link rel="stylesheet" href="../../resources/tabler/css/tabler.css">
+  <link rel="stylesheet" href="../../resources/tabler/css/tabler.min.css">
+  
+  <!-- Tabler -->
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/guest/styles.css">
+  
 </head>
+
 <body>
   <isee-header></isee-header>
 
   <main class="container">
-    <section class="section">
 
+    <!-- Hero -->
+    <section class="explore-hero">
+      <span class="eyebrow">Species Library</span>
+      <h1>Explore Seagrass Species</h1>
+      <p class="lead">
+        Browse all known seagrass species recognised by iSeeGrass. Each entry includes taxonomy,
+        habitat, distribution, and key ecological facts to support field identification and research.
+      </p>
     </section>
 
-    <section class="section">
-      
-    </section>
+    <!-- Stats row -->
+    <div class="stats-row" id="stats-row" aria-hidden="true">
+      <a href="guest/Aid.html" class="btn-identify" aria-label="Open species identification tool">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+          stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+          <path d="M11 8v6M8 11h6"/>
+        </svg>
+        Identify
+      </a>
+    </div>
+
+    <!-- Search & filter -->
+    <div class="section">
+
+      <!-- Row 1: search + region pills -->
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input type="search" id="species-search" placeholder="Search name, genus, family, region…"
+            aria-label="Search seagrass species" autocomplete="off">
+        </div>
+
+        <div class="region-scope">
+
+          <!-- Global / Local radio toggle -->
+          <div class="scope-toggle" role="radiogroup" aria-label="Region scope">
+            <label class="scope-radio">
+              <input type="radio" name="scope" value="global" checked>
+              <span>Global</span>
+            </label>
+            <label class="scope-radio">
+              <input type="radio" name="scope" value="local">
+              <span>Local (Philippines)</span>
+            </label>
+          </div>
+
+          <!-- Global region pills -->
+          <div class="filter-pills" id="pills-global" role="group" aria-label="Filter by global region">
+            <button class="pill active" data-filter="all">All regions</button>
+            <button class="pill" data-filter="caribbean">Caribbean</button>
+            <button class="pill" data-filter="mediterranean">Mediterranean</button>
+            <button class="pill" data-filter="indo-pacific">Indo-Pacific</button>
+            <button class="pill" data-filter="temperate">Temperate</button>
+          </div>
+
+          <!-- Local (Philippines) region pills — hidden until "Local" is selected -->
+          <div class="filter-pills hidden" id="pills-local" role="group" aria-label="Filter by Philippine region">
+            <button class="pill active" data-local-filter="all">All Philippines</button>
+            <button class="pill" data-local-filter="luzon">Luzon</button>
+            <button class="pill" data-local-filter="visayas">Visayas</button>
+            <button class="pill" data-local-filter="mindanao">Mindanao</button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Row 2: dropdowns + sort -->
+      <div class="filter-selects" role="group" aria-label="Detailed filters">
+        <div class="select-wrap">
+          <label for="filter-family" class="select-label">Family</label>
+          <select id="filter-family" aria-label="Filter by family">
+            <option value="">All families</option>
+          </select>
+        </div>
+
+        <div class="select-wrap">
+          <label for="filter-genus" class="select-label">Genus</label>
+          <select id="filter-genus" aria-label="Filter by genus">
+            <option value="">All genera</option>
+          </select>
+        </div>
+
+        <div class="select-wrap">
+          <label for="filter-status" class="select-label">IUCN Status</label>
+          <select id="filter-status" aria-label="Filter by IUCN status">
+            <option value="">All statuses</option>
+          </select>
+        </div>
+
+        <div class="select-wrap">
+          <label for="sort-select" class="select-label">Sort by</label>
+          <select id="sort-select" aria-label="Sort species">
+            <option value="name-az">Name A → Z</option>
+            <option value="name-za">Name Z → A</option>
+            <option value="scientific">Scientific name</option>
+            <option value="family">Family</option>
+            <option value="genus">Genus</option>
+            <option value="status">IUCN status</option>
+          </select>
+        </div>
+
+        <button id="clear-filters" class="btn-clear" aria-label="Clear all filters">
+          Clear filters
+        </button>
+      </div>
+
+      <p id="results-count" aria-live="polite"></p>
+
+      <!-- Grid -->
+      <div class="species-grid" id="species-grid" role="list"></div>
+    </div>
+
   </main>
 
-  <isee-footer></isee-footer>
   <script type="module" src="../components/wp-site-header.js"></script>
-  <script type="module" src="../components/wp-site-footer.js"></script>
+  <script type="module" src="../components/footer.js"></script>
+  <isee-footer></isee-footer>
+
+  <!-- Species detail modal — sg- prefix avoids Tabler CSS conflicts -->
+  <div class="sg-modal-overlay" id="species-modal" role="dialog" aria-modal="true"
+    aria-labelledby="modal-title-text" aria-describedby="modal-description-text">
+    <div class="sg-modal-box">
+      <button class="sg-modal-close" id="modal-close-btn" aria-label="Close species detail">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/guest/script.js"></script>
 </body>
+
 </html>

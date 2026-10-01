@@ -1,0 +1,745 @@
+/* ── Explore-page local styles ── */
+
+    /* Hero banner */
+    .explore-hero {
+      padding: 3rem 0 2rem;
+    }
+
+    .explore-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin: 0 0 0.5rem;
+      line-height: 1.1;
+    }
+
+    .explore-hero p.lead {
+      max-width: 56ch;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.8;
+      margin: 0;
+    }
+
+    /* Search & filter bar */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-wrap {
+      flex: 0 0 260px;
+      width: 400px;
+      min-width: 400px;
+      max-width: 400px;
+      position: relative;
+    }
+
+    .search-wrap svg {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    #species-search {
+      width: 100%;
+      padding: 0.65rem 0.9rem 0.65rem 2.5rem;
+      border-radius: 999px;
+      border: 1px solid rgba(142, 214, 85, 0.32);
+      background: rgba(20, 58, 24, 0.82);
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    #species-search::placeholder {
+      color: var(--muted);
+    }
+
+    #species-search:focus {
+      border-color: rgba(142, 214, 85, 0.65);
+      box-shadow: 0 0 0 3px rgba(142, 214, 85, 0.14);
+    }
+
+    .filter-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .pill {
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      border: 1px solid rgba(124, 203, 77, 0.28);
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
+    }
+
+    .pill:hover {
+      border-color: rgba(124, 203, 77, 0.5);
+      color: var(--text);
+    }
+
+    .pill.active {
+      background: rgba(124, 203, 77, 0.18);
+      border-color: rgba(124, 203, 77, 0.55);
+      color: var(--accent);
+    }
+
+    /* Results summary */
+    #results-count {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+    }
+
+    /* Species grid */
+    .species-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+
+    /* Species card */
+    .species-card {
+      background: rgba(18, 56, 24, 0.72);
+      border: 1px solid rgba(142, 214, 85, 0.22);
+      border-radius: 20px;
+      padding: 1.4rem 1.5rem 1.25rem;
+      cursor: pointer;
+      transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .species-card:hover,
+    .species-card:focus-visible {
+      transform: translateY(-4px);
+      border-color: rgba(142, 214, 85, 0.50);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.22);
+      outline: none;
+    }
+
+    .species-card:focus-visible {
+      outline: 2px solid rgba(124, 203, 77, 0.7);
+      outline-offset: 3px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .card-names {
+      flex: 1;
+    }
+
+    .card-common {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #dff5c8;
+      margin: 0 0 0.2rem;
+      line-height: 1.2;
+    }
+
+    .card-scientific {
+      font-size: 0.82rem;
+      font-style: italic;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    /* IUCN status badge */
+    .status-badge {
+      flex-shrink: 0;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .status-lc {
+      background: rgba(74, 180, 74, 0.2);
+      color: #7ddb7d;
+      border: 1px solid rgba(74, 180, 74, 0.35);
+    }
+
+    .status-nt {
+      background: rgba(160, 200, 80, 0.18);
+      color: #b8e05e;
+      border: 1px solid rgba(160, 200, 80, 0.32);
+    }
+
+    .status-vu {
+      background: rgba(220, 170, 40, 0.18);
+      color: #e6c44a;
+      border: 1px solid rgba(220, 170, 40, 0.32);
+    }
+
+    .status-en {
+      background: rgba(220, 100, 30, 0.18);
+      color: #e8834c;
+      border: 1px solid rgba(220, 100, 30, 0.32);
+    }
+
+    .status-cr {
+      background: rgba(200, 50, 50, 0.2);
+      color: #e07070;
+      border: 1px solid rgba(200, 50, 50, 0.35);
+    }
+
+    .status-dd {
+      background: rgba(160, 160, 160, 0.15);
+      color: #b0b8b0;
+      border: 1px solid rgba(160, 160, 160, 0.28);
+    }
+
+    /* Quick-info row */
+    .card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .meta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.76rem;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 0.2rem 0.55rem;
+    }
+
+    .meta-chip svg {
+      flex-shrink: 0;
+      color: rgba(124, 203, 77, 0.7);
+    }
+
+    /* Short description preview */
+    .card-desc {
+      font-size: 0.84rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Tag row */
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.15rem;
+    }
+
+    .tag {
+      font-size: 0.71rem;
+      font-weight: 600;
+      color: rgba(124, 203, 77, 0.8);
+      background: rgba(124, 203, 77, 0.08);
+      border: 1px solid rgba(124, 203, 77, 0.18);
+      border-radius: 4px;
+      padding: 0.15rem 0.45rem;
+    }
+
+    /* "View details" affordance */
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.35rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: rgba(124, 203, 77, 0.6);
+      margin-top: auto;
+      transition: color 180ms ease;
+    }
+
+    .species-card:hover .card-footer,
+    .species-card:focus-visible .card-footer {
+      color: var(--accent);
+    }
+
+    /* Empty state */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 4rem 1rem;
+      color: var(--muted);
+    }
+
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      opacity: 0.35;
+      margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    /* ── Species detail modal (sg- prefix avoids Tabler conflicts) ── */
+    .sg-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(2, 8, 4, 0.82);
+      backdrop-filter: blur(6px);
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .sg-modal-overlay.open {
+      display: flex;
+    }
+
+    .sg-modal-box {
+      background: rgba(18, 52, 22, 0.98);
+      border: 1px solid rgba(142, 214, 85, 0.32);
+      border-radius: 24px;
+      padding: 2rem 2.25rem 2.25rem;
+      max-width: 680px;
+      width: 100%;
+      max-height: 90dvh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.38);
+    }
+
+    .sg-modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 50%;
+      width: 2.2rem;
+      height: 2.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      transition: background 180ms ease, color 180ms ease;
+    }
+
+    .sg-modal-close:hover {
+      background: rgba(255,255,255,0.12);
+      color: var(--text);
+    }
+
+    .sg-modal-close:focus-visible {
+      outline: 2px solid rgba(124, 203, 77, 0.7);
+      outline-offset: 2px;
+    }
+
+    .sg-modal-eyebrow {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 0.35rem;
+    }
+
+    .sg-modal-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #d6f0b8;
+      margin: 0 0 0.2rem;
+      padding-right: 2rem;
+    }
+
+    .sg-modal-scientific {
+      font-style: italic;
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin: 0 0 1rem;
+    }
+
+    .sg-modal-divider {
+      border: none;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      margin: 1rem 0;
+    }
+
+    .sg-modal-section-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(124, 203, 77, 0.6);
+      margin: 0 0 0.65rem;
+    }
+
+    .sg-modal-description {
+      font-size: 0.93rem;
+      color: var(--muted);
+      line-height: 1.8;
+      margin: 0 0 1rem;
+    }
+
+    .sg-modal-facts {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 0.65rem;
+      margin-bottom: 1rem;
+    }
+
+    .sg-fact-item {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px;
+      padding: 0.65rem 0.85rem;
+    }
+
+    .sg-fact-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(124, 203, 77, 0.55);
+      margin-bottom: 0.2rem;
+    }
+
+    .sg-fact-value {
+      font-size: 0.88rem;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .sg-modal-funfact {
+      background: rgba(142, 214, 85, 0.09);
+      border: 1px solid rgba(142, 214, 85, 0.24);
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      display: flex;
+      gap: 0.65rem;
+      align-items: flex-start;
+    }
+
+    .sg-modal-funfact svg {
+      flex-shrink: 0;
+      color: var(--accent);
+      margin-top: 0.1rem;
+    }
+
+    .sg-modal-funfact p {
+      font-size: 0.86rem;
+      color: var(--muted);
+      line-height: 1.75;
+      margin: 0;
+    }
+
+    @media (max-width: 600px) {
+      .sg-modal-box {
+        padding: 1.4rem 1.2rem 1.6rem;
+      }
+      .sg-modal-title {
+        font-size: 1.3rem;
+      }
+    }
+
+    /* ── Mobile layout fixes ─────────────────────────────────────── */
+    @media (max-width: 640px) {
+
+      /* Search bar — stop it forcing a 400px width */
+      .search-wrap {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        flex: 1 1 100%;
+      }
+
+      /* Filter bar stacks vertically */
+      .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.65rem;
+      }
+
+      /* Region scope stacks its children */
+      .region-scope {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      /* Scope toggle (Global / Local) wraps neatly */
+      .scope-toggle {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      /* Pills wrap and stay within bounds */
+      .filter-pills {
+        flex-wrap: wrap;
+        gap: 0.4rem;
+      }
+
+      .pill {
+        font-size: 0.78rem;
+        padding: 0.35rem 0.75rem;
+      }
+
+      /* Dropdowns — full width stacked */
+      .filter-selects {
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+
+      .select-wrap {
+        flex: 1 1 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+      }
+
+      select {
+        width: 100%;
+      }
+
+      /* Species grid — single column on mobile */
+      .species-grid {
+        grid-template-columns: 1fr;
+      }
+
+      /* Species cards — tighten padding */
+      .species-card {
+        padding: 1rem 1.1rem 0.9rem;
+      }
+
+      /* Hero text */
+      .explore-hero h1 {
+        font-size: 1.6rem;
+      }
+
+      .explore-hero p.lead {
+        font-size: 0.9rem;
+      }
+
+      /* Stats row wraps */
+      .stats-row {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+    }
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .stat-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+      background: rgba(124, 203, 77, 0.06);
+      border: 1px solid rgba(124, 203, 77, 0.16);
+      border-radius: 999px;
+      padding: 0.35rem 0.9rem;
+    }
+
+    .stat-chip strong {
+      color: var(--accent);
+    }
+
+/* Identify button in stats row */
+.btn-identify {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(124, 203, 77, 0.5);
+  background: rgba(124, 203, 77, 0.12);
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: background 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.btn-identify:hover {
+  background: rgba(124, 203, 77, 0.22);
+  box-shadow: 0 4px 18px rgba(124, 203, 77, 0.18);
+  transform: translateY(-1px);
+}
+
+.btn-identify:focus-visible {
+  outline: 2px solid rgba(124, 203, 77, 0.8);
+  outline-offset: 3px;
+}
+
+    /* Stats bar at top of page */
+.filter-selects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+  margin-top: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.select-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1 1 150px;
+  min-width: 140px;
+  max-width: 220px;
+}
+
+.select-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgba(124, 203, 77, 0.6);
+}
+
+.select-wrap select {
+  padding: 0.55rem 2rem 0.55rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid rgba(142, 214, 85, 0.32);
+  background: rgba(20, 58, 24, 0.82) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238ed655' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 0.65rem center;
+  background-size: 14px;
+  color: var(--text);
+  font-size: 0.87rem;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.select-wrap select:focus {
+  border-color: rgba(142, 214, 85, 0.65);
+  box-shadow: 0 0 0 3px rgba(142, 214, 85, 0.14);
+}
+
+.select-wrap select option {
+  background: #162e18;
+  color: var(--text);
+}
+
+/* Clear filters button */
+.btn-clear {
+  align-self: flex-end;
+  padding: 0.55rem 1.1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
+  white-space: nowrap;
+}
+
+.btn-clear:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.btn-clear:focus-visible {
+  outline: 2px solid rgba(124, 203, 77, 0.7);
+  outline-offset: 2px;
+}
+
+/* Family chip styling inside cards */
+.family-chip {
+  background: rgba(124, 203, 77, 0.1);
+  border-color: rgba(124, 203, 77, 0.22);
+  font-style: italic;
+  color: rgba(183, 230, 140, 0.9);
+}
+
+/* ── Scope toggle (Global / Local) ── */
+.region-scope {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.scope-toggle {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.scope-radio {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.scope-radio input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(124, 203, 77, 0.4);
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 180ms ease, background 180ms ease;
+  flex-shrink: 0;
+}
+
+.scope-radio input[type="radio"]:checked {
+  border-color: var(--accent);
+  background: radial-gradient(circle, var(--accent) 45%, transparent 46%);
+}
+
+.scope-radio input[type="radio"]:focus-visible {
+  outline: 2px solid rgba(124, 203, 77, 0.7);
+  outline-offset: 2px;
+}
+
+.scope-radio span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  transition: color 180ms ease;
+}
+
+.scope-radio:has(input:checked) span {
+  color: var(--text);
+}
+
+/* Utility */
+.hidden {
+  display: none !important;
+}

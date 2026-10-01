@@ -3,157 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="../../public/icons/favicon.png">
-    <link rel="stylesheet" href="../../public/css/styles.css">
+    <meta name="description" content="iSeeGrass user dashboard — overview of your identification activity and observations.">
+    <title>Dashboard | iSeeGrass</title>
 
+    <!-- iSeeGrass Default Theme -->
+    <link rel="icon" type="image/png" href="../../public/icons/favicon.png">
+    <link rel="stylesheet" href="../../public/css/users/styles-users.css">
+    <link rel="stylesheet" href="../../public/css/users/dashboard/styles-users-dashboard.css">
+
+    <!-- Tabler -->
     <link rel="stylesheet" href="../../resources/tabler/css/tabler.css">
     <link rel="stylesheet" href="../../resources/tabler/css/tabler.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.min.css" />
 
-    <title></title>
+    <!-- Tabler Icons webfont -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/tabler-icons.min.css">
 </head>
 
 <body>
-    <!-- 
-    <div class="container" style="margin-top: 2rem; text-align: center;">
-        <h2>User Quick Links</h2>
-        
-    </div>
-    <div class="container" style="margin-top: 2rem; text-align: center;">
-        <h2>About iSeeGrass</h2>
-        <p>iSeeGrass is a web and mobile application designed for seagrass species identification and assessment using image recognition and CNN classification.</p>
-        <p>It aims to support researchers, students, and marine practitioners in accurately identifying seagrass species and improving data collection efficiency.</p>
-    </div>
-    <div class="container" style="margin-top: 2rem; text-align: center;">
-        <h2>Contact Us</h2>
-        <p>If you have any questions or need assistance, please reach out to our support team at <a href="mailto:support@iseegrass.com">support@iseegrass.com</a>.</p>
-    </div> -->
-
-    <!-- <main class="container"> -->
-    <div class="page">
-        <!-- Sidebar -->
+    <div class="page" id="main-content">
         <isee-navbar-user></isee-navbar-user>
+
         <div class="page-wrapper">
+            <!-- Page header -->
             <div class="page-header d-print-none">
                 <div class="container-xl">
                     <div class="row g-2 align-items-center">
                         <div class="col">
-                            <h2 class="page-title text-primary">>Users/Dashboard</h2>
+                            <h2 class="page-title text-primary">&gt; Dashboard</h2>
                         </div>
                     </div>
                 </div>
             </div>
+
             <div class="page-body">
                 <div class="container-xl">
-                    <div class="row row-deck row-cards">
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 10rem">
+                    <div class="row row-deck row-cards g-3">
 
+                        <!-- ── Hero Card: Stat Cards (left) + Quick Actions 2×2 (right) ── -->
+                        <div class="col-12">
+                            <div class="dash-hero">
+                                <!-- Left: stat cards in a single horizontal row -->
+                                <div class="dash-hero__stats">
+                                    <a href="/views/users/identify.html" class="dash-stat-card dash-stat-card--link">
+                                        <span class="stat-label">Identifications</span>
+                                        <span class="stat-value" id="stat-identifications">—</span>
+                                        <span class="stat-sub">Total sessions run</span>
+                                    </a>
+                                    <a href="/views/users/editor.html" class="dash-stat-card dash-stat-card--link">
+                                        <span class="stat-label">Observations Saved</span>
+                                        <span class="stat-value" id="stat-observations">—</span>
+                                        <span class="stat-sub">Logged assessment records</span>
+                                    </a>
+                                    <a href="/views/users/editor.html" class="dash-stat-card dash-stat-card--link">
+                                        <span class="stat-label">Species Identified</span>
+                                        <span class="stat-value" id="stat-species">—</span>
+                                        <span class="stat-sub">Unique species found</span>
+                                    </a>
+                                    <a href="/views/users/identify.html" class="dash-stat-card dash-stat-card--link">
+                                        <span class="stat-label">ID Scope</span>
+                                        <span class="stat-value" style="font-size:1.35rem; padding-top:0.2rem;">Negros</span>
+                                        <span class="stat-sub">CNN model region focus</span>
+                                    </a>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 10rem">
 
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 10rem">
+                                <!-- Divider -->
+                                <div class="dash-hero__divider"></div>
 
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 10rem">
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 20rem">
-                                    <ul class="dashboard-actions">
-                                        <li>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/users/dashboard.html'">Dashboard</button>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/users/identify.html'">Identify
-                                                Grass</button>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/users/editor.html'">My
-                                                Observations</button>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/users/profile.html'">Profile</button>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/auth/login.html'">Signout</button>
-                                            <a href="../../index.html" class="btn">Back to Home Page</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-8">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 20rem">
-                                    <div class="container">
-                                        <h1>Welcome to iSeeGrass</h1>
-                                        <p>This is the user dashboard.</p>
-                                        <p>From here, you can access various features and functionalities of the
-                                            iSeeGrass application.</p>
-                                        <p>Use the navigation menu to explore different sections.</p>
+                                <!-- Right: quick actions in 2×2 grid -->
+                                <div class="dash-hero__actions">
+                                    <p class="section-label">Quick Actions</p>
+                                    <div class="quick-link-grid">
+                                        <a href="/views/users/identify.html" class="quick-link-btn">
+                                            <span class="ql-icon"><i class="ti ti-microscope"></i></span> Identify Seagrass
+                                        </a>
+                                        <a href="/views/users/editor.html" class="quick-link-btn">
+                                            <span class="ql-icon"><i class="ti ti-clipboard-list"></i></span> My Observations
+                                        </a>
+                                        <a href="/views/users/profile.html" class="quick-link-btn">
+                                            <span class="ql-icon"><i class="ti ti-user-circle"></i></span> Profile
+                                        </a>
+                                        <a href="/views/users/" class="quick-link-btn">
+                                            <span class="ql-icon"><i class="ti ti-home"></i></span> Home
+                                        </a>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                        <!-- <div class="col-12">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div>
-                        <div class="col-md-12 col-lg-8">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div>
-                        <div class="col-md-12 col-lg-8">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div>
+
+                        <!-- ── Recent Activity + Species Breakdown 50/50 ── -->
                         <div class="col-12">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
+                            <div class="dash-panels-row">
+                                <div class="dash-panel dash-panel--tall">
+                                    <h3><span class="panel-icon"><i class="ti ti-clock"></i></span> Recent Activity</h3>
+                                    <ul class="activity-list" id="activity-list">
+                                        <!-- populated by script-users-dashboard.js -->
+                                    </ul>
+                                </div>
+                                <div class="dash-panel dash-panel--tall">
+                                    <h3><span class="panel-icon"><i class="ti ti-chart-bar"></i></span> Species Breakdown</h3>
+                                    <div class="species-bar-list" id="species-breakdown">
+                                        <!-- populated by script-users-dashboard.js -->
+                                    </div>
+                                </div>
                             </div>
-                        </div> -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- </main> -->
+                        </div>
 
-    <!-- <isee-footer></isee-footer> -->    
+                        <!-- ── System Scope Notice ────────────────────── -->
+                        <div class="col-12">
+                            <div class="scope-notice">
+                                <span class="sn-tag">SCOPE</span>
+                                <span>
+                                    The identification feature is trained on seagrass species documented in the
+                                    <strong style="color:#d6f0b8;">Negros region</strong>. The species information
+                                    library covers an estimated <strong style="color:#d6f0b8;">60–72 species
+                                    worldwide</strong> for reference — but only Negros-documented species will
+                                    return a confident classification result from the CNN model.
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- ── Assessment Tips + About the Model ─────── -->
+                        <div class="col-lg-6">
+                            <div class="dash-panel">
+                                <h3><span class="panel-icon"><i class="ti ti-bulb"></i></span> Tips for Better Identifications</h3>
+                                <ul class="tip-list">
+                                    <li>Use clear, well-lit images taken in shallow water or at the surface.</li>
+                                    <li>Frame a single plant or patch — avoid cluttered multi-species shots for initial ID.</li>
+                                    <li>Capture the leaf shape, tip, and any visible veins; these are key classification features.</li>
+                                    <li>For quadrat assessments, photograph each quadrat from directly above.</li>
+                                    <li>Rinse lenses of underwater cameras before shooting to reduce distortion.</li>
+                                    <li>Low-visibility or blurry images will reduce model confidence — retake if possible.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="dash-panel">
+                                <h3><span class="panel-icon"><i class="ti ti-robot"></i></span> About the Identification Model</h3>
+                                <ul class="tip-list">
+                                    <li>Classification is performed by a <strong style="color:#d6f0b8;">Convolutional Neural Network (CNN)</strong> trained on labeled seagrass images.</li>
+                                    <li>The model outputs a species prediction alongside a <strong style="color:#d6f0b8;">confidence score</strong> — lower scores suggest ambiguous images.</li>
+                                    <li>Only species present in the <strong style="color:#d6f0b8;">Negros region dataset</strong> are within the model's trained scope.</li>
+                                    <li>Results should be reviewed by the researcher; the system does not replace expert field assessment.</li>
+                                    <li>Assessment outputs include species composition, abundance, and percentage cover estimates.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- ── Negros Species Reference ───────────────── -->
+                        <div class="col-12">
+                            <div class="dash-panel">
+                                <h3><span class="panel-icon"><i class="ti ti-plant"></i></span> Identifiable Species — Negros Region</h3>
+                                <p style="font-size:0.84rem; color:var(--muted); margin:0 0 1rem;">
+                                    These are the seagrass species the CNN model is trained to classify from
+                                    field images. Part of the broader ~60–72 species worldwide catalogue.
+                                </p>
+                                <div class="row g-2" id="negros-species-grid">
+                                    <!-- populated by script-users-dashboard.js -->
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!-- /row -->
+                </div><!-- /container-xl -->
+            </div><!-- /page-body -->
+        </div><!-- /page-wrapper -->
+    </div><!-- /page -->
+
     <script type="module" src="../../components/navbar-user.js"></script>
-    <script type="module" src="../../resources/tabler/js/tabler.min.js"></script>
-    <script type="module" src="../../resources/tabler/js/tabler.js"></script>
+    <script type="module" src="../../public/js/users/dashboard/script-users-dashboard.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
+  <!-- Android back-button handler (no-op on web) -->
+  <script src="/js/back-handler.js"></script>
 </body>
-
 </html>

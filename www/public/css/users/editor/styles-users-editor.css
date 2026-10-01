@@ -1,0 +1,1273 @@
+/* ═══════════════════════════════════════════════════════════════════
+   iSeeGrass — Assessment Editor Page Styles
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Tabler page chrome resets ─────────────────────────────────── */
+.page-wrapper  { background: transparent !important; }
+.page-header   { background: transparent !important; border-bottom-color: rgba(124, 203, 77, 0.12) !important; }
+.page-body     { background: transparent !important; }
+
+/* ─── Page layout – two-column ──────────────────────────────────── */
+.assessment-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  margin-top: 1rem;
+}
+
+/* ─── Left panel – template / document list ─────────────────────── */
+.assessment-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.panel-card {
+  background: rgba(20, 58, 24, 0.86);
+  border: 1px solid rgba(142, 214, 85, 0.24);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.16);
+}
+
+.panel-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.75rem 1rem;
+  background: rgba(142, 214, 85, 0.12);
+  border-bottom: 1px solid rgba(142, 214, 85, 0.20);
+}
+
+/* Delete-all button sits at the right end of the panel header */
+.panel-card__delete-all {
+  margin-left: auto;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  padding: 0;
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.panel-card__delete-all:hover {
+  background: rgba(220, 55, 55, 0.22);
+  border-color: rgba(220, 55, 55, 0.50);
+  color: #ffa0a0;
+}
+
+.panel-card__delete-all:focus-visible {
+  outline: 2px solid rgba(220, 55, 55, 0.7);
+  outline-offset: 2px;
+}
+
+.panel-card__delete-all[hidden] { display: none; }
+
+.panel-card__header-icon {
+  color: var(--accent);
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.panel-card__header h3 {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #d6f0b8;
+}
+
+.panel-card__body {
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.panel-card__hint {
+  margin: 0 0 0.3rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.55;
+  padding: 0 0.25rem;
+}
+
+/* Template items */
+.template-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.7rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(142, 214, 85, 0.18);
+  background: rgba(26, 62, 30, 0.65);
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, transform 150ms ease;
+  user-select: none;
+}
+
+.template-item:hover {
+  border-color: rgba(142, 214, 85, 0.50);
+  background: rgba(142, 214, 85, 0.13);
+  transform: translateX(2px);
+}
+
+.template-item.is-selected {
+  border-color: rgba(142, 214, 85, 0.65);
+  background: rgba(142, 214, 85, 0.18);
+}
+
+.template-item:focus-visible {
+  outline: 2px solid rgba(124, 203, 77, 0.8);
+  outline-offset: 2px;
+}
+
+.template-item__icon {
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 1px;
+  font-size: 0.95rem;
+}
+
+.template-item__text { flex: 1; min-width: 0; }
+
+.template-item__name {
+  display: block;
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: #d6f0b8;
+  line-height: 1.3;
+}
+
+.template-item__desc {
+  display: block;
+  font-size: 0.73rem;
+  color: var(--muted);
+  line-height: 1.45;
+  margin-top: 0.15rem;
+}
+
+/* Saved document items */
+.doc-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(142, 214, 85, 0.16);
+  background: rgba(26, 62, 30, 0.55);
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.doc-item:hover {
+  border-color: rgba(142, 214, 85, 0.42);
+  background: rgba(142, 214, 85, 0.10);
+}
+
+.doc-item__icon {
+  color: rgba(124, 203, 77, 0.55);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+/* Stacked name + date */
+.doc-item__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.doc-item__name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Status badge + date on same row */
+.doc-item__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.doc-item__badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.1rem 0.42rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.badge--draft {
+  background: rgba(160, 160, 160, 0.18);
+  color: #c8c8c8;
+  border: 1px solid rgba(160, 160, 160, 0.28);
+}
+
+.badge--progress {
+  background: rgba(220, 160, 30, 0.18);
+  color: #f0c040;
+  border: 1px solid rgba(220, 160, 30, 0.35);
+}
+
+.badge--final {
+  background: rgba(142, 214, 85, 0.18);
+  color: #8ed655;
+  border: 1px solid rgba(142, 214, 85, 0.35);
+}
+
+.doc-item__date {
+  font-size: 0.67rem;
+  color: rgba(255,255,255,0.32);
+  white-space: nowrap;
+}
+
+/* Cap doc list at 5 items then scroll */
+#docList {
+  max-height: calc(5 * 58px);   /* ~5 items tall */
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(142, 214, 85, 0.25) transparent;
+}
+
+#docList::-webkit-scrollbar { width: 4px; }
+#docList::-webkit-scrollbar-thumb {
+  background: rgba(142, 214, 85, 0.25);
+  border-radius: 4px;
+}
+
+/* Delete button on saved assessment items */
+.doc-item__delete {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  padding: 0;
+  transition: background 130ms ease, color 130ms ease, border-color 130ms ease;
+  opacity: 0;
+}
+
+.doc-item:hover .doc-item__delete {
+  opacity: 1;
+}
+
+.doc-item__delete:hover {
+  background: rgba(220, 55, 55, 0.22);
+  border-color: rgba(220, 55, 55, 0.50);
+  color: #ff8080;
+}
+
+.doc-item__delete:focus-visible {
+  opacity: 1;
+  outline: 2px solid rgba(220, 55, 55, 0.7);
+  outline-offset: 1px;
+}
+
+.doc-empty {
+  padding: 1rem 0.5rem;
+  text-align: center;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.25);
+  line-height: 1.65;
+}
+
+/* ─── Right panel – editor card ─────────────────────────────────── */
+.editor-card {
+  background: rgba(20, 58, 24, 0.86);
+  border: 1px solid rgba(142, 214, 85, 0.24);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.16);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Editor card header */
+.editor-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(142, 214, 85, 0.12);
+  border-bottom: 1px solid rgba(142, 214, 85, 0.20);
+  flex-wrap: wrap;
+}
+
+.editor-card__header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.editor-card__header-icon {
+  color: var(--accent);
+  font-size: 1rem;
+}
+
+.editor-card__header h3 {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #d6f0b8;
+}
+
+.editor-card__header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.unsaved-badge {
+  font-size: 0.72rem;
+  color: rgba(220, 160, 30, 0.85);
+  background: rgba(220, 160, 30, 0.1);
+  border: 1px solid rgba(220, 160, 30, 0.25);
+  border-radius: 6px;
+  padding: 0.15rem 0.5rem;
+}
+
+.unsaved-badge[hidden] { display: none; }
+
+/* ─── Title field ────────────────────────────────────────────────── */
+.editor-title-row {
+  padding: 0.85rem 1rem 0.5rem;
+  background: #ffffff;
+  border-bottom: 1px solid #d1d1d1;
+}
+
+.editor-title-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #555555;
+  margin-bottom: 0.35rem;
+}
+
+.editor-title-label i { color: #555555; }
+
+.editor-title-input {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #adadad;
+  border-radius: 2px;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #000000;
+  outline: none;
+  font-family: "Calibri", "Segoe UI", Arial, sans-serif;
+  transition: border-color 80ms ease;
+}
+
+.editor-title-input::placeholder { color: #aaaaaa; font-weight: 400; }
+
+.editor-title-input:focus {
+  border-color: #005a9e;
+  box-shadow: 0 0 0 2px #cce4f7;
+}
+
+/* ─── Content label row ──────────────────────────────────────────── */
+.editor-content-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #555555;
+  padding: 0.55rem 1rem 0.15rem;
+  background: #ffffff;
+}
+
+.editor-content-label i { color: #555555; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Word / Excel-style TOOLBAR  — pure neutral Office defaults
+   ═══════════════════════════════════════════════════════════════════ */
+
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.15rem;
+  padding: 0.35rem 0.75rem 0.3rem;
+  background: #f5f5f5;         /* Office ribbon grey */
+  border-bottom: 1px solid #d1d1d1;
+  user-select: none;
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0 0.15rem;
+  flex-shrink: 0;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 22px;
+  background: #c8c8c8;         /* Office neutral separator */
+  margin: 0 0.3rem;
+  flex-shrink: 0;
+}
+
+/* Base toolbar button — matches Office icon-button look */
+.tb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 26px;
+  padding: 0 5px;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #212121;              /* Office dark-grey icon colour */
+  font-size: 0.82rem;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 80ms ease, border-color 80ms ease;
+  line-height: 1;
+}
+
+.tb-btn:hover {
+  background: #e5e5e5;         /* Office hover — light grey */
+  border-color: #adadad;
+  color: #000000;
+}
+
+.tb-btn.is-active {
+  background: #cce4f7;         /* Office active — light blue */
+  border-color: #70b0e0;
+  color: #000000;
+}
+
+.tb-btn:focus-visible {
+  outline: 2px solid #005a9e;  /* Office focus blue */
+  outline-offset: 1px;
+}
+
+.tb-btn i {
+  font-size: 0.95rem;
+  pointer-events: none;
+  line-height: 1;
+}
+
+.tb-btn--bold      { font-weight: 900; font-size: 0.9rem; }
+.tb-btn--italic    { font-style: italic; font-size: 0.88rem; }
+.tb-btn--underline { text-decoration: underline; font-size: 0.85rem; }
+.tb-btn--strike    { text-decoration: line-through; font-size: 0.85rem; }
+.tb-btn--code      { font-family: monospace; font-size: 0.8rem; letter-spacing: -0.03em; }
+
+/* Select dropdowns — Office style */
+.tb-select {
+  height: 26px;
+  padding: 0 1.2rem 0 0.4rem;
+  border-radius: 3px;
+  border: 1px solid #adadad;
+  background: #ffffff;
+  color: #212121;
+  font-size: 0.78rem;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23555'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 5px center;
+}
+
+.tb-select:hover  { border-color: #888888; }
+.tb-select:focus  { border-color: #005a9e; outline: 2px solid #cce4f7; outline-offset: 0; }
+.tb-select option { background: #ffffff; color: #212121; }
+
+/* Colour picker — neutral */
+.tb-color-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tb-color-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 28px;
+  height: 26px;
+  padding: 3px 5px 2px;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #212121;
+  font-size: 0.82rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: background 80ms ease, border-color 80ms ease;
+}
+
+.tb-color-btn:hover {
+  background: #e5e5e5;
+  border-color: #adadad;
+}
+
+.tb-color-btn:focus-visible {
+  outline: 2px solid #005a9e;
+  outline-offset: 1px;
+}
+
+.tb-color-swatch {
+  width: 18px;
+  height: 3px;
+  border-radius: 1px;
+  background: #e6a800;
+  pointer-events: none;
+}
+
+.tb-color-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ContentEditable editing area  — pure Word / Excel defaults
+   ═══════════════════════════════════════════════════════════════════ */
+
+.editor-body {
+  flex: 1;
+  padding: 0.75rem 1.25rem 1.25rem;
+  background: #d0d0d0;   /* page-shadow surround, like Word's grey margin */
+}
+
+.editor-canvas-wrap {
+  background: #ffffff;
+  border: none;
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.10);
+}
+
+.editor-canvas {
+  width: 100%;
+  min-height: 440px;
+  max-height: 60vh;
+  overflow-y: auto;
+  /* Word uses 2.54 cm (1 in) margins = ~96px at 96 dpi */
+  padding: 1in 1in 1in 1in;
+  outline: none;
+  font-size: 11pt;           /* Word / Excel default body size */
+  line-height: 1.15;         /* Word Normal style line-spacing */
+  color: #000000;
+  font-family: "Calibri", "Segoe UI", Arial, sans-serif;
+  white-space: normal;       /* Word wraps normally */
+  word-break: normal;
+  background: #ffffff;
+
+  /* Word-style scrollbar — very subtle grey */
+  scrollbar-width: thin;
+  scrollbar-color: #c0c0c0 #f0f0f0;
+}
+
+.editor-canvas::-webkit-scrollbar { width: 8px; }
+.editor-canvas::-webkit-scrollbar-track { background: #f0f0f0; }
+.editor-canvas::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border-radius: 2px;
+}
+.editor-canvas::-webkit-scrollbar-thumb:hover { background: #999999; }
+
+.editor-canvas:empty::before {
+  content: attr(data-placeholder);
+  color: #aaaaaa;
+  pointer-events: none;
+  font-style: italic;
+}
+
+/* Standard browser text selection */
+.editor-canvas ::selection { background: #accef7; }   /* Word blue selection */
+
+/* ── Headings — match Word built-in Heading styles ───────────────── */
+.editor-canvas h1 {
+  font-size: 16pt;
+  font-weight: 700;
+  color: #2E74B5;   /* Word Heading 1 blue */
+  margin: 12pt 0 6pt;
+  line-height: 1.15;
+  border-bottom: none;
+}
+.editor-canvas h2 {
+  font-size: 13pt;
+  font-weight: 700;
+  color: #2E74B5;
+  margin: 10pt 0 5pt;
+  line-height: 1.15;
+}
+.editor-canvas h3 {
+  font-size: 12pt;
+  font-weight: 700;
+  color: #1F4E79;
+  margin: 8pt 0 4pt;
+  line-height: 1.15;
+}
+.editor-canvas p {
+  margin: 0 0 8pt;
+  color: #000000;
+  font-size: 11pt;
+  line-height: 1.15;
+}
+.editor-canvas ul,
+.editor-canvas ol { padding-left: 1.5rem; margin: 0 0 8pt; }
+.editor-canvas li { margin: 2pt 0; color: #000000; font-size: 11pt; }
+
+/* Blockquote — Word block quote style */
+.editor-canvas blockquote {
+  border-left: 2px solid #BFBFBF;
+  margin: 8pt 0 8pt 24pt;
+  padding: 2pt 8pt;
+  color: #595959;
+  font-style: italic;
+  background: transparent;
+  border-radius: 0;
+}
+
+/* Code block — Word Preformatted / Courier */
+.editor-canvas pre {
+  background: #F2F2F2;
+  border: 1px solid #D9D9D9;
+  border-radius: 0;
+  padding: 6pt 8pt;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 10pt;
+  color: #000000;
+  overflow-x: auto;
+  white-space: pre;
+  line-height: 1.3;
+}
+
+.editor-canvas a { color: #0563C1; text-decoration: underline; }   /* Word hyperlink */
+
+.editor-canvas hr {
+  border: none;
+  border-top: 1px solid #BFBFBF;
+  margin: 12pt 0;
+}
+
+/* ── Table — Excel default grid style ────────────────────────────── */
+.editor-canvas table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8pt 0;
+  font-size: 10pt;          /* Excel default cell font */
+  font-family: "Calibri", Arial, sans-serif;
+  table-layout: auto;
+}
+
+.editor-canvas th,
+.editor-canvas td {
+  border: 1px solid #BFBFBF;   /* Excel default grid line colour */
+  padding: 3pt 6pt;
+  text-align: left;
+  min-width: 48px;
+  outline: none;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #000000;
+  vertical-align: middle;
+  font-size: 10pt;
+  line-height: 1.3;
+}
+
+.editor-canvas th {
+  background: #D9E1F2;    /* Excel Table Style Medium 2 header — blue-grey */
+  color: #000000;
+  font-weight: 700;
+  border: 1px solid #9DC3E6;
+}
+
+.editor-canvas td {
+  background: #FFFFFF;
+}
+
+/* Alternating row — Excel banded rows */
+.editor-canvas tr:nth-child(even) td {
+  background: #DEEAF1;    /* Excel light-blue band */
+}
+
+/* Active cell — Excel selection box */
+.editor-canvas td:focus,
+.editor-canvas th:focus {
+  background: #FFF2CC !important;            /* Excel selected cell yellow */
+  box-shadow: inset 0 0 0 2px #70AD47;       /* Excel green selection border */
+  outline: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Modern unified modal system
+   Replaces all separate *-dialog-backdrop / *-dialog blocks
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Backdrop ────────────────────────────────────────────────────── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  background: rgba(4, 12, 6, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: modal-fade-in 160ms ease;
+}
+
+.modal-backdrop[hidden] { display: none; }
+
+@keyframes modal-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Card ────────────────────────────────────────────────────────── */
+.modal-card {
+  background: rgba(18, 46, 22, 0.98);
+  border: 1px solid rgba(142, 214, 85, 0.28);
+  border-radius: 20px;
+  width: 380px;
+  max-width: calc(100vw - 2rem);
+  box-shadow:
+    0 4px 6px rgba(0,0,0,0.08),
+    0 16px 40px rgba(0,0,0,0.40),
+    inset 0 0 0 1px rgba(142, 214, 85, 0.07);
+  overflow: hidden;
+  animation: modal-pop 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-card--sm { width: 340px; }
+
+@keyframes modal-pop {
+  from { opacity: 0; transform: scale(0.93) translateY(12px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+/* ── Header ──────────────────────────────────────────────────────── */
+.modal-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1.15rem 0.9rem;
+  border-bottom: 1px solid rgba(142, 214, 85, 0.13);
+  background: rgba(142, 214, 85, 0.07);
+}
+
+.modal-card__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #dff5c8;
+  letter-spacing: 0.01em;
+  margin: 0;
+}
+
+.modal-card__title-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: rgba(142, 214, 85, 0.14);
+  border: 1px solid rgba(142, 214, 85, 0.26);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  color: #8ed655;
+  flex-shrink: 0;
+}
+
+.modal-card__close {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.92rem;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.modal-card__close:hover {
+  background: rgba(220, 55, 55, 0.22);
+  border-color: rgba(220, 55, 55, 0.45);
+  color: #ff9090;
+}
+
+.modal-card__close:focus-visible {
+  outline: 2px solid rgba(142, 214, 85, 0.7);
+  outline-offset: 2px;
+}
+
+/* ── Body ────────────────────────────────────────────────────────── */
+.modal-card__body {
+  padding: 1.1rem 1.15rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+/* ── Field ───────────────────────────────────────────────────────── */
+.modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.modal-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+
+.modal-field label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: rgba(196, 221, 192, 0.78);
+}
+
+.modal-field__opt {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: rgba(196, 221, 192, 0.38);
+  font-size: 0.7rem;
+}
+
+.modal-field input[type="text"],
+.modal-field input[type="url"],
+.modal-field input[type="number"] {
+  padding: 0.52rem 0.8rem;
+  border-radius: 9px;
+  border: 1px solid rgba(142, 214, 85, 0.22);
+  background: rgba(0, 0, 0, 0.28);
+  color: #f0f9ed;
+  font-size: 0.87rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 130ms ease, box-shadow 130ms ease;
+}
+
+.modal-field input:focus {
+  border-color: rgba(142, 214, 85, 0.60);
+  box-shadow: 0 0 0 3px rgba(142, 214, 85, 0.12);
+}
+
+.modal-field input::placeholder { color: rgba(255,255,255,0.22); }
+
+/* ── Checkbox ────────────────────────────────────────────────────── */
+.modal-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #c4ddc0;
+  user-select: none;
+}
+
+.modal-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #8ed655;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ── Divider ─────────────────────────────────────────────────────── */
+.modal-divider {
+  height: 1px;
+  background: rgba(142, 214, 85, 0.11);
+  margin: 0.1rem 0;
+}
+
+/* ── "or" label ──────────────────────────────────────────────────── */
+.modal-or {
+  text-align: center;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.26);
+}
+
+/* ── Footer ──────────────────────────────────────────────────────── */
+.modal-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  padding: 0.8rem 1.15rem 1.05rem;
+  border-top: 1px solid rgba(142, 214, 85, 0.10);
+  background: rgba(0, 0, 0, 0.10);
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────── */
+.modal-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  padding: 0.5rem 1.05rem;
+  border-radius: 9px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 120ms ease, border-color 120ms ease, transform 110ms ease;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.modal-btn:hover  { transform: translateY(-1px); }
+.modal-btn:active { transform: translateY(0); }
+
+.modal-btn:focus-visible {
+  outline: 2px solid rgba(142, 214, 85, 0.7);
+  outline-offset: 2px;
+}
+
+.modal-btn--ghost {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.50);
+}
+
+.modal-btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.24);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.modal-btn--primary {
+  background: linear-gradient(135deg, #6abf36, #3d8018);
+  border-color: rgba(90, 170, 42, 0.8);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(60, 140, 30, 0.28);
+}
+
+.modal-btn--primary:hover {
+  background: linear-gradient(135deg, #7ed045, #4a9a22);
+  box-shadow: 0 4px 14px rgba(60, 140, 30, 0.42);
+}
+
+/* ── Table grid picker ───────────────────────────────────────────── */
+.table-grid-picker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tgp-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: rgba(196, 221, 192, 0.78);
+  align-self: flex-start;
+}
+
+.tgp-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 22px);
+  gap: 2px;
+}
+
+.tgp-cell {
+  width: 22px;
+  height: 22px;
+  border-radius: 3px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(142, 214, 85, 0.18);
+  cursor: pointer;
+  transition: background 70ms ease, border-color 70ms ease;
+}
+
+.tgp-cell.is-hover {
+  background: rgba(142, 214, 85, 0.32);
+  border-color: rgba(142, 214, 85, 0.70);
+}
+
+.tgp-size-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #dff5c8;
+}
+
+/* ── Image dropzone ──────────────────────────────────────────────── */
+.image-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.38rem;
+  padding: 1.4rem 1rem;
+  border: 1.5px dashed rgba(142, 214, 85, 0.36);
+  border-radius: 10px;
+  background: rgba(142, 214, 85, 0.05);
+  color: rgba(196, 221, 192, 0.72);
+  font-size: 0.83rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.image-dropzone:hover,
+.image-dropzone:focus-visible {
+  border-color: rgba(142, 214, 85, 0.68);
+  background: rgba(142, 214, 85, 0.11);
+  outline: none;
+}
+
+.image-dropzone i { font-size: 1.75rem; color: rgba(142, 214, 85, 0.60); }
+.image-dropzone__sub { font-size: 0.70rem; color: rgba(255,255,255,0.26); }
+
+
+/* ─── Editor footer / action bar — dark green theme ─────────────── */
+.editor-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.7rem 1rem;
+  border-top: 2px solid rgba(142, 214, 85, 0.30);
+  background: rgba(20, 55, 24, 0.96);
+}
+
+.editor-footer__left {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.editor-footer__right {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+/* Base button reset for footer — override Tabler */
+.editor-footer .btn {
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.42rem 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease, transform 120ms ease;
+}
+
+.editor-footer .btn:hover { transform: translateY(-1px); }
+
+/* ── Left buttons: Back / Clear / Preview / Insert Transect / Print ── */
+.editor-footer .btn-secondary {
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #e8f5d8;
+}
+.editor-footer .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.50);
+  color: #ffffff;
+}
+
+/* ── Insert Transect Table ── */
+.btn-transect {
+  background: rgba(60, 120, 200, 0.25);
+  border: 1px solid rgba(100, 160, 240, 0.55);
+  color: #a8d4ff;
+}
+.btn-transect:hover {
+  background: rgba(60, 120, 200, 0.42);
+  border-color: rgba(100, 160, 240, 0.80);
+  color: #ddeeff;
+}
+
+/* ── Save Draft ── */
+.editor-footer .btn-outline-primary,
+#btnSaveDraft {
+  background: rgba(142, 214, 85, 0.18);
+  border: 1px solid rgba(142, 214, 85, 0.60);
+  color: #c8f0a0;
+}
+#btnSaveDraft:hover {
+  background: rgba(142, 214, 85, 0.32);
+  border-color: rgba(142, 214, 85, 0.90);
+  color: #e8ffd0;
+}
+
+/* ── In Progress ── */
+.btn-in-progress {
+  background: rgba(220, 160, 30, 0.22);
+  border: 1px solid rgba(220, 160, 30, 0.60);
+  color: #ffe08a;
+  font-weight: 700;
+}
+.btn-in-progress:hover {
+  background: rgba(220, 160, 30, 0.38);
+  border-color: rgba(220, 160, 30, 0.90);
+  color: #fff0bb;
+}
+
+/* ── Finalize ── */
+.btn-finalize {
+  background: linear-gradient(135deg, #6abf36, #3d8018);
+  border: 1px solid #5aaa2a;
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(60, 140, 30, 0.35);
+}
+.btn-finalize:hover {
+  background: linear-gradient(135deg, #7ed045, #4a9a22);
+  border-color: #70cc38;
+  box-shadow: 0 4px 14px rgba(60, 140, 30, 0.50);
+  color: #ffffff;
+}
+
+/* ─── Status toast — neutral ─────────────────────────────────────── */
+.editor-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  background: #1e3e1e;
+  border: 1px solid rgba(90, 170, 51, 0.5);
+  color: #d0f0c0;
+  font-size: 0.83rem;
+  font-weight: 600;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.22);
+  animation: toast-in 220ms ease;
+  pointer-events: none;
+}
+
+.editor-toast[hidden] { display: none; }
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.editor-toast i { font-size: 1rem; }
+.editor-toast--success i { color: var(--accent); }
+.editor-toast--error { border-color: rgba(220,55,55,0.4); }
+.editor-toast--error i { color: #ff8080; }
+
+/* ─── Status bar — Word-style grey bar ───────────────────────────── */
+.editor-statusbar {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.28rem 1rem;
+  font-size: 0.72rem;
+  color: #ffffff;
+  background: #217346;    /* Word/Excel status bar green */
+  border-top: none;
+}
+
+.editor-statusbar span { white-space: nowrap; }
+.editor-statusbar .sb-sep {
+  width: 1px;
+  height: 12px;
+  background: rgba(255,255,255,0.35);
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .assessment-layout {
+    grid-template-columns: 1fr;
+  }
+  .assessment-sidebar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .assessment-sidebar {
+    grid-template-columns: 1fr;
+  }
+  .editor-toolbar {
+    gap: 0.1rem;
+    padding: 0.3rem 0.5rem 0.25rem;
+  }
+  .editor-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .editor-footer__left,
+  .editor-footer__right {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}

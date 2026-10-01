@@ -1,0 +1,437 @@
+/* ═══════════════════════════════════════════════════════════
+   iSeeGrass — Users Dashboard  (views/users/dashboard.html)
+   Depends on: public/css/users/styles-users.css (base)
+═══════════════════════════════════════════════════════════ */
+
+/* ── Hero card: stat cards left + quick actions 2×2 right ── */
+.dash-hero {
+    background: rgba(20, 58, 24, 0.82);
+    border: 1px solid rgba(142, 214, 85, 0.26);
+    border-radius: 20px;
+    padding: 1.5rem 1.75rem;
+    display: flex;
+    gap: 1.5rem;
+    align-items: stretch;
+    width: 100%;
+}
+
+/* Left: 4 stat cards in ONE horizontal row */
+.dash-hero__stats {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: row;
+    gap: 0.75rem;
+}
+
+.dash-hero__stats .dash-stat-card {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+/* Vertical divider between stats and quick actions */
+.dash-hero__divider {
+    width: 1px;
+    background: rgba(124, 203, 77, 0.18);
+    align-self: stretch;
+    flex-shrink: 0;
+}
+
+/* Right: label + 2×2 quick-action grid */
+.dash-hero__actions {
+    flex: 0 0 auto;
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.quick-link-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+    flex: 1;
+}
+
+/* ── Stat cards ──────────────────────────────────────────── */
+.dash-stat-card {
+    border-radius: 16px;
+    padding: 1.35rem 1.5rem;
+    background: rgba(24, 64, 28, 0.80);
+    border: 1px solid rgba(142, 214, 85, 0.26);
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+/* Linked stat card */
+.dash-stat-card--link {
+    text-decoration: none;
+    transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
+    cursor: pointer;
+}
+
+.dash-stat-card--link:hover {
+    transform: translateY(-2px);
+    border-color: rgba(142, 214, 85, 0.55);
+    background: rgba(32, 80, 38, 0.88);
+}
+
+.dash-stat-card--link:hover .stat-value {
+    color: #c0ffb0;
+}
+
+.dash-stat-card .stat-label {
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #aae888;
+    text-transform: uppercase;
+}
+
+.dash-stat-card .stat-value {
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: #f0f9ed;
+    line-height: 1;
+}
+
+.dash-stat-card .stat-sub {
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+/* ── Two-panel 50/50 row (Recent Activity + Species Breakdown) ── */
+.dash-panels-row {
+    display: flex;
+    gap: 1rem;
+    align-items: stretch;
+    width: 100%;
+}
+
+.dash-panels-row > .dash-panel {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+/* ── Section panels ──────────────────────────────────────── */
+.dash-panel {
+    background: rgba(20, 58, 24, 0.82);
+    border: 1px solid rgba(142, 214, 85, 0.22);
+    border-radius: 18px;
+    padding: 1.6rem 1.75rem;
+    height: 100%;
+}
+
+/* Enlarged variant for Recent Activity & Species Breakdown */
+.dash-panel--tall {
+    padding: 2rem;
+    min-height: 420px;
+    height: 100%;
+}
+
+.dash-panel h3 {
+    margin: 0 0 1.1rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #d6f0b8;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dash-panel h3 .panel-icon {
+    font-size: 1.05rem;
+}
+
+/* ── Activity list ───────────────────────────────────────── */
+.activity-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem 0.9rem;
+    background: rgba(142, 214, 85, 0.08);
+    border: 1px solid rgba(142, 214, 85, 0.18);
+    border-radius: 10px;
+    font-size: 0.86rem;
+}
+
+.activity-item .act-icon {
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 8px;
+    background: rgba(142, 214, 85, 0.16);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+.activity-item .act-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.activity-item .act-title {
+    color: #d6f0b8;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.activity-item .act-meta {
+    color: var(--muted);
+    font-size: 0.78rem;
+    margin-top: 0.15rem;
+}
+
+.activity-item .act-badge {
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.2rem 0.55rem;
+    border-radius: 20px;
+    background: rgba(142, 214, 85, 0.20);
+    color: #aae888;
+    white-space: nowrap;
+    align-self: center;
+}
+
+/* ── Empty state ─────────────────────────────────────────── */
+.empty-state-dash {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--muted);
+    font-size: 0.88rem;
+    line-height: 1.7;
+}
+
+.empty-state-dash .es-icon {
+    font-size: 2.2rem;
+    margin-bottom: 0.65rem;
+    opacity: 0.55;
+}
+
+/* ── Species breakdown bars ──────────────────────────────── */
+.species-bar-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.species-bar-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.species-bar-item .bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+}
+
+.species-bar-item .bar-name {
+    color: #d6f0b8;
+    font-weight: 600;
+}
+
+.species-bar-item .bar-count {
+    color: var(--muted);
+}
+
+.bar-track {
+    height: 6px;
+    border-radius: 99px;
+    background: rgba(124, 203, 77, 0.1);
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #84d64f, #4f8f1e);
+    transition: width 0.5s ease;
+}
+
+/* ── Scope notice ────────────────────────────────────────── */
+.scope-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    background: rgba(142, 214, 85, 0.09);
+    border: 1px solid rgba(142, 214, 85, 0.26);
+    border-radius: 12px;
+    padding: 0.9rem 1.1rem;
+    font-size: 0.83rem;
+    color: var(--muted);
+    line-height: 1.65;
+}
+
+.scope-notice .sn-tag {
+    flex-shrink: 0;
+    background: rgba(142, 214, 85, 0.20);
+    color: #aae888;
+    border-radius: 8px;
+    padding: 0.2rem 0.55rem;
+    font-size: 0.73rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    margin-top: 0.1rem;
+}
+
+/* ── Quick-link buttons ──────────────────────────────────── */
+.quick-link-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+
+.quick-link-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.8rem 1rem;
+    border-radius: 10px;
+    background: rgba(28, 72, 34, 0.76);
+    border: 1px solid rgba(142, 214, 85, 0.30);
+    color: #dff5c8;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 150ms ease, border-color 150ms ease;
+    min-height: 3.5rem;
+}
+
+.quick-link-btn:hover {
+    transform: translateY(-2px);
+    border-color: rgba(142, 214, 85, 0.58);
+    color: #f0f9ed;
+}
+
+.quick-link-btn .ql-icon {
+    font-size: 1.05rem;
+}
+
+/* ── Section label ───────────────────────────────────────── */
+.section-label {
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: #aae888;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+}
+
+/* ── Tip list ────────────────────────────────────────────── */
+.tip-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.tip-list li {
+    font-size: 0.86rem;
+    color: var(--muted);
+    line-height: 1.65;
+    padding-left: 1.1rem;
+    position: relative;
+}
+
+.tip-list li::before {
+    content: "▸";
+    position: absolute;
+    left: 0;
+    color: #9fe997;
+    font-size: 0.75rem;
+    top: 0.05rem;
+}
+
+/* ── Negros species reference cards ─────────────────────── */
+.negros-species-card {
+    background: rgba(142, 214, 85, 0.08);
+    border: 1px solid rgba(142, 214, 85, 0.20);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+}
+
+.negros-species-card .nsc-name {
+    margin: 0 0 0.2rem;
+    font-weight: 700;
+    color: #dff5c8;
+    font-size: 0.88rem;
+}
+
+.negros-species-card .nsc-scientific {
+    margin: 0 0 0.35rem;
+    font-size: 0.77rem;
+    font-style: italic;
+    color: rgba(196, 221, 192, 0.75);
+}
+
+.negros-species-card .nsc-habitat {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.55;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 991px) {
+    .dash-hero {
+        flex-direction: column;
+    }
+
+    .dash-hero__stats {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .dash-hero__stats .dash-stat-card {
+        flex: 1 1 calc(50% - 0.375rem);
+    }
+
+    .dash-hero__divider {
+        width: 100%;
+        height: 1px;
+    }
+
+    .dash-hero__actions {
+        width: 100%;
+    }
+
+    .dash-panels-row {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 575px) {
+    .dash-hero {
+        padding: 1.1rem;
+        gap: 1rem;
+    }
+
+    .dash-hero__stats .dash-stat-card {
+        flex: 1 1 calc(50% - 0.375rem);
+    }
+
+    .dash-panel,
+    .dash-panel--tall {
+        padding: 1.25rem;
+        min-height: unset;
+    }
+}

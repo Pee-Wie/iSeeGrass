@@ -1,0 +1,957 @@
+/* ─── Aid page layout ──────────────────────────────────────────── */
+
+.aid-layout {
+  display: grid;
+  grid-template-columns: 75fr 25fr;
+  grid-auto-rows: 1fr;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  align-items: stretch;
+}
+
+/* Left panel */
+.aid-main {
+  min-height: 480px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0;          /* reset — sections handle their own padding */
+  overflow: hidden;    /* keep rounded corners on footer */
+}
+
+/* Header */
+.aid-main__header {
+  padding: 1.5rem 1.5rem 1rem;
+}
+
+.aid-main__header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.35rem;
+}
+
+.aid-main__header-row h2 {
+  margin: 0;
+}
+
+.aid-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.82rem;
+  border-radius: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  opacity: 0.8;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.aid-back-btn:hover {
+  opacity: 1;
+  transform: translateX(-2px);
+}
+
+.aid-main__header h2 {
+  margin: 0 0 0.35rem;
+}
+
+.aid-main__header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+/* Body — grows to fill available space */
+.aid-main__body {
+  flex: 1;
+  padding: 0 1.5rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Footer — caution strip */
+.aid-main__footer {
+  border-top: 1px solid rgba(220, 160, 30, 0.2);
+  padding: 0.75rem 1.5rem;
+  background: rgba(220, 160, 30, 0.05);
+}
+
+/* ─── Big ID prompt ─────────────────────────────────────────────── */
+
+.aid-id-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem 0;
+}
+
+.aid-id-btn {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 2px solid rgba(124, 203, 77, 0.3);
+  background: rgba(124, 203, 77, 0.07);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 200ms ease, background 200ms ease, transform 200ms ease,
+              box-shadow 200ms ease;
+  box-shadow: 0 0 0 0 rgba(124, 203, 77, 0);
+}
+
+.aid-id-btn:hover {
+  border-color: rgba(124, 203, 77, 0.75);
+  background: rgba(124, 203, 77, 0.14);
+  transform: scale(1.05);
+  box-shadow: 0 0 32px 6px rgba(124, 203, 77, 0.18);
+}
+
+.aid-id-btn:active {
+  transform: scale(0.97);
+}
+
+.aid-id-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 5px;
+}
+
+.aid-id-btn__img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  border-radius: 12px;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Plus badge — bottom-right of the circle */
+.aid-id-btn__plus {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #84d64f, #4f8f1e);
+  color: #081908;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+  pointer-events: none;
+}
+
+.aid-id-prompt__label {
+  margin: 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.species-results {
+  flex: 1;
+}
+
+/* Right sidebar */
+.aid-sidebar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ─── Photo Collector ──────────────────────────────────────────── */
+
+.photo-collector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.photo-collector-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  color: #d6f0b8;
+  font-size: 0.92rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.photo-count {
+  font-size: 0.78rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.photo-collector-hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+/* Drop zone */
+.photo-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 1.25rem 1rem;
+  border: 1.5px dashed rgba(124, 203, 77, 0.35);
+  border-radius: 14px;
+  background: rgba(124, 203, 77, 0.04);
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease;
+  user-select: none;
+}
+
+.photo-dropzone:hover,
+.photo-dropzone.drag-over {
+  border-color: rgba(124, 203, 77, 0.7);
+  background: rgba(124, 203, 77, 0.1);
+  color: var(--text);
+}
+
+.photo-dropzone:focus-visible {
+  outline: 2px solid rgba(124, 203, 77, 0.8);
+  outline-offset: 3px;
+}
+
+.dropzone-icon {
+  color: rgba(124, 203, 77, 0.6);
+  margin-bottom: 0.15rem;
+}
+
+.dropzone-sub {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* Thumbnail grid */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+/* Locked state — MID photo is active in the 75% panel */
+.photo-grid.pc-locked {
+  opacity: 0.45;
+  pointer-events: none;
+  position: relative;
+}
+
+.photo-grid.pc-locked::after {
+  content: 'Clear the ID panel to select';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  color: var(--muted);
+  background: rgba(8, 25, 8, 0.55);
+  border-radius: 10px;
+  padding: 0.5rem;
+  text-align: center;
+  pointer-events: none;
+}
+
+.photo-thumb {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(124, 203, 77, 0.2);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.photo-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  cursor: pointer;
+  transition: filter 160ms ease;
+}
+
+.photo-thumb.is-selected img {
+  filter: brightness(0.65);
+}
+
+/* Selection tick */
+.photo-thumb__tick {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #081908;
+  font-size: 0.7rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 140ms ease, transform 140ms ease;
+  pointer-events: none;
+}
+
+.photo-thumb.is-selected .photo-thumb__tick {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Hover toolbar (send + rename + remove) — right edge, vertical */
+.photo-thumb__toolbar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 34px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px 4px;
+  background: linear-gradient(to left, rgba(0,0,0,0.78), transparent);
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+.photo-thumb:hover .photo-thumb__toolbar,
+.photo-thumb:focus-within .photo-thumb__toolbar {
+  opacity: 1;
+}
+
+.photo-thumb__action {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(20, 20, 20, 0.85);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  transition: background 120ms ease, border-color 120ms ease;
+  flex-shrink: 0;
+}
+
+.photo-thumb__action:hover {
+  background: rgba(124, 203, 77, 0.35);
+  border-color: rgba(124, 203, 77, 0.7);
+  color: #d6f0b8;
+}
+
+.photo-thumb__action--remove:hover {
+  background: rgba(220, 55, 55, 0.55);
+  border-color: rgba(220, 55, 55, 0.8);
+  color: #ffd5d5;
+}
+
+/* Send-to-panel button — green accent on hover */
+.photo-thumb__action--send:hover {
+  background: rgba(124, 203, 77, 0.45);
+  border-color: rgba(124, 203, 77, 0.85);
+  color: #d6f0b8;
+}
+
+.photo-thumb__action:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.photo-thumb__action svg {
+  flex-shrink: 0;
+}
+
+/* Label below thumbnail */
+.photo-thumb__label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 2px 5px 3px;
+  background: rgba(0,0,0,0.55);
+  color: rgba(255,255,255,0.82);
+  font-size: 0.65rem;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+/* Inline rename input */
+.photo-thumb__rename-input {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 3px 5px;
+  background: rgba(8, 25, 8, 0.92);
+  border: 1px solid rgba(124, 203, 77, 0.6);
+  border-radius: 0 0 10px 10px;
+  color: var(--text);
+  font-size: 0.7rem;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 2;
+}
+
+/* Action row */
+.photo-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.photo-identify-btn {
+  width: 100%;
+  border-radius: 10px;
+  padding: 0.65rem 1rem;
+  font-size: 0.88rem;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.photo-identify-btn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.photo-clear-btn {
+  width: 100%;
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  font-size: 0.82rem;
+}
+
+/* ─── MID preview (direct upload in the 75% panel) ─────────────── */
+
+.mid-preview {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 1.5rem;
+  width: 100%;
+  animation: mid-fadein 220ms ease;
+}
+
+@keyframes mid-fadein {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Photo – left side */
+.mid-preview__img {
+  flex: 1;
+  min-width: 0;
+  max-height: 360px;
+  width: 100%;
+  height: auto;
+  border-radius: 14px;
+  object-fit: contain;
+  border: 1px solid rgba(124, 203, 77, 0.22);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  background: rgba(0,0,0,0.2);
+}
+
+/* Right side – MID btn + actions */
+.mid-preview__aside {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  width: 130px;
+}
+
+/* Compact MID button */
+.mid-preview__mid-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px solid rgba(124, 203, 77, 0.35);
+  background: rgba(124, 203, 77, 0.08);
+  cursor: pointer;
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+  padding: 0;
+  justify-content: center;
+}
+
+.mid-preview__mid-btn:hover {
+  border-color: rgba(124, 203, 77, 0.7);
+  background: rgba(124, 203, 77, 0.16);
+  transform: scale(1.06);
+}
+
+.mid-preview__mid-btn img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+.mid-preview__mid-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  pointer-events: none;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+/* Filename */
+.mid-preview__name {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-align: center;
+  word-break: break-all;
+  line-height: 1.4;
+  max-width: 100%;
+}
+
+/* Change photo */
+.mid-preview__change {
+  width: 100%;
+  border-radius: 10px;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.82rem;
+}
+
+/* Clear */
+.mid-preview__clear {
+  width: 100%;
+  border-radius: 10px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.78rem;
+  background: rgba(220, 55, 55, 0.12);
+  border: 1px solid rgba(220, 55, 55, 0.3);
+  color: #ffa0a0;
+}
+
+.mid-preview__clear:hover {
+  background: rgba(220, 55, 55, 0.28);
+  border-color: rgba(220, 55, 55, 0.6);
+}
+
+@media (max-width: 600px) {
+  .mid-preview {
+    flex-direction: column;
+    align-items: center;
+  }
+  .mid-preview__aside {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+/* ─── Left panel drop target ────────────────────────────────────── */
+
+.aid-main__body {
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.aid-main__body.drop-active {
+  background: rgba(124, 203, 77, 0.07);
+  outline: 2px dashed rgba(124, 203, 77, 0.55);
+  outline-offset: -4px;
+  border-radius: 10px;
+}
+
+/* Thumbnail being dragged */
+.photo-thumb.is-dragging {
+  opacity: 0.45;
+  cursor: grabbing;
+}
+
+/* ─── AI caution notice (card footer) ──────────────────────────── */
+
+.aid-caution {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.aid-caution__icon {
+  color: rgba(220, 160, 30, 0.85);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.aid-caution p {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.aid-caution p strong {
+  color: rgba(220, 160, 30, 0.85);
+  font-weight: 600;
+}
+
+/* ─── Responsive collapse ──────────────────────────────────────── */
+@media (max-width: 768px) {
+  .aid-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .aid-sidebar {
+    position: static;
+  }
+
+  /* Larger thumbnails — 2 columns instead of 3 */
+  .photo-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.65rem;
+  }
+
+  /* Always show the toolbar on touch — no hover available */
+  .photo-thumb__toolbar {
+    opacity: 1;
+    width: 36px;
+    background: linear-gradient(to left, rgba(0,0,0,0.82), transparent);
+  }
+
+  /* Bigger tap targets */
+  .photo-thumb__action {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+  }
+
+  .photo-thumb__action svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Slightly larger selection tick */
+  .photo-thumb__tick {
+    width: 22px;
+    height: 22px;
+    font-size: 0.75rem;
+  }
+}
+
+/* ─── Photo input row (dropzone + capture side-by-side) ────────── */
+
+.photo-input-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ─── Capture button ────────────────────────────────────────────── */
+
+.photo-capture-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border-radius: 12px;
+  border: 1.5px solid rgba(124, 203, 77, 0.32);
+  background: rgba(124, 203, 77, 0.08);
+  color: #d6f0b8;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+  font-family: inherit;
+}
+
+.photo-capture-btn:hover {
+  background: rgba(124, 203, 77, 0.18);
+  border-color: rgba(124, 203, 77, 0.65);
+  transform: translateY(-1px);
+}
+
+.photo-capture-btn:active {
+  transform: translateY(0);
+}
+
+.photo-capture-btn:focus-visible {
+  outline: 2px solid rgba(124, 203, 77, 0.8);
+  outline-offset: 3px;
+}
+
+/* ─── Camera modal overlay ──────────────────────────────────────── */
+
+.camera-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.camera-modal[hidden] {
+  display: none;
+}
+
+.camera-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 8, 3, 0.88);
+  backdrop-filter: blur(6px);
+}
+
+.camera-modal__box {
+  position: relative;
+  z-index: 1;
+  background: rgba(8, 28, 10, 0.97);
+  border: 1px solid rgba(124, 203, 77, 0.22);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
+  animation: camera-modal-in 220ms ease;
+}
+
+@keyframes camera-modal-in {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+/* Header */
+.camera-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem 0.75rem;
+  border-bottom: 1px solid rgba(124, 203, 77, 0.1);
+}
+
+.camera-modal__title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #d6f0b8;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.camera-modal__close {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.camera-modal__close:hover {
+  background: rgba(220, 55, 55, 0.2);
+  border-color: rgba(220, 55, 55, 0.4);
+  color: #ffa0a0;
+}
+
+.camera-modal__close:focus-visible {
+  outline: 2px solid rgba(124, 203, 77, 0.8);
+  outline-offset: 2px;
+}
+
+/* Viewfinder */
+.camera-viewfinder {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #000;
+  overflow: hidden;
+}
+
+.camera-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Flash overlay — briefly shown on shutter press */
+.camera-flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 80ms ease;
+}
+
+.camera-flash.flash-active {
+  opacity: 0.75;
+}
+
+/* Error state inside viewfinder */
+.camera-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: rgba(8, 20, 10, 0.92);
+  color: var(--muted);
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.camera-error[hidden] {
+  display: none;
+}
+
+.camera-error svg {
+  color: rgba(220, 160, 30, 0.7);
+  flex-shrink: 0;
+}
+
+.camera-error p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* Controls bar */
+.camera-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem 1.25rem;
+}
+
+/* Switch-camera / utility button */
+.camera-ctrl-btn {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  border: 1px solid rgba(124, 203, 77, 0.25);
+  background: rgba(124, 203, 77, 0.07);
+  color: #d6f0b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+
+.camera-ctrl-btn:hover {
+  background: rgba(124, 203, 77, 0.18);
+  border-color: rgba(124, 203, 77, 0.55);
+  transform: rotate(30deg);
+}
+
+.camera-ctrl-btn:focus-visible {
+  outline: 2px solid rgba(124, 203, 77, 0.8);
+  outline-offset: 2px;
+}
+
+/* Shutter button */
+.camera-shutter-btn {
+  width: 4.25rem;
+  height: 4.25rem;
+  border-radius: 50%;
+  border: 3px solid rgba(124, 203, 77, 0.55);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: border-color 150ms ease, transform 150ms ease;
+}
+
+.camera-shutter-btn:hover {
+  border-color: rgba(124, 203, 77, 0.9);
+  transform: scale(1.05);
+}
+
+.camera-shutter-btn:active {
+  transform: scale(0.94);
+}
+
+.camera-shutter-btn:focus-visible {
+  outline: 2px solid rgba(124, 203, 77, 0.8);
+  outline-offset: 3px;
+}
+
+/* White filled inner disc */
+.camera-shutter-btn__inner {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: #fff;
+  display: block;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.camera-shutter-btn:hover .camera-shutter-btn__inner {
+  background: #d6f0b8;
+}
+
+.camera-shutter-btn:active .camera-shutter-btn__inner {
+  transform: scale(0.9);
+}
+
+/* ─── Responsive ────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .camera-modal__box {
+    border-radius: 16px;
+  }
+
+  .camera-viewfinder {
+    aspect-ratio: 3 / 4; /* portrait on phones */
+  }
+}

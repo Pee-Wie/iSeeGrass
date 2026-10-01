@@ -3,30 +3,60 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contact iSeeGrass</title>
+  <meta name="description" content="Contact the iSeeGrass research team for inquiries about the project, collaboration, or technical support.">
+  <title>Contact | iSeeGrass</title>
+
+  <!-- iSeeGrass Default Theme -->
+  <link rel="stylesheet" href="../../resources/tabler/css/tabler.css">
+  <link rel="stylesheet" href="../../resources/tabler/css/tabler.min.css">
+
+  <link rel="icon" type="image/png" href="icons/favicon.png">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
   <isee-header></isee-header>
 
   <main class="container">
+
+    <!-- Hero -->
     <section class="section">
+      <span class="eyebrow">Get in Touch</span>
       <h1>Contact Us</h1>
-      <p>Use this page to add contact information for your research team, support, or general inquiries.</p>
+      <p class="lead">Have a question about the project, want to collaborate, or need technical support? Reach out to the iSeeGrass research team.</p>
     </section>
 
+    <!-- Contact details -->
     <section class="section">
-      <h2>Starter contact fields</h2>
-      <ul>
-        <li>Project lead email</li>
-        <li>Research collaboration inquiries</li>
-        <li>Technical support or feature requests</li>
-        <li>Social media or lab profiles</li>
-      </ul>
+      <h2>Research Team</h2>
+      <div class="grid features">
+        <article class="card">
+          <h3>Project Lead</h3>
+          <p>For inquiries about the research scope, academic collaboration, or project documentation.</p>
+          <p><strong>Email:</strong> <a href="mailto:team@iseegrass.local">team@iseegrass.local</a></p>
+        </article>
+        <article class="card">
+          <h3>Technical Support</h3>
+          <p>For issues related to the web application, mobile app, or image recognition system.</p>
+          <p><strong>Email:</strong> <a href="mailto:support@iseegrass.local">support@iseegrass.local</a></p>
+        </article>
+        <article class="card">
+          <h3>Research Collaboration</h3>
+          <p>Interested in contributing to the seagrass dataset, fieldwork, or academic research?</p>
+          <p><strong>Email:</strong> <a href="mailto:research@iseegrass.local">research@iseegrass.local</a></p>
+        </article>
+      </div>
     </section>
+
+    <!-- Context -->
+    <section class="section">
+      <h2>About This Project</h2>
+      <p>iSeeGrass is an academic capstone project focused on seagrass species identification and ecological assessment using image recognition. It is developed for the purpose of research, education, and marine conservation support.</p>
+      <p>This application is not a commercial product. Contact inquiries are intended for research-related purposes.</p>
+    </section>
+
+    <isee-wp-site-footer></isee-wp-site-footer>
   </main>
 
-  <isee-footer></isee-footer>
   <script type="module" src="../components/wp-site-header.js"></script>
   <script type="module" src="../components/wp-site-footer.js"></script>
 </body>

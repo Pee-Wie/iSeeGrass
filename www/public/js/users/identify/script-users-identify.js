@@ -1,0 +1,638 @@
+/**
+ * Identify page – Users
+ *
+ * Replicates the guest Aid page behaviour:
+ *   • Photo Collector (PC) — drag-and-drop / browse, up to 12 images, 5 MB each
+ *   • Single-select thumbnail → Identify Species button activates
+ *   • Inline rename (format: newName(originalName).ext)
+ *   • Direct-upload panel (left 75%) — bypasses the PC
+ *   • Drag from PC thumbnail → left panel
+ *   • Camera modal (getUserMedia with front/back switch + shutter)
+ *   • Fallback to native <input capture="environment"> when no getUserMedia
+ *
+ * Element IDs match identify.html (not the guest Aid IDs).
+ */
+
+'use strict';
+
+// ─── Constants ───────────────────────────────────────────────────
+
+const MAX_PHOTOS = 12;
+const MAX_BYTES  = 5 * 1024 * 1024; // 5 MB
+
+// ─── DOM refs ────────────────────────────────────────────────────
+
+const dropzone     = document.getElementById('photoDropzone');
+const fileInput    = document.getElementById('photoInput');
+const photoGrid    = document.getElementById('photoGrid');
+const photoCount   = document.getElementById('photoCount');
+const photoActions = document.getElementById('photoActions');
+const identifyBtn  = document.getElementById('identifyBtn');
+const clearBtn     = document.getElementById('clearBtn');
+const mainBody     = document.getElementById('speciesResults');
+
+// Direct-upload (left panel)
+const directUploadBtn   = document.getElementById('directUploadBtn');
+const directUploadInput = document.getElementById('directUploadInput');
+
+// Camera
+const captureBtn    = document.getElementById('captureBtn');
+const captureInput  = document.getElementById('captureInput');
+
+const cameraModal    = document.getElementById('cameraModal');
+const cameraBackdrop = document.getElementById('cameraBackdrop');
+const cameraCloseBtn = document.getElementById('cameraCloseBtn');
+const cameraVideo    = document.getElementById('cameraVideo');
+const cameraShutterBtn = document.getElementById('cameraShutterBtn');
+const cameraSwitchBtn  = document.getElementById('cameraSwitchBtn');
+const cameraCanvas   = document.getElementById('cameraCanvas');
+const cameraFlash    = document.getElementById('cameraFlash');
+const cameraError    = document.getElementById('cameraError');
+const cameraErrorMsg = document.getElementById('cameraErrorMsg');
+
+// ─── Photo Collector state ────────────────────────────────────────
+
+/**
+ * @typedef {{ file: File, url: string, label: string, originalName: string, ext: string, selected: boolean }} PhotoEntry
+ * @type {PhotoEntry[]}
+ */
+let photos = [];
+
+// ─── UI helpers ──────────────────────────────────────────────────
+
+function updateUI() {
+  photoCount.textContent = `${photos.length} / ${MAX_PHOTOS}`;
+  photoActions.hidden    = photos.length === 0;
+  dropzone.style.display = photos.length >= MAX_PHOTOS ? 'none' : '';
+
+  const selected = photos.filter(p => p.selected);
+  const hasOne   = selected.length === 1;
+
+  identifyBtn.textContent = hasOne
+    ? `Identify "${selected[0].label}"`
+    : 'Select a photo to identify';
+  identifyBtn.disabled = !hasOne;
+}
+
+function getEntry(url) {
+  return photos.find(p => p.url === url);
+}
+
+// ─── Add photos to the collector ─────────────────────────────────
+
+function addPhotos(files) {
+  const remaining = MAX_PHOTOS - photos.length;
+  const accepted  = Array.from(files).slice(0, remaining);
+
+  for (const file of accepted) {
+    if (!file.type.startsWith('image/')) continue;
+    if (file.size > MAX_BYTES) {
+      modalAlert(`"${file.name}" exceeds the 5 MB limit and was skipped.`, 'File Too Large', 'error');
+      continue;
+    }
+
+    const url      = URL.createObjectURL(file);
+    const dotIdx   = file.name.lastIndexOf('.');
+    const origName = dotIdx !== -1 ? file.name.slice(0, dotIdx) : file.name;
+    const ext      = dotIdx !== -1 ? file.name.slice(dotIdx)     : '';
+
+    photos.push({ file, url, label: origName, originalName: origName, ext, selected: false });
+    renderThumb(url);
+  }
+
+  updateUI();
+}
+
+// ─── Render a thumbnail ───────────────────────────────────────────
+
+function renderThumb(url) {
+  const entry = getEntry(url);
+
+  const wrap = document.createElement('div');
+  wrap.className   = 'photo-thumb';
+  wrap.dataset.url = url;
+  wrap.setAttribute('role', 'group');
+  wrap.setAttribute('aria-label', entry.label);
+  wrap.draggable = true;
+
+  // Drag from PC → left panel
+  wrap.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('text/x-collector-url', url);
+    e.dataTransfer.effectAllowed = 'copy';
+    wrap.classList.add('is-dragging');
+  });
+  wrap.addEventListener('dragend', () => wrap.classList.remove('is-dragging'));
+
+  // Image — click to select / deselect
+  const img   = document.createElement('img');
+  img.src     = url;
+  img.alt     = entry.label;
+  img.loading = 'lazy';
+  img.title   = 'Click to select / deselect';
+  img.addEventListener('click', () => toggleSelect(url));
+
+  // Selection tick
+  const tick = document.createElement('span');
+  tick.className = 'photo-thumb__tick';
+  tick.setAttribute('aria-hidden', 'true');
+  tick.innerHTML = '&#10003;';
+
+  // Hover toolbar
+  const toolbar = document.createElement('div');
+  toolbar.className = 'photo-thumb__toolbar';
+
+  // Send to left panel
+  const sendBtn = document.createElement('button');
+  sendBtn.className = 'photo-thumb__action photo-thumb__action--send';
+  sendBtn.type = 'button';
+  sendBtn.setAttribute('aria-label', `Send ${entry.label} to identification panel`);
+  sendBtn.title = 'Send to ID panel';
+  sendBtn.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+      fill="none" stroke="currentColor" stroke-width="2.5"
+      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="15 3 21 3 21 9"/>
+      <path d="M10 14L21 3"/>
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+    </svg>`;
+  sendBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    const target = getEntry(url);
+    if (target) loadDirectPhoto(target.file);
+  });
+
+  // Rename
+  const renameBtn = document.createElement('button');
+  renameBtn.className = 'photo-thumb__action';
+  renameBtn.type = 'button';
+  renameBtn.setAttribute('aria-label', `Rename ${entry.label}`);
+  renameBtn.title = 'Rename';
+  renameBtn.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+      fill="none" stroke="currentColor" stroke-width="2.5"
+      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+    </svg>`;
+  renameBtn.addEventListener('click', e => { e.stopPropagation(); startRename(url, wrap); });
+
+  // Remove
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'photo-thumb__action photo-thumb__action--remove';
+  removeBtn.type = 'button';
+  removeBtn.setAttribute('aria-label', `Remove ${entry.label}`);
+  removeBtn.title = 'Remove';
+  removeBtn.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+      fill="none" stroke="currentColor" stroke-width="2.5"
+      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <line x1="18" y1="6" x2="6" y2="18"/>
+      <line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>`;
+  removeBtn.addEventListener('click', e => { e.stopPropagation(); removePhoto(url); });
+
+  toolbar.appendChild(sendBtn);
+  toolbar.appendChild(renameBtn);
+  toolbar.appendChild(removeBtn);
+
+  // Label
+  const labelEl = document.createElement('span');
+  labelEl.className   = 'photo-thumb__label';
+  labelEl.textContent = entry.label;
+  labelEl.title       = entry.label;
+
+  wrap.appendChild(img);
+  wrap.appendChild(tick);
+  wrap.appendChild(toolbar);
+  wrap.appendChild(labelEl);
+  photoGrid.appendChild(wrap);
+}
+
+// ─── Select / deselect (single selection) ────────────────────────
+
+function toggleSelect(url) {
+  // PC selection locked while a direct photo is in the left panel
+  if (directPhoto) return;
+
+  const entry = getEntry(url);
+  if (!entry) return;
+
+  if (entry.selected) {
+    entry.selected = false;
+    const wrap = photoGrid.querySelector(`[data-url="${CSS.escape(url)}"]`);
+    if (wrap) wrap.classList.remove('is-selected');
+    updateUI();
+  } else {
+    selectOnly(url);
+  }
+}
+
+function selectOnly(url) {
+  photos.forEach(p => {
+    if (p.selected) {
+      p.selected = false;
+      const w = photoGrid.querySelector(`[data-url="${CSS.escape(p.url)}"]`);
+      if (w) w.classList.remove('is-selected');
+    }
+  });
+
+  const entry = getEntry(url);
+  if (!entry) return;
+  entry.selected = true;
+  const wrap = photoGrid.querySelector(`[data-url="${CSS.escape(url)}"]`);
+  if (wrap) wrap.classList.add('is-selected');
+  updateUI();
+}
+
+// ─── Inline rename ────────────────────────────────────────────────
+
+function startRename(url, wrap) {
+  const entry = getEntry(url);
+  if (!entry) return;
+
+  const labelEl = wrap.querySelector('.photo-thumb__label');
+
+  const input    = document.createElement('input');
+  input.className = 'photo-thumb__rename-input';
+  input.type      = 'text';
+  input.value     = entry.label;
+  input.maxLength = 64;
+  input.setAttribute('aria-label', 'Rename photo');
+
+  labelEl.replaceWith(input);
+  input.focus();
+  input.select();
+
+  const commit = () => {
+    const typed = input.value.trim();
+    const newLabel = typed && typed !== entry.originalName
+      ? `${typed}(${entry.originalName})${entry.ext}`
+      : `${entry.originalName}${entry.ext}`;
+
+    entry.label = newLabel;
+
+    const newLabelEl = document.createElement('span');
+    newLabelEl.className   = 'photo-thumb__label';
+    newLabelEl.textContent = newLabel;
+    newLabelEl.title       = newLabel;
+
+    input.replaceWith(newLabelEl);
+
+    const img = wrap.querySelector('img');
+    if (img) img.alt = newLabel;
+    wrap.setAttribute('aria-label', newLabel);
+  };
+
+  input.addEventListener('blur', commit);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter')  { e.preventDefault(); input.blur(); }
+    if (e.key === 'Escape') { input.value = entry.originalName; input.blur(); }
+  });
+}
+
+// ─── Remove / clear ───────────────────────────────────────────────
+
+function removePhoto(url) {
+  const entry = getEntry(url);
+  if (entry) URL.revokeObjectURL(entry.url);
+  photos = photos.filter(p => p.url !== url);
+  const thumb = photoGrid.querySelector(`[data-url="${CSS.escape(url)}"]`);
+  if (thumb) thumb.remove();
+  updateUI();
+}
+
+function clearAll() {
+  photos.forEach(p => URL.revokeObjectURL(p.url));
+  photos = [];
+  photoGrid.innerHTML = '';
+  fileInput.value = '';
+  updateUI();
+}
+
+// ─── Event wiring – collector ─────────────────────────────────────
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length) addPhotos(fileInput.files);
+  fileInput.value = '';
+});
+
+dropzone.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropzone.classList.add('drag-over');
+});
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('drag-over');
+  if (e.dataTransfer.files.length) addPhotos(e.dataTransfer.files);
+});
+dropzone.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+});
+
+clearBtn.addEventListener('click', clearAll);
+
+identifyBtn.addEventListener('click', () => {
+  const selected = photos.filter(p => p.selected);
+  if (selected.length !== 1) return;
+  const target = selected[0];
+  // TODO: send target.file to identification API
+  console.log('Identify:', { name: target.label, file: target.file.name });
+  modalAlert(
+    `Identifying "${target.label}"…\n\nAPI integration is pending — results will appear here once the model is connected.`,
+    'Identification Pending',
+    'info'
+  );
+});
+
+// ─── Direct-upload – left panel ───────────────────────────────────
+// User clicks the big circle button → file picker → image loads into
+// the left panel preview without going through the collector.
+
+/** @type {{ file: File, url: string } | null} */
+let directPhoto = null;
+
+directUploadBtn.addEventListener('click', () => directUploadInput.click());
+
+directUploadInput.addEventListener('change', () => {
+  if (!directUploadInput.files.length) return;
+  loadDirectPhoto(directUploadInput.files[0]);
+  directUploadInput.value = '';
+});
+
+function loadDirectPhoto(file) {
+  if (!file.type.startsWith('image/')) return;
+  if (file.size > MAX_BYTES) {
+    modalAlert(`"${file.name}" exceeds the 5 MB limit.`, 'File Too Large', 'error');
+    return;
+  }
+
+  // Revoke previous object URL
+  if (directPhoto) URL.revokeObjectURL(directPhoto.url);
+  directPhoto = { file, url: URL.createObjectURL(file) };
+
+  // Lock the collector — deselect anything currently selected
+  photos.forEach(p => {
+    if (p.selected) {
+      p.selected = false;
+      const w = photoGrid.querySelector(`[data-url="${CSS.escape(p.url)}"]`);
+      if (w) w.classList.remove('is-selected');
+    }
+  });
+  photoGrid.classList.add('pc-locked');
+  updateUI();
+
+  renderDirectPreview();
+}
+
+function renderDirectPreview() {
+  const prompt  = document.getElementById('uploadPrompt');
+  let   preview = document.getElementById('directPreview');
+
+  prompt.hidden = true;
+
+  if (!preview) {
+    preview = document.createElement('div');
+    preview.id        = 'directPreview';
+    preview.className = 'direct-preview';
+    preview.setAttribute('aria-label', 'Direct upload preview');
+
+    // Left: full image
+    const img     = document.createElement('img');
+    img.className = 'direct-preview__img';
+    img.alt       = '';
+
+    // Right: compact re-upload button + actions
+    const aside     = document.createElement('div');
+    aside.className = 'direct-preview__aside';
+
+    // Small circle button (same icon as the big one)
+    const reuploadBtn     = document.createElement('button');
+    reuploadBtn.className = 'direct-preview__reupload-btn';
+    reuploadBtn.type      = 'button';
+    reuploadBtn.id        = 'directIdentifyBtn';
+    reuploadBtn.setAttribute('aria-label', 'Identify this photo');
+    reuploadBtn.title = 'Identify';
+    reuploadBtn.innerHTML = `
+      <img src="../../public/icons/favicon.png" alt="" aria-hidden="true">
+      <span class="direct-preview__reupload-label">Identify</span>`;
+    reuploadBtn.addEventListener('click', () => {
+      if (!directPhoto) return;
+      // TODO: send directPhoto.file to identification API
+      console.log('Direct Identify:', directPhoto.file.name);
+      modalAlert(
+        `Identifying "${directPhoto.file.name}"…\n\nAPI integration is pending — results will appear here once the model is connected.`,
+        'Identification Pending',
+        'info'
+      );
+    });
+
+    // Filename
+    const nameEl     = document.createElement('span');
+    nameEl.className = 'direct-preview__name';
+
+    // Change photo
+    const changeBtn     = document.createElement('button');
+    changeBtn.className = 'btn btn-secondary direct-preview__change';
+    changeBtn.type      = 'button';
+    changeBtn.textContent = 'Change photo';
+    changeBtn.addEventListener('click', () => directUploadInput.click());
+
+    // Clear
+    const clearDirectBtn     = document.createElement('button');
+    clearDirectBtn.className = 'btn direct-preview__clear';
+    clearDirectBtn.type      = 'button';
+    clearDirectBtn.textContent = 'Clear';
+    clearDirectBtn.addEventListener('click', clearDirect);
+
+    aside.appendChild(reuploadBtn);
+    aside.appendChild(nameEl);
+    aside.appendChild(changeBtn);
+    aside.appendChild(clearDirectBtn);
+
+    preview.appendChild(img);
+    preview.appendChild(aside);
+    mainBody.appendChild(preview);
+  }
+
+  const img    = preview.querySelector('.direct-preview__img');
+  const nameEl = preview.querySelector('.direct-preview__name');
+  img.src            = directPhoto.url;
+  img.alt            = directPhoto.file.name;
+  nameEl.textContent = directPhoto.file.name;
+  nameEl.title       = directPhoto.file.name;
+}
+
+function clearDirect() {
+  if (directPhoto) { URL.revokeObjectURL(directPhoto.url); directPhoto = null; }
+
+  const preview = document.getElementById('directPreview');
+  if (preview) preview.remove();
+
+  photoGrid.classList.remove('pc-locked');
+  updateUI();
+
+  document.getElementById('uploadPrompt').hidden = false;
+}
+
+// ─── Left panel – drop target ─────────────────────────────────────
+
+let dragDepth = 0;
+
+mainBody.addEventListener('dragenter', e => {
+  e.preventDefault();
+  dragDepth++;
+  mainBody.classList.add('drop-active');
+});
+mainBody.addEventListener('dragleave', () => {
+  dragDepth--;
+  if (dragDepth <= 0) { dragDepth = 0; mainBody.classList.remove('drop-active'); }
+});
+mainBody.addEventListener('dragover', e => {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'copy';
+});
+mainBody.addEventListener('drop', e => {
+  e.preventDefault();
+  dragDepth = 0;
+  mainBody.classList.remove('drop-active');
+
+  // Case 1: dragged from the Photo Collector thumbnail
+  const collectorUrl = e.dataTransfer.getData('text/x-collector-url');
+  if (collectorUrl) {
+    const entry = getEntry(collectorUrl);
+    if (entry) loadDirectPhoto(entry.file);
+    return;
+  }
+
+  // Case 2: dragged directly from the filesystem
+  if (e.dataTransfer.files.length) {
+    loadDirectPhoto(e.dataTransfer.files[0]);
+  }
+});
+
+// ─── Camera modal ─────────────────────────────────────────────────
+//
+// Preference: getUserMedia live modal with shutter + switch.
+// Fallback:   native <input capture="environment"> for old browsers.
+
+/** @type {MediaStream | null} */
+let cameraStream  = null;
+
+/** 'user' | 'environment' */
+let facingMode    = 'environment';
+
+/** Locks the shutter during flash animation */
+let shutterLocked = false;
+
+captureBtn.addEventListener('click', () => {
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    openCameraModal();
+  } else {
+    captureInput.click();
+  }
+});
+
+// Fallback input
+captureInput.addEventListener('change', () => {
+  if (captureInput.files.length) {
+    addPhotos(captureInput.files);
+    captureInput.value = '';
+  }
+});
+
+function openCameraModal() {
+  cameraModal.hidden = false;
+  document.body.style.overflow = 'hidden';
+  cameraError.hidden = true;
+  startStream();
+}
+
+function closeCameraModal() {
+  stopStream();
+  cameraModal.hidden = true;
+  document.body.style.overflow = '';
+}
+
+cameraCloseBtn.addEventListener('click', closeCameraModal);
+cameraBackdrop.addEventListener('click', closeCameraModal);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !cameraModal.hidden) closeCameraModal();
+});
+
+async function startStream() {
+  stopStream();
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode, width: { ideal: 1280 }, height: { ideal: 960 } },
+      audio: false,
+    });
+    cameraVideo.srcObject = cameraStream;
+    cameraError.hidden = true;
+  } catch (err) {
+    cameraError.hidden = false;
+    cameraErrorMsg.textContent =
+      err.name === 'NotAllowedError'
+        ? 'Camera access was denied. Please allow camera permission and try again.'
+        : err.name === 'NotFoundError'
+          ? 'No camera was found on this device.'
+          : `Camera error: ${err.message}`;
+  }
+}
+
+function stopStream() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+  }
+  cameraVideo.srcObject = null;
+}
+
+cameraSwitchBtn.addEventListener('click', () => {
+  facingMode = facingMode === 'environment' ? 'user' : 'environment';
+  startStream();
+});
+
+cameraShutterBtn.addEventListener('click', () => {
+  if (shutterLocked || !cameraStream) return;
+
+  const video = cameraVideo;
+  if (video.readyState < 2) return;
+
+  shutterLocked = true;
+
+  // Flash
+  cameraFlash.classList.add('flash-active');
+  setTimeout(() => cameraFlash.classList.remove('flash-active'), 150);
+
+  // Snap frame to canvas
+  const w = video.videoWidth;
+  const h = video.videoHeight;
+  cameraCanvas.width  = w;
+  cameraCanvas.height = h;
+
+  const ctx = cameraCanvas.getContext('2d');
+
+  // Mirror front-camera selfie
+  if (facingMode === 'user') {
+    ctx.translate(w, 0);
+    ctx.scale(-1, 1);
+  }
+
+  ctx.drawImage(video, 0, 0, w, h);
+
+  cameraCanvas.toBlob(blob => {
+    if (!blob) { shutterLocked = false; return; }
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const file = new File([blob], `capture-${timestamp}.jpg`, { type: 'image/jpeg' });
+
+    addPhotos([file]);
+    closeCameraModal();
+    shutterLocked = false;
+  }, 'image/jpeg', 0.92);
+});
+
+// ─── Init ─────────────────────────────────────────────────────────
+
+updateUI();

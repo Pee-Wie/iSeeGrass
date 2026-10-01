@@ -1,16 +1,16 @@
 :root {
   --white: #fff;
   --black: #000;
-  --yelloworange: rgba(255, 180, 40, 0.616); /* lowered/softer orange */
-  --bg-dark: #041005;
-  --panel: rgba(6, 20, 9, 0.92);
-  --panel-soft: rgba(15, 48, 18, 0.95);
-  --surface: rgba(13, 34, 15, 0.98);
-  --text: #eef7eb;
-  --muted: #b8d7b1;
-  --accent: #7ccd4f;
-  --accent-strong: #4b7b28;
-  --border: rgba(124, 203, 77, 0.3);
+  --yelloworange: rgba(255, 180, 40, 0.616);
+  --bg-dark: #0c2010;
+  --panel: rgba(16, 46, 20, 0.94);
+  --panel-soft: rgba(26, 62, 30, 0.96);
+  --surface: rgba(22, 52, 26, 0.98);
+  --text: #f0f9ed;
+  --muted: #c4ddc0;
+  --accent: #8ed655;
+  --accent-strong: #5aaa33;
+  --border: rgba(142, 214, 85, 0.32);
 }
 
 * {
@@ -21,7 +21,7 @@
 }
 
 body {
-  background: linear-gradient(180deg, rgba(8, 17, 8, 0.75), rgba(4, 8, 4, 0.92)), url('../../../public/icons/iSeeGrass.png') center/cover no-repeat fixed;
+  background: linear-gradient(180deg, rgba(14, 30, 14, 0.60), rgba(10, 20, 10, 0.80)), url('../../../public/icons/iSeeGrass.png') center/cover no-repeat fixed;
   color: var(--text);
   overflow: hidden;
   height: 100vh;
@@ -172,7 +172,7 @@ body::before {
 .input-box input {
   width: 100%;
   padding: 14px 16px;
-  border: 1px solid rgba(124, 203, 77, 0.18);
+  border: 1px solid rgba(142, 214, 85, 0.24);
   border-radius: 12px;
   background: var(--surface);
   color: var(--text);
@@ -270,7 +270,6 @@ body::before {
   line-height: 1.8;
   color: var(--muted);
 }
-
 .info-section a {
   color: var(--accent);
   text-decoration: none;

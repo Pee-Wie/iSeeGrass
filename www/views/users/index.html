@@ -4,122 +4,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="../../public/icons/favicon.png">
-    <link rel="stylesheet" href="../../public/css//users/styles-users.css">
+    <meta name="description" content="iSeeGrass user homepage — seagrass species identification and field assessment platform.">
+    <title>iSeeGrass — Home</title>
     
+    <!-- iSeeGrass Default Theme -->
+    <link rel="icon" type="image/png" href="../../public/icons/favicon.png">
+    <link rel="stylesheet" href="../../public/css/users/styles-users.css">
+    <link rel="stylesheet" href="../../public/css/users/homepage/styles-users-homepage.css">
+    
+    <!-- Tabler -->
     <link rel="stylesheet" href="../../resources/tabler/css/tabler.css">
     <link rel="stylesheet" href="../../resources/tabler/css/tabler.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.min.css" />
 
-    <title></title>
+    <!-- Tabler Icons webfont -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/tabler-icons.min.css">
+
 </head>
 
 <body>
-    <!-- 
-    <div class="container" style="margin-top: 2rem; text-align: center;">
-        <h2>User Quick Links</h2>
-        
-    </div>
-    <div class="container" style="margin-top: 2rem; text-align: center;">
-        <h2>About iSeeGrass</h2>
-        <p>iSeeGrass is a web and mobile application designed for seagrass species identification and assessment using image recognition and CNN classification.</p>
-        <p>It aims to support researchers, students, and marine practitioners in accurately identifying seagrass species and improving data collection efficiency.</p>
-    </div>
-    <div class="container" style="margin-top: 2rem; text-align: center;">
-        <h2>Contact Us</h2>
-        <p>If you have any questions or need assistance, please reach out to our support team at <a href="mailto:support@iseegrass.com">support@iseegrass.com</a>.</p>
-    </div> -->
-
-    <!-- <main class="container"> -->
     <div class="page" id="main-content">
-        <!-- Sidebar -->
+        <!-- Sidebar navigation -->
         <isee-navbar-user></isee-navbar-user>
+
         <div class="page-wrapper">
+            <!-- Page header -->
             <div class="page-header d-print-none">
                 <div class="container-xl">
                     <div class="row g-2 align-items-center">
                         <div class="col">
-                            <h2 class="page-title text-primary">>Users/Homepage</h2>
+                            <h2 class="page-title text-primary">&gt; Home</h2>
                         </div>
                     </div>
                 </div>
             </div>
+
             <div class="page-body">
                 <div class="container-xl">
-                    <div class="row row-deck row-cards">
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 10rem">
+                    <div class="row row-deck row-cards g-3">
 
+                        <!-- ── Hero / Welcome + Stats (2×2) ─────────────── -->
+                        <div class="col-12">
+                            <div class="home-hero">
+                                <!-- Left: welcome text + actions -->
+                                <div class="home-hero__content">
+                                    <p class="eyebrow">WELCOME BACK</p>
+                                    <h2>iSeeGrass — Seagrass Identification &amp; Assessment</h2>
+                                    <p>
+                                        Use the tools below to identify seagrass species from field images, log your
+                                        observations, and contribute to structured marine data collection. Everything
+                                        you need for accurate, research-grade seagrass assessment is in one place.
+                                    </p>
+                                    <div class="hero-actions">
+                                        <a href="/views/users/identify.html" class="btn btn-primary">
+                                            <i class="ti ti-microscope"></i> Identify a Species
+                                        </a>
+                                        <a href="/views/users/editor.html" class="btn btn-secondary">
+                                            <i class="ti ti-clipboard-list"></i> My Observations
+                                        </a>
+                                        <a href="/views/users/dashboard.html" class="btn btn-dark">
+                                            <i class="ti ti-chart-bar"></i> Dashboard
+                                        </a>
+                                        <a href="/views/users/profile.html" class="btn btn-secondary">
+                                            <i class="ti ti-user-circle"></i> Profile
+                                        </a>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 10rem">
 
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 10rem">
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 10rem">
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 20rem">
-                                    <ul class="dashboard-actions">
-                                        <li>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/users/dashboard.html'">Dashboard</button>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/users/identify.html'">Identify
-                                                Grass</button>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/users/editor.html'">My
-                                                Observations</button>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/users/profile.html'">Profile</button>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/auth/login.html'">Signout</button>
-                                            <a href="../../index.html" class="btn">Back to Home Page</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-8">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 20rem">
-                                    <div class="container">
-                                        <h1>Welcome to iSeeGrass</h1>
-                                        <p>This is the user dashboard.</p>
-                                        <p>From here, you can access various features and functionalities of the
-                                            iSeeGrass application.</p>
-                                        <p>Use the navigation menu to explore different sections.</p>
+                                <!-- Right: 2×2 stat grid -->
+                                <div class="home-hero__stats">
+                                    <div class="stat-card">
+                                        <span class="stat-label">Species in Database</span>
+                                        <span class="stat-value">60–72</span>
+                                        <span class="stat-sub">Worldwide · 12 genera, 4 families</span>
+                                    </div>
+                                    <div class="stat-card">
+                                        <span class="stat-label">Identification Scope</span>
+                                        <span class="stat-value">Negros</span>
+                                        <span class="stat-sub">Species found in the Negros region</span>
+                                    </div>
+                                    <div class="stat-card">
+                                        <span class="stat-label">Classification Method</span>
+                                        <span class="stat-value">CNN</span>
+                                        <span class="stat-sub">Convolutional Neural Network</span>
+                                    </div>
+                                    <div class="stat-card">
+                                        <span class="stat-label">Platform</span>
+                                        <span class="stat-value">Web</span>
+                                        <span class="stat-sub">Mobile-ready via Capacitor</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
+                        <!-- ── About iSeeGrass ─────────────────────────── -->
+                        <div class="col-lg-7">
+                            <div class="info-section">
+                                <h3>About iSeeGrass</h3>
+                                <p>
+                                    iSeeGrass is a hybrid web and mobile platform built for seagrass species
+                                    identification and ecological assessment. It applies image recognition and
+                                    Convolutional Neural Network (CNN) classification to automate species
+                                    identification from field photographs — reducing reliance on manual observation
+                                    and improving consistency across surveys.
+                                </p>
+                                <p style="margin-top: 0.75rem;">
+                                    The species information library covers an estimated <strong style="color:#d6f0b8;">60–72 seagrass species worldwide</strong>
+                                    across 12 genera and 4 families, providing reference data for researchers and
+                                    students. However, the <strong style="color:#d6f0b8;">image-based identification feature is focused on
+                                    species documented in the Negros region</strong> — the geographic scope of
+                                    the system's trained CNN model and dataset.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- ── How to Use + Did You Know ─────────────────── -->
+                        <div class="col-lg-5">
+                            <div class="info-section" style="height: 100%; display: flex; flex-direction: column; gap: 1.1rem;">
+                                <div>
+                                    <h3>How to Get Started</h3>
+                                    <ul>
+                                        <li>Go to <strong style="color:#d6f0b8;">Identify</strong> and upload a clear field image of the seagrass.</li>
+                                        <li>The CNN model classifies the species and returns a confidence result.</li>
+                                        <li>Results are based on species found in the <strong style="color:#d6f0b8;">Negros region</strong> — the system's trained scope.</li>
+                                        <li>Save the result to <strong style="color:#d6f0b8;">My Observations</strong> for your records.</li>
+                                        <li>Review your activity summary on the <strong style="color:#d6f0b8;">Dashboard</strong>.</li>
+                                    </ul>
+                                </div>
+                                <div class="fact-pill">
+                                    <span class="fact-tag">DID YOU KNOW</span>
+                                    Seagrass meadows cover only 0.1% of the ocean floor yet support around 20% of
+                                    the world's biggest fisheries and sequester carbon up to 35× faster per
+                                    hectare than tropical forests.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── Key Species Overview ───────────────────────── -->
+                        <div class="col-12">
+                            <div class="info-section">
+                                <h3>Key Seagrass Species — Negros Region
+                                    <span style="font-size:0.78rem; font-weight:500; color:var(--muted); margin-left:0.65rem;">
+                                        (Identification scope · part of the broader ~60–72 species worldwide)
+                                    </span>
+                                </h3>
+                                <div class="row g-2 mt-1">
+                                    <div class="col-sm-6 col-lg-4">
+                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Enhalus acoroides</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Tape Seagrass · Largest species in the world. Forms extensive intertidal meadows across Luzon, Visayas &amp; Mindanao.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-lg-4">
+                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Thalassia hemprichii</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Hemprich's Seagrass · Dominant species in Indo-Pacific mixed meadows; common across all Philippine regions.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-lg-4">
+                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Halophila ovalis</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Dugong Grass · Pioneer coloniser with small oval leaf pairs. A primary food source for dugongs and green sea turtles.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-lg-4">
+                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Cymodocea rotundata</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Rotund Cymodocea · Common on reef flats and shallow lagoons. Recognised by its rounded leaf tip.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-lg-4">
+                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Halodule uninervis</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Spade Grass · Abundant pioneer species with a distinctive trident-shaped leaf tip. Key dugong food source.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-lg-4">
+                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Syringodium isoetifolium</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Needle Seagrass · Unique cylindrical hollow leaves. Forms monospecific beds on sandy reef flats.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── System Info Footer Row ─────────────────────── -->
+                        <div class="col-12">
+                            <div style="display:flex; flex-wrap:wrap; gap:0.75rem; padding:1rem 1.25rem; background:rgba(8,25,10,0.6); border:1px solid rgba(124,203,77,0.12); border-radius:14px; font-size:0.82rem; color:var(--muted); align-items:center; justify-content:space-between;">
+                                <span>
+                                    <strong style="color:#d6f0b8;">iSeeGrass</strong> &nbsp;·&nbsp;
+                                    Seagrass Species Identification &amp; Assessment Platform
+                                </span>
+                                <span style="display:flex; gap:1.25rem; flex-wrap:wrap;">
+                                    <span>
+                                        <i class="ti ti-database" style="vertical-align:middle;margin-right:0.3em;"></i>~60–72 species worldwide · 12 genera · 4 families
+                                    </span>
+                                    <span>
+                                        <i class="ti ti-map-pin" style="vertical-align:middle;margin-right:0.3em;"></i>Identification scope: <strong style="color:#d6f0b8;">Negros region</strong>
+                                    </span>
+                                    <span>
+                                        <i class="ti ti-robot" style="vertical-align:middle;margin-right:0.3em;"></i>Powered by CNN Image Classification
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+
+                    </div><!-- /row -->
+                </div><!-- /container-xl -->
+            </div><!-- /page-body -->
+        </div><!-- /page-wrapper -->
+    </div><!-- /page -->
+
     <script type="module" src="../../components/navbar-user.js"></script>
-    <script type="module" src="../../resources/tabler/js/tabler.min.js"></script>
-    <script type="module" src="../../resources/tabler/js/tabler.js"></script>
+    <script type="module" src="../../public/js/users/homepage/script-users-homepage.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
+  <!-- Android back-button handler (no-op on web) -->
+  <script src="/js/back-handler.js"></script>
 </body>
 
 </html>

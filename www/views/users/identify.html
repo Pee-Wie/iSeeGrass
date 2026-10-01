@@ -1,39 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../../public/css/styles.css">
+    <title>Identify Species | iSeeGrass</title>
+
     <link rel="icon" type="image/png" href="../../public/icons/favicon.png">
 
+    <!-- Tabler (load first so iSeeGrass styles can override) -->
     <link rel="stylesheet" href="../../resources/tabler/css/tabler.css">
     <link rel="stylesheet" href="../../resources/tabler/css/tabler.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.min.css" />
-    
-    <title></title>
+
+    <!-- Tabler Icons webfont -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/tabler-icons.min.css">
+
+    <!-- iSeeGrass Default Theme -->
+    <link rel="stylesheet" href="../../public/css/styles.css">
+    <link rel="stylesheet" href="../../public/css/users/styles-users.css">
+    <link rel="stylesheet" href="../../public/css/users/identify/styles-users-identify.css">
 </head>
 
 <body>
-    <!-- 
-    <div class="container" style="margin-top: 2rem; text-align: center;">
-        <h2>User Quick Links</h2>
-        
-    </div>
-    <div class="container" style="margin-top: 2rem; text-align: center;">
-        <h2>About iSeeGrass</h2>
-        <p>iSeeGrass is a web and mobile application designed for seagrass species identification and assessment using image recognition and CNN classification.</p>
-        <p>It aims to support researchers, students, and marine practitioners in accurately identifying seagrass species and improving data collection efficiency.</p>
-    </div>
-    <div class="container" style="margin-top: 2rem; text-align: center;">
-        <h2>Contact Us</h2>
-        <p>If you have any questions or need assistance, please reach out to our support team at <a href="mailto:support@iseegrass.com">support@iseegrass.com</a>.</p>
-    </div> -->
-
-    <!-- <main class="container"> -->
     <div class="page">
-        <!-- Sidebar -->
+
+        <!-- Sidebar — untouched -->
         <isee-navbar-user></isee-navbar-user>
+
         <div class="page-wrapper">
+
+            <!-- Page header -->
             <div class="page-header d-print-none">
                 <div class="container-xl">
                     <div class="row g-2 align-items-center">
@@ -43,117 +39,257 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Page body -->
             <div class="page-body">
                 <div class="container-xl">
-                    <div class="row row-deck row-cards">
-                        <!-- <div class="col-sm-6 col-lg-3">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 10rem">
-                                    1
+
+                    <div class="section">
+
+                        <!-- 75 / 25 layout -->
+                        <div class="identify-layout">
+
+                            <!-- ── Left panel – 75% ── -->
+                            <div class="identify-main card">
+
+                                <!-- Card header -->
+                                <div class="identify-main__header">
+                                    <div class="identify-main__header-row">
+                                        <h2 class="highlight">Field Identification Aid</h2>
+                                    </div>
+                                    <p>Upload a photo from the collection, select it, then press
+                                        <strong>Identify</strong> to run the CNN model against it.</p>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 10rem">
-                                    2
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 10rem">
-                                    3
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 10rem">
-                                    4
-                                </div>
-                            </div>
-                        </div> -->
-                        <div class="col-lg-4">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 20rem">
-                                    <ul class="dashboard-actions">
-                                        <li>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/users/dashboard.html'">Dashboard</button>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/users/identify.html'">Identify
-                                                Grass</button>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/users/editor.html'">My
-                                                Observations</button>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/users/profile.html'">Profile</button>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/auth/login.html'">Signout</button>
-                                            <a href="../../index.html" class="btn">Back to Home Page</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-8">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 20rem">
-                                    <div class="container">
-                                        <h1>Welcome to iSeeGrass</h1>
-                                        <p>This is the user dashboard.</p>
-                                        <p>From here, you can access various features and functionalities of the
-                                            iSeeGrass application.</p>
-                                        <p>Use the navigation menu to explore different sections.</p>
+
+                                <!-- Card body – results area -->
+                                <div class="identify-main__body species-results" id="speciesResults">
+
+                                    <!-- Big upload prompt shown when nothing has been identified yet -->
+                                    <div class="upload-prompt" id="uploadPrompt">
+                                        <!-- Direct upload button -->
+                                        <button class="upload-trigger-btn" id="directUploadBtn" type="button"
+                                            aria-label="Upload a photo directly for identification">
+                                            <input type="file" id="directUploadInput" accept="image/*" hidden>
+                                            <!-- Favicon / magnifier image -->
+                                            <img src="../../public/icons/favicon.png" alt=""
+                                                class="upload-trigger-btn__img" aria-hidden="true">
+                                            <!-- Plus badge -->
+                                            <span class="upload-trigger-btn__plus" aria-hidden="true">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="3" stroke-linecap="round"
+                                                    stroke-linejoin="round">
+                                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                                </svg>
+                                            </span>
+                                        </button>
+                                        <p class="upload-prompt__label">
+                                            Click the button above to upload a photo directly for identification,<br>
+                                            or drag one from the <strong>Photo Collector</strong>
+                                        </p>
+                                    </div>
+
+                                </div><!-- /#speciesResults -->
+
+                                <!-- Card footer – AI caution -->
+                                <div class="identify-main__footer">
+                                    <div class="id-caution" role="note" aria-label="AI identification caution">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                            class="id-caution__icon" aria-hidden="true">
+                                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                                            <line x1="12" y1="9" x2="12" y2="13"/>
+                                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                                        </svg>
+                                        <p>
+                                            Results are generated by a CNN-based AI model and are intended as a
+                                            <strong>starting point only</strong>.
+                                            Confidence scores may not reflect true certainty — always cross-check
+                                            findings with a qualified marine biologist or a peer-reviewed field
+                                            guide before drawing scientific or management conclusions.
+                                        </p>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                        <!-- <div class="col-12">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div>
-                        <div class="col-md-12 col-lg-8">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div>
-                        <div class="col-md-12 col-lg-8">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div> -->
-                    </div>
+
+                            </div><!-- /.identify-main -->
+
+                            <!-- ── Right panel – 25% : Photo Collector ── -->
+                            <aside class="collector-sidebar card">
+
+                                <div class="collector-header">
+                                    <h3 class="collector-title">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                            aria-hidden="true">
+                                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                                            <circle cx="12" cy="13" r="4"/>
+                                        </svg>
+                                        Photo Collection
+                                    </h3>
+                                    <span class="collector-count" id="photoCount">0 / 12</span>
+                                </div>
+
+                                <p class="collector-hint">Add up to 12 photos to help identify a species.</p>
+
+                                <!-- Upload / Capture row -->
+                                <div class="collector-input-row">
+
+                                    <!-- Drop zone / browse -->
+                                    <label class="collector-dropzone" id="photoDropzone" for="photoInput"
+                                        role="button" tabindex="0"
+                                        aria-label="Upload photos for identification">
+                                        <input type="file" id="photoInput" accept="image/*" multiple hidden>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                            class="collector-dropzone__icon" aria-hidden="true">
+                                            <polyline points="16 16 12 12 8 16"/>
+                                            <line x1="12" y1="12" x2="12" y2="21"/>
+                                            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+                                        </svg>
+                                        <span>Drag &amp; drop or <u>browse</u></span>
+                                        <span class="collector-dropzone__sub">JPG, PNG, WEBP · max 5 MB each</span>
+                                    </label>
+
+                                    <!-- Capture button -->
+                                    <button class="collector-capture-btn" id="captureBtn" type="button"
+                                        aria-label="Capture a photo using your camera">
+                                        <input type="file" id="captureInput" accept="image/*"
+                                            capture="environment" hidden>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1.75" stroke-linecap="round"
+                                            stroke-linejoin="round" aria-hidden="true">
+                                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                                            <circle cx="12" cy="13" r="4"/>
+                                        </svg>
+                                        <span>Capture</span>
+                                    </button>
+
+                                </div><!-- /.collector-input-row -->
+
+                                <!-- Thumbnail grid -->
+                                <div class="collector-grid" id="photoGrid"
+                                    aria-label="Collected photos" aria-live="polite"></div>
+
+                                <!-- Action row -->
+                                <div class="collector-actions" id="photoActions" hidden>
+                                    <button class="btn btn-primary collector-identify-btn"
+                                        id="identifyBtn" type="button">
+                                        Identify Species
+                                    </button>
+                                    <button class="btn btn-secondary collector-clear-btn"
+                                        id="clearBtn" type="button" aria-label="Clear all photos">
+                                        Clear all
+                                    </button>
+                                </div>
+
+                            </aside><!-- /.collector-sidebar -->
+
+                        </div><!-- /.identify-layout -->
+
+                    </div><!-- /.section -->
+
+                </div><!-- /.container-xl -->
+            </div><!-- /.page-body -->
+
+        </div><!-- /.page-wrapper -->
+    </div><!-- /.page -->
+
+    <!-- History sidebar web component -->
+    <isee-identify-history></isee-identify-history>
+
+    <!-- ── Camera capture modal ──────────────────────────────────── -->
+    <div class="camera-modal" id="cameraModal" role="dialog" aria-modal="true"
+        aria-label="Camera capture" hidden>
+        <div class="camera-modal__backdrop" id="cameraBackdrop"></div>
+        <div class="camera-modal__box">
+
+            <div class="camera-modal__header">
+                <h3 class="camera-modal__title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        aria-hidden="true">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                        <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                    Capture Photo
+                </h3>
+                <button class="camera-modal__close" id="cameraCloseBtn" type="button"
+                    aria-label="Close camera">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                        aria-hidden="true">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Live viewfinder -->
+            <div class="camera-viewfinder" id="cameraViewfinder">
+                <video class="camera-video" id="cameraVideo" autoplay muted playsinline
+                    aria-label="Camera viewfinder"></video>
+                <!-- Shutter overlay flash -->
+                <div class="camera-flash" id="cameraFlash" aria-hidden="true"></div>
+                <!-- Error state -->
+                <div class="camera-error" id="cameraError" hidden>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                        aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <p id="cameraErrorMsg">Camera not available.</p>
                 </div>
             </div>
-        </div>
-    </div>
-    <!-- </main> -->
 
-    <!-- <isee-footer></isee-footer> -->    
+            <!-- Controls -->
+            <div class="camera-controls">
+                <button class="camera-ctrl-btn" id="cameraSwitchBtn" type="button"
+                    aria-label="Switch camera" title="Switch camera">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        aria-hidden="true">
+                        <polyline points="1 4 1 10 7 10"/>
+                        <polyline points="23 20 23 14 17 14"/>
+                        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+                    </svg>
+                </button>
+
+                <button class="camera-shutter-btn" id="cameraShutterBtn" type="button"
+                    aria-label="Take photo">
+                    <span class="camera-shutter-btn__inner" aria-hidden="true"></span>
+                </button>
+
+                <!-- Spacer to keep shutter centred -->
+                <div style="width:2.75rem" aria-hidden="true"></div>
+            </div>
+
+            <!-- Hidden canvas used to snap the frame -->
+            <canvas id="cameraCanvas" hidden aria-hidden="true"></canvas>
+
+        </div><!-- /.camera-modal__box -->
+    </div><!-- /#cameraModal -->
+
+    <!-- iSeeGrass Default Scripts -->
     <script type="module" src="../../components/navbar-user.js"></script>
-    <!-- <script type="module" src="../../components/wp-site-header.js"></script> -->
-    <!-- <script type="module" src="../../components/wp-site-footer.js"></script> -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
+    <script type="module" src="../../components/sidebar-users-identify.js"></script>
+    <!-- Custom modal utility — must load before page script -->
+    <script type="module" src="../../components/modal-utils.js"></script>
+    <script type="module" src="../../public/js/users/identify/script-users-identify.js"></script>
+
+    <!-- Tabler -->
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
+  <!-- Android back-button handler (no-op on web) -->
+  <script src="/js/back-handler.js"></script>
 </body>
 </html>

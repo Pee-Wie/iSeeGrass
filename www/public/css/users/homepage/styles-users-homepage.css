@@ -1,0 +1,288 @@
+/* ═══════════════════════════════════════════════════════════
+   iSeeGrass — Users Homepage  (views/users/index.html)
+   Depends on: public/css/users/styles-users.css (base)
+═══════════════════════════════════════════════════════════ */
+
+/* ── Hero banner ─────────────────────────────────────────── */
+.home-hero {
+    background: linear-gradient(135deg, rgba(22, 60, 26, 0.90), rgba(12, 34, 16, 0.94));
+    border: 1px solid rgba(142, 214, 85, 0.26);
+    border-radius: 20px;
+    padding: 2rem 2.25rem;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 2rem;
+}
+
+/* Left column — text + actions */
+.home-hero__content {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Right column — 2×2 stat grid */
+.home-hero__stats {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 0.65rem;
+    align-self: stretch;
+    min-width: 260px;
+}
+
+.home-hero .eyebrow {
+    font-size: 0.78rem;
+    letter-spacing: 0.16em;
+    color: #9fe997;
+    font-weight: 700;
+    margin: 0;
+}
+
+.home-hero h2 {
+    margin: 0.25rem 0 0.5rem;
+    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+    color: #eef7eb;
+    font-weight: 700;
+}
+
+.home-hero p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.93rem;
+    line-height: 1.75;
+    max-width: 60ch;
+}
+
+.home-hero .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+
+/* ── Stat cards ──────────────────────────────────────────── */
+.stat-card {
+    border-radius: 16px;
+    padding: 1.35rem 1.5rem;
+    background: rgba(24, 64, 28, 0.80);
+    border: 1px solid rgba(142, 214, 85, 0.26);
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.stat-card .stat-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: #aae888;
+    text-transform: uppercase;
+}
+
+.stat-card .stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #f0f9ed;
+    line-height: 1;
+}
+
+.stat-card .stat-sub {
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+
+/* ── Quick-action cards ──────────────────────────────────── */
+.quick-action-card {
+    border-radius: 16px;
+    padding: 1.4rem;
+    background: rgba(28, 72, 34, 0.76);
+    border: 1px solid rgba(142, 214, 85, 0.30);
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(142, 214, 85, 0.58);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+}
+
+.quick-action-card .qa-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 10px;
+    background: rgba(142, 214, 85, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.quick-action-card .qa-title {
+    font-weight: 700;
+    font-size: 0.98rem;
+    color: #dff5c8;
+    margin: 0;
+}
+
+.quick-action-card .qa-desc {
+    font-size: 0.83rem;
+    color: var(--muted);
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* ── Info sections ───────────────────────────────────────── */
+.info-section {
+    background: rgba(20, 58, 24, 0.82);
+    border: 1px solid rgba(142, 214, 85, 0.22);
+    border-radius: 18px;
+    padding: 1.75rem 2rem;
+}
+
+.info-section h3 {
+    margin: 0 0 0.85rem;
+    font-size: 1.05rem;
+    color: #dff5c8;
+    font-weight: 700;
+}
+
+.info-section p,
+.info-section li {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.8;
+}
+
+.info-section ul {
+    padding-left: 1.25rem;
+    margin: 0;
+}
+
+.info-section ul li + li {
+    margin-top: 0.35rem;
+}
+
+/* ── Species mini-cards (inside info-section) ────────────── */
+.species-mini-card {
+    background: rgba(142, 214, 85, 0.09);
+    border: 1px solid rgba(142, 214, 85, 0.22);
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.species-mini-card .smc-name {
+    margin: 0 0 0.25rem;
+    font-weight: 700;
+    color: #dff5c8;
+    font-size: 0.9rem;
+}
+
+.species-mini-card .smc-desc {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+/* ── Fact pill ───────────────────────────────────────────── */
+.fact-pill {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    background: rgba(142, 214, 85, 0.11);
+    border: 1px solid rgba(142, 214, 85, 0.28);
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.65;
+}
+
+.fact-pill .fact-tag {
+    flex-shrink: 0;
+    background: rgba(142, 214, 85, 0.22);
+    color: #aae888;
+    border-radius: 8px;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin-top: 0.1rem;
+}
+
+/* ── Section label ───────────────────────────────────────── */
+.section-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: #aae888;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+}
+
+/* ── Footer info strip ───────────────────────────────────── */
+.info-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: rgba(18, 44, 22, 0.65);
+    border: 1px solid rgba(142, 214, 85, 0.16);
+    border-radius: 14px;
+    font-size: 0.82rem;
+    color: var(--muted);
+    align-items: center;
+    justify-content: space-between;
+}
+
+.info-strip .strip-meta {
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 767px) {
+    .home-hero {
+        flex-direction: column;
+        padding: 1.25rem;
+        gap: 1rem;
+    }
+
+    .home-hero__stats {
+        min-width: 0;
+        width: 100%;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    .stat-card {
+        padding: 0.85rem 1rem;
+    }
+
+    .stat-card .stat-value {
+        font-size: 1.5rem;
+    }
+
+    .home-hero .hero-actions {
+        flex-direction: column;
+    }
+
+    .home-hero .hero-actions .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+    }
+}

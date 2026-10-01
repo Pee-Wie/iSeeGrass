@@ -1,159 +1,552 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="../../public/icons/favicon.png">
-    <link rel="stylesheet" href="../../public/css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="iSeeGrass Assessment Manager — create and edit seagrass survey records.">
+  <title>Assessment Manager | iSeeGrass</title>
 
-    <link rel="stylesheet" href="../../resources/tabler/css/tabler.css">
-    <link rel="stylesheet" href="../../resources/tabler/css/tabler.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.min.css" />
+  <link rel="icon" type="image/png" href="../../public/icons/favicon.png">
 
-    <title></title>
+  <!-- Tabler (load first so iSeeGrass styles can override) -->
+  <link rel="stylesheet" href="../../resources/tabler/css/tabler.css">
+  <link rel="stylesheet" href="../../resources/tabler/css/tabler.min.css">
+
+  <!-- Tabler Icons webfont -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/tabler-icons.min.css">
+
+  <!-- iSeeGrass shared theme -->
+  <link rel="stylesheet" href="../../public/css/users/styles-users.css">
+
+  <!-- Assessment editor page styles -->
+  <link rel="stylesheet" href="../../public/css/users/editor/styles-users-editor.css">
+
+  <!-- Identify history sidebar styles (reused for ID History panel on this page) -->
+  <link rel="stylesheet" href="../../public/css/users/identify/styles-users-identify.css">
 </head>
 
 <body>
-    <!-- 
-    <div class="container" style="margin-top: 2rem; text-align: center;">
-        <h2>User Quick Links</h2>
-        
-    </div>
-    <div class="container" style="margin-top: 2rem; text-align: center;">
-        <h2>About iSeeGrass</h2>
-        <p>iSeeGrass is a web and mobile application designed for seagrass species identification and assessment using image recognition and CNN classification.</p>
-        <p>It aims to support researchers, students, and marine practitioners in accurately identifying seagrass species and improving data collection efficiency.</p>
-    </div>
-    <div class="container" style="margin-top: 2rem; text-align: center;">
-        <h2>Contact Us</h2>
-        <p>If you have any questions or need assistance, please reach out to our support team at <a href="mailto:support@iseegrass.com">support@iseegrass.com</a>.</p>
-    </div> -->
+  <div class="page">
 
-    <!-- <main class="container"> -->
-    <div class="page">
-        <!-- Sidebar -->
-        <isee-navbar-user></isee-navbar-user>
-        <div class="page-wrapper">
-            <div class="page-header d-print-none">
-                <div class="container-xl">
-                    <div class="row g-2 align-items-center">
-                        <div class="col">
-                            <h2 class="page-title text-primary">>Users/Assessment Manager</h2>
-                        </div>
-                    </div>
-                </div>
+    <!-- Sidebar -->
+    <isee-navbar-user></isee-navbar-user>
+
+    <div class="page-wrapper">
+
+      <!-- ── Page header ───────────────────────────────────────── -->
+      <div class="page-header d-print-none">
+        <div class="container-xl">
+          <div class="row g-2 align-items-center">
+            <div class="col">
+              <h2 class="page-title text-primary">&gt; Assessment Manager</h2>
             </div>
-            <div class="page-body">
-                <div class="container-xl">
-                    <div class="row row-deck row-cards">
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 10rem">
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 10rem">
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 10rem">
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 10rem">
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 20rem">
-                                    <ul class="dashboard-actions">
-                                        <li>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/users/dashboard.html'">Dashboard</button>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/users/identify.html'">Identify
-                                                Grass</button>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/users/editor.html'">My
-                                                Observations</button>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/users/profile.html'">Profile</button>
-                                            <button class="btn btn-secondary" type="submit"
-                                                onclick="window.location.href='/views/auth/login.html'">Signout</button>
-                                            <a href="../../index.html" class="btn">Back to Home Page</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-8">
-                            <div class="card transparent">
-                                <div class="card-body" style="height: 20rem">
-                                    <div class="container">
-                                        <h1>Welcome to iSeeGrass</h1>
-                                        <p>This is the user dashboard.</p>
-                                        <p>From here, you can access various features and functionalities of the
-                                            iSeeGrass application.</p>
-                                        <p>Use the navigation menu to explore different sections.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                        <!-- <div class="col-12">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div>
-                        <div class="col-md-12 col-lg-8">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div>
-                        <div class="col-md-12 col-lg-8">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-body" style="height: 10rem"></div>
-                            </div>
-                        </div> -->
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
-    </div>
-    <!-- </main> -->
+      </div>
 
-    <!-- <isee-footer></isee-footer> -->    
-    <script type="module" src="../../components/navbar-user.js"></script>
-    <script type="module" src="../../resources/tabler/js/tabler.min.js"></script>
-    <script type="module" src="../../resources/tabler/js/tabler.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
+      <!-- ── Page body ─────────────────────────────────────────── -->
+      <div class="page-body">
+        <div class="container-xl">
+
+          <!-- Two-column layout: sidebar left, editor right -->
+          <div class="assessment-layout">
+
+            <!-- ══════════════════════════════════════════════════
+                 LEFT SIDEBAR
+                 ══════════════════════════════════════════════════ -->
+            <aside class="assessment-sidebar">
+
+              <!-- Templates panel -->
+              <div class="panel-card">
+                <div class="panel-card__header">
+                  <span class="panel-card__header-icon"><i class="ti ti-layout-grid"></i></span>
+                  <h3>Templates</h3>
+                </div>
+                <div class="panel-card__body">
+                  <p class="panel-card__hint">Click a template to load its structure, or start blank.</p>
+
+                  <div class="template-item is-selected" data-template="blank" tabindex="0"
+                    role="button" aria-label="Blank template — start from scratch">
+                    <i class="ti ti-file-plus template-item__icon"></i>
+                    <span class="template-item__text">
+                      <span class="template-item__name">Blank</span>
+                      <span class="template-item__desc">Start from scratch</span>
+                    </span>
+                  </div>
+
+                  <div class="template-item" data-template="transect" tabindex="0"
+                    role="button" aria-label="Transect Quadrat template">
+                    <i class="ti ti-table template-item__icon"></i>
+                    <span class="template-item__text">
+                      <span class="template-item__name">Transect Quadrat</span>
+                      <span class="template-item__desc">8-quadrat seagrass survey table</span>
+                    </span>
+                  </div>
+
+                  <div class="template-item" data-template="species" tabindex="0"
+                    role="button" aria-label="Species Observation template">
+                    <i class="ti ti-microscope template-item__icon"></i>
+                    <span class="template-item__text">
+                      <span class="template-item__name">Species Observation</span>
+                      <span class="template-item__desc">Log identified species per site</span>
+                    </span>
+                  </div>
+
+                </div>
+              </div><!-- /Templates panel -->
+
+              <!-- Saved assessments panel -->
+              <div class="panel-card">
+                <div class="panel-card__header">
+                  <span class="panel-card__header-icon"><i class="ti ti-files"></i></span>
+                  <h3>Saved Assessments</h3>
+                  <button class="panel-card__delete-all" id="btnDeleteAllAssessments"
+                    type="button" title="Delete all saved assessments"
+                    aria-label="Delete all saved assessments" hidden>
+                    <i class="ti ti-trash"></i>
+                  </button>
+                </div>
+                <div class="panel-card__body" id="docList">
+                  <p class="doc-empty">No saved assessments yet.</p>
+                </div>
+              </div><!-- /Saved assessments panel -->
+
+            </aside><!-- /LEFT SIDEBAR -->
+
+            <!-- ══════════════════════════════════════════════════
+                 EDITOR CARD
+                 ══════════════════════════════════════════════════ -->
+            <div class="editor-card">
+
+              <!-- Editor card header -->
+              <div class="editor-card__header">
+                <div class="editor-card__header-left">
+                  <span class="editor-card__header-icon"><i class="ti ti-edit"></i></span>
+                  <h3>Assessment Editor</h3>
+                </div>
+                <div class="editor-card__header-right">
+                  <span class="unsaved-badge" id="unsavedBadge" hidden>Unsaved changes</span>
+                </div>
+              </div>
+
+              <!-- Title field -->
+              <div class="editor-title-row">
+                <div class="editor-title-label">
+                  <i class="ti ti-heading"></i> TITLE
+                  <span style="color:rgba(220,55,55,0.7);margin-left:2px;">*</span>
+                </div>
+                <input type="text" id="editorTitle" class="editor-title-input"
+                  placeholder="e.g. Coastal Survey — Batangas Bay, May 2026"
+                  aria-label="Assessment title">
+              </div>
+
+              <!-- Content section label -->
+              <div class="editor-content-label">
+                <i class="ti ti-align-left"></i> CONTENT
+              </div>
+
+              <!-- ─── TOOLBAR ──────────────────────────────────── -->
+              <div class="editor-toolbar" role="toolbar" aria-label="Formatting toolbar">
+
+                <!-- Group: history -->
+                <div class="toolbar-group">
+                  <button class="tb-btn" id="tbUndo" title="Undo (Ctrl+Z)" aria-label="Undo">
+                    <i class="ti ti-arrow-back-up"></i>
+                  </button>
+                  <button class="tb-btn" id="tbRedo" title="Redo (Ctrl+Y)" aria-label="Redo">
+                    <i class="ti ti-arrow-forward-up"></i>
+                  </button>
+                </div>
+
+                <div class="toolbar-divider" role="separator"></div>
+
+                <!-- Group: heading + font size -->
+                <div class="toolbar-group">
+                  <select class="tb-select" id="tbHeading" title="Paragraph style"
+                    aria-label="Heading style">
+                    <option value="">Paragraph</option>
+                    <option value="h1">Heading 1</option>
+                    <option value="h2">Heading 2</option>
+                    <option value="h3">Heading 3</option>
+                    <option value="blockquote">Blockquote</option>
+                    <option value="pre">Code block</option>
+                  </select>
+
+                  <select class="tb-select" id="tbFontSize" title="Font size"
+                    aria-label="Font size" style="width:52px;">
+                    <option value="1">8</option>
+                    <option value="2">10</option>
+                    <option value="3" selected>12</option>
+                    <option value="4">14</option>
+                    <option value="5">18</option>
+                    <option value="6">24</option>
+                    <option value="7">36</option>
+                  </select>
+                </div>
+
+                <div class="toolbar-divider" role="separator"></div>
+
+                <!-- Group: inline formatting -->
+                <div class="toolbar-group">
+                  <button class="tb-btn tb-btn--bold" data-cmd="bold"
+                    title="Bold (Ctrl+B)" aria-label="Bold" aria-pressed="false">B</button>
+                  <button class="tb-btn tb-btn--italic" data-cmd="italic"
+                    title="Italic (Ctrl+I)" aria-label="Italic" aria-pressed="false">I</button>
+                  <button class="tb-btn tb-btn--underline" data-cmd="underline"
+                    title="Underline (Ctrl+U)" aria-label="Underline" aria-pressed="false">U</button>
+                  <button class="tb-btn tb-btn--strike" data-cmd="strikeThrough"
+                    title="Strikethrough" aria-label="Strikethrough" aria-pressed="false">S</button>
+                  <button class="tb-btn tb-btn--code" data-cmd="insertHTML" data-val="<code>code</code>"
+                    title="Inline code" aria-label="Inline code">&lt;/&gt;</button>
+                </div>
+
+                <div class="toolbar-divider" role="separator"></div>
+
+                <!-- Group: colour -->
+                <div class="toolbar-group">
+                  <div class="tb-color-wrap" title="Font colour" aria-label="Font colour">
+                    <button class="tb-color-btn" id="tbColorBtn" aria-label="Apply font colour">
+                      <span style="font-weight:900;font-size:.82rem;line-height:1;">A</span>
+                      <span class="tb-color-swatch" id="tbColorSwatch"></span>
+                    </button>
+                    <input type="color" id="tbColorInput" class="tb-color-input"
+                      value="#f9f871" aria-label="Choose font colour" tabindex="-1">
+                  </div>
+                </div>
+
+                <div class="toolbar-divider" role="separator"></div>
+
+                <!-- Group: lists -->
+                <div class="toolbar-group">
+                  <button class="tb-btn" data-cmd="insertUnorderedList"
+                    title="Bullet list" aria-label="Bullet list" aria-pressed="false">
+                    <i class="ti ti-list"></i>
+                  </button>
+                  <button class="tb-btn" data-cmd="insertOrderedList"
+                    title="Numbered list" aria-label="Numbered list" aria-pressed="false">
+                    <i class="ti ti-list-numbers"></i>
+                  </button>
+                  <button class="tb-btn" data-cmd="outdent"
+                    title="Decrease indent" aria-label="Decrease indent">
+                    <i class="ti ti-indent-decrease"></i>
+                  </button>
+                  <button class="tb-btn" data-cmd="indent"
+                    title="Increase indent" aria-label="Increase indent">
+                    <i class="ti ti-indent-increase"></i>
+                  </button>
+                </div>
+
+                <div class="toolbar-divider" role="separator"></div>
+
+                <!-- Group: alignment -->
+                <div class="toolbar-group">
+                  <button class="tb-btn" data-cmd="justifyLeft"
+                    title="Align left" aria-label="Align left" aria-pressed="false">
+                    <i class="ti ti-align-left"></i>
+                  </button>
+                  <button class="tb-btn" data-cmd="justifyCenter"
+                    title="Align centre" aria-label="Align centre" aria-pressed="false">
+                    <i class="ti ti-align-center"></i>
+                  </button>
+                  <button class="tb-btn" data-cmd="justifyRight"
+                    title="Align right" aria-label="Align right" aria-pressed="false">
+                    <i class="ti ti-align-right"></i>
+                  </button>
+                  <button class="tb-btn" data-cmd="justifyFull"
+                    title="Justify" aria-label="Justify" aria-pressed="false">
+                    <i class="ti ti-align-justified"></i>
+                  </button>
+                </div>
+
+                <div class="toolbar-divider" role="separator"></div>
+
+                <!-- Group: insert -->
+                <div class="toolbar-group">
+                  <button class="tb-btn" id="tbInsertTable"
+                    title="Insert table" aria-label="Insert table">
+                    <i class="ti ti-table-plus"></i>
+                  </button>
+                  <button class="tb-btn" id="tbInsertLink"
+                    title="Insert link" aria-label="Insert link">
+                    <i class="ti ti-link"></i>
+                  </button>
+                  <button class="tb-btn" id="tbInsertImage"
+                    title="Insert image" aria-label="Insert image">
+                    <i class="ti ti-photo"></i>
+                  </button>
+                  <button class="tb-btn" id="tbInsertHR"
+                    title="Horizontal rule" aria-label="Insert horizontal rule">
+                    <i class="ti ti-separator"></i>
+                  </button>
+                </div>
+
+                <div class="toolbar-divider" role="separator"></div>
+
+                <!-- Group: utilities -->
+                <div class="toolbar-group">
+                  <button class="tb-btn" id="tbClearFormat"
+                    title="Clear formatting" aria-label="Clear formatting">
+                    <i class="ti ti-clear-formatting"></i>
+                  </button>
+                  <button class="tb-btn" id="tbSource"
+                    title="Toggle source view" aria-label="Toggle HTML source view">
+                    <i class="ti ti-code"></i>
+                  </button>
+                  <button class="tb-btn" id="tbHelp"
+                    title="Keyboard shortcuts" aria-label="Show keyboard shortcuts">
+                    <i class="ti ti-help"></i>
+                  </button>
+                </div>
+
+              </div><!-- /TOOLBAR -->
+
+              <!-- ─── EDITING AREA ─────────────────────────────── -->
+              <div class="editor-body">
+
+                <div class="editor-canvas-wrap" id="editorCanvasWrap">
+                  <div class="editor-canvas"
+                    id="editorCanvas"
+                    role="textbox"
+                    aria-multiline="true"
+                    aria-label="Assessment content editor"
+                    data-placeholder="Start typing your assessment, or choose a template from the left…">
+                  </div>
+                </div>
+
+                <!-- Source view textarea (hidden by default) -->
+                <textarea id="editorSource"
+                  style="display:none;width:100%;min-height:440px;max-height:60vh;
+                         background:#ffffff;border:none;
+                         border-radius:0;padding:1in;color:#000000;
+                         font-family:'Calibri','Segoe UI',Arial,sans-serif;
+                         font-size:11pt;line-height:1.15;resize:vertical;outline:none;
+                         scrollbar-width:thin;scrollbar-color:#c0c0c0 #f0f0f0;"
+                  aria-label="HTML source editor"
+                  spellcheck="false"></textarea>
+
+              </div><!-- /editor-body -->
+
+              <!-- ─── STATUS BAR ─────────────────────────────────── -->
+              <div class="editor-statusbar" aria-live="polite" aria-atomic="true">
+                <span id="sbWords">Words: 0</span>
+                <span class="sb-sep" role="separator"></span>
+                <span id="sbChars">Chars: 0</span>
+                <span class="sb-sep" role="separator"></span>
+                <span id="sbCursor">Ready</span>
+              </div>
+
+              <!-- ─── FOOTER ACTION BAR ──────────────────────────── -->
+              <div class="editor-footer">
+                <div class="editor-footer__left">
+                  <button class="btn btn-secondary" id="btnClear" type="button">
+                    <i class="ti ti-trash"></i> Clear
+                  </button>
+                  <button class="btn btn-secondary" id="btnPreview" type="button">
+                    <i class="ti ti-eye"></i> Preview
+                  </button>
+                  <button class="btn btn-transect" id="btnTransect" type="button">
+                    <i class="ti ti-table-plus"></i> Insert Transect Table
+                  </button>
+                  <button class="btn btn-secondary" id="btnImport" type="button"
+                    title="Import an existing HTML or text document">
+                    <i class="ti ti-file-import"></i> Import
+                  </button>
+                  <input type="file" id="importFileInput"
+                    accept=".html,.htm,.txt,.docx,.xlsx" hidden
+                    aria-label="Import document file">
+                  <button class="btn btn-secondary" id="btnPrint" type="button">
+                    <i class="ti ti-printer"></i> Print
+                  </button>
+                </div>
+                <div class="editor-footer__right">
+                  <button class="btn btn-secondary" id="btnSaveDraft" type="button">
+                    <i class="ti ti-device-floppy"></i> Save Draft
+                  </button>
+                  <button class="btn btn-in-progress" id="btnInProgress" type="button">
+                    <i class="ti ti-pencil"></i> In Progress
+                  </button>
+                  <button class="btn btn-finalize" id="btnFinalize" type="button">
+                    <i class="ti ti-circle-check"></i> Finalize
+                  </button>
+                </div>
+              </div><!-- /editor-footer -->
+
+            </div><!-- /EDITOR CARD -->
+
+          </div><!-- /assessment-layout -->
+
+        </div><!-- /container-xl -->
+      </div><!-- /page-body -->
+
+    </div><!-- /page-wrapper -->
+  </div><!-- /page -->
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       TABLE INSERT DIALOG
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="tableDialogBackdrop" hidden
+    role="dialog" aria-modal="true" aria-labelledby="tableDialogTitle">
+    <div class="modal-card">
+      <div class="modal-card__header">
+        <div class="modal-card__title" id="tableDialogTitle">
+          <span class="modal-card__title-icon"><i class="ti ti-table-plus"></i></span>
+          Insert Table
+        </div>
+        <button class="modal-card__close" id="tableDialogClose" aria-label="Close">
+          <i class="ti ti-x"></i>
+        </button>
+      </div>
+
+      <div class="modal-card__body">
+        <!-- Visual grid picker -->
+        <div class="table-grid-picker">
+          <span class="tgp-label">Drag to select size</span>
+          <div class="tgp-grid" id="tgpGrid" aria-label="Table size grid picker"></div>
+          <span class="tgp-size-label" id="tgpSizeLabel">3 × 3</span>
+        </div>
+        <div class="modal-divider"></div>
+        <div class="modal-fields">
+          <div class="modal-field">
+            <label for="tableRows">Rows</label>
+            <input type="number" id="tableRows" value="3" min="1" max="50">
+          </div>
+          <div class="modal-field">
+            <label for="tableCols">Columns</label>
+            <input type="number" id="tableCols" value="3" min="1" max="20">
+          </div>
+        </div>
+        <label class="modal-checkbox">
+          <input type="checkbox" id="tableHeader" checked>
+          <span>Include header row</span>
+        </label>
+      </div>
+
+      <div class="modal-card__footer">
+        <button class="modal-btn modal-btn--ghost" id="tableCancelBtn" type="button">Cancel</button>
+        <button class="modal-btn modal-btn--primary" id="tableInsertBtn" type="button">
+          <i class="ti ti-table-plus"></i> Insert Table
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       LINK INSERT DIALOG
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="linkDialogBackdrop" hidden
+    role="dialog" aria-modal="true" aria-labelledby="linkDialogTitle">
+    <div class="modal-card modal-card--sm">
+      <div class="modal-card__header">
+        <div class="modal-card__title" id="linkDialogTitle">
+          <span class="modal-card__title-icon"><i class="ti ti-link"></i></span>
+          Insert Link
+        </div>
+        <button class="modal-card__close" id="linkDialogClose" aria-label="Close">
+          <i class="ti ti-x"></i>
+        </button>
+      </div>
+
+      <div class="modal-card__body">
+        <div class="modal-field">
+          <label for="linkUrl">URL</label>
+          <input type="url" id="linkUrl" placeholder="https://example.com"
+            autocomplete="off" spellcheck="false">
+        </div>
+        <div class="modal-field">
+          <label for="linkText">Display text <span class="modal-field__opt">(optional)</span></label>
+          <input type="text" id="linkText" placeholder="Leave blank to use the URL">
+        </div>
+      </div>
+
+      <div class="modal-card__footer">
+        <button class="modal-btn modal-btn--ghost" id="linkCancelBtn" type="button">Cancel</button>
+        <button class="modal-btn modal-btn--primary" id="linkInsertBtn" type="button">
+          <i class="ti ti-link"></i> Insert Link
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       IMAGE INSERT DIALOG
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="imageDialogBackdrop" hidden
+    role="dialog" aria-modal="true" aria-labelledby="imageDialogTitle">
+    <div class="modal-card modal-card--sm">
+      <div class="modal-card__header">
+        <div class="modal-card__title" id="imageDialogTitle">
+          <span class="modal-card__title-icon"><i class="ti ti-photo-plus"></i></span>
+          Insert Image
+        </div>
+        <button class="modal-card__close" id="imageDialogClose" aria-label="Close">
+          <i class="ti ti-x"></i>
+        </button>
+      </div>
+
+      <div class="modal-card__body">
+        <div class="modal-field">
+          <label>Upload from device</label>
+          <div class="image-dropzone" id="imageDropZone" tabindex="0"
+            role="button" aria-label="Click or drag to upload an image">
+            <i class="ti ti-cloud-upload"></i>
+            <span>Click or drag &amp; drop</span>
+            <span class="image-dropzone__sub">PNG · JPG · GIF · WEBP</span>
+          </div>
+          <input type="file" id="imageFileInput" accept="image/*" hidden>
+        </div>
+
+        <div class="modal-or">— or paste a URL —</div>
+
+        <div class="modal-field">
+          <label for="imageUrl">Image URL</label>
+          <input type="url" id="imageUrl" placeholder="https://example.com/photo.jpg"
+            autocomplete="off" spellcheck="false">
+        </div>
+        <div class="modal-field">
+          <label for="imageAlt">Alt text <span class="modal-field__opt">(accessibility)</span></label>
+          <input type="text" id="imageAlt" placeholder="e.g. Seagrass meadow at 5 m depth">
+        </div>
+      </div>
+
+      <div class="modal-card__footer">
+        <button class="modal-btn modal-btn--ghost" id="imageCancelBtn" type="button">Cancel</button>
+        <button class="modal-btn modal-btn--primary" id="imageInsertBtn" type="button">
+          <i class="ti ti-photo-plus"></i> Insert Image
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ID History Sidebar — same panel as Identify page (session-only) -->
+  <isee-identify-history></isee-identify-history>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       TOAST NOTIFICATION
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="editor-toast editor-toast--success" id="editorToast" hidden role="status"
+    aria-live="polite" aria-atomic="true">
+    <i class="ti ti-circle-check"></i>
+    <span>Saved</span>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SCRIPTS
+       ═══════════════════════════════════════════════════════════════ -->
+  <script type="module" src="../../components/navbar-user.js"></script>
+  <!-- ID History sidebar — same component as Identify page, session-only -->
+  <script type="module" src="../../components/sidebar-users-identify.js"></script>
+  <!-- Custom modal utility — must load before editor script -->
+  <script type="module" src="../../components/modal-utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
+  <script src="../../public/js/users/editor/script-users-editor.js"></script>
+
+  <!-- Android back-button handler (no-op on web) -->
+  <script src="/js/back-handler.js"></script>
 </body>
 
 </html>

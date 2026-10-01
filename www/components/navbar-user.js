@@ -1,66 +1,122 @@
 class ISeeNavbar extends HTMLElement {
   connectedCallback() {
-    if (this.dataset.ready === 'true') {
-      return;
-    }
-
+    if (this.dataset.ready === 'true') return;
     this.dataset.ready = 'true';
 
+    const path = window.location.pathname;
+
+    const links = [
+      { href: '/views/users/index.html',     label: 'Home',       icon: 'ti-home'             },
+      { href: '/views/users/dashboard.html', label: 'Dashboard',  icon: 'ti-layout-dashboard' },
+      { href: '/views/users/identify.html',  label: 'Identify',   icon: 'ti-microscope'       },
+      { href: '/views/users/editor.html',    label: 'Assessment', icon: 'ti-clipboard-list'   },
+    ];
+
+    const navItems = links.map(({ href, label, icon }) => {
+      const isActive = path.endsWith(href) || path === href;
+      return `
+        <li class="nav-item">
+          <a class="nav-link isee-nav-link${isActive ? ' active' : ''}" href="${href}">
+            <span class="isee-nav-link__icon"><i class="ti ${icon}"></i></span>
+            <span class="isee-nav-link__label">${label}</span>
+          </a>
+        </li>`;
+    }).join('');
+
+    const isProfileActive = path.endsWith('/views/users/profile.html');
+
     this.innerHTML = `
-      <nav class="navbar navbar-vertical navbar-expand-sm position-absolute user-navigation" data-bs-theme="dark" aria-label="User navigation">
+      <nav class="navbar navbar-vertical navbar-expand-sm position-absolute user-navigation isee-navbar"
+        data-bs-theme="dark" aria-label="User navigation">
         <div class="container-fluid">
-          <button class="navbar-toggler" type="button">
-            <span class="navbar-toggler-icon"></span>
+
+          <!-- Mobile toggler -->
+          <button class="navbar-toggler isee-navbar__toggler" type="button"
+            aria-label="Toggle navigation" aria-expanded="false">
+            <i class="ti ti-menu-2 isee-toggler-icon isee-toggler-icon--open"></i>
+            <i class="ti ti-x    isee-toggler-icon isee-toggler-icon--close" style="display:none"></i>
           </button>
-          <h1 class="navbar-brand navbar-brand-autodark">
-            <a href="/views/users/identify.html">
-              <img src="/../../public/icons/favicon.png" width="110" height="32" alt="Tabler"
-                class="navbar-brand-image" />iSeeGrass
+
+          <!-- Brand -->
+          <div class="isee-navbar__brand">
+            <a href="/views/users/identify.html" class="isee-navbar__brand-link">
+              <img src="/public/icons/favicon.png" width="28" height="28" alt="iSeeGrass logo"
+                class="isee-navbar__brand-img">
+              <span class="isee-navbar__brand-name">iSeeGrass</span>
             </a>
-          </h1>
+          </div>
+
+          <!-- Nav links -->
           <div class="collapse navbar-collapse" id="sidebar-menu">
-            <ul class="navbar-nav user-navigation-links pt-lg-3">
-              <li class="nav-item">
-                <a class="nav-link" href="/views/users/">
-                  <span class="nav-link-title"> Home </span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/views/users/dashboard.html">
-                  <span class="nav-link-title"> Dashboard</span>
-                </a>
-              </li>
-               <li class="nav-item">
-                <a class="nav-link" href="/views/users/identify.html">
-                  <span class="nav-link-title"> Identify</span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/views/users/editor.html">
-                  <span class="nav-link-title"> Assessment</span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="/views/users/profile.html">
-                  <span class="nav-link-title"> Profile</span>
-                </a>
-              </li>
+            <ul class="navbar-nav user-navigation-links isee-navbar__links pt-lg-3">
+              ${navItems}
             </ul>
           </div>
-          <div class="nav-footer">
-            <h1 class="navbar-brand navbar-brand-autodark">
-              <a href="/views/users/identify.html">
-                <img src="/../../public/icons/favicon.png" width="110" height="32" alt="i" class="navbar-brand-image" />iSeeGrass
-                <a href="/views/auth/login.html">  -{]</a>
+
+          <!-- Footer — user menu -->
+          <div class="isee-navbar__footer">
+
+            <!-- Pop-up menu (hidden by default) -->
+            <div class="isee-user-menu" id="iseeUserMenu" hidden>
+              <a href="/views/users/profile.html"
+                class="isee-user-menu__item${isProfileActive ? ' active' : ''}">
+                <i class="ti ti-user-circle"></i>
+                <span>Profile</span>
               </a>
-            </h1>
+              <a href="/views/auth/login.html" class="isee-user-menu__item isee-user-menu__item--danger">
+                <i class="ti ti-logout"></i>
+                <span>Log out</span>
+              </a>
+            </div>
+
+            <!-- Trigger button -->
+            <button class="isee-user-btn" id="iseeUserBtn" type="button"
+              aria-haspopup="true" aria-expanded="false" aria-controls="iseeUserMenu"
+              title="Account">
+              <span class="isee-user-btn__avatar">
+                <i class="ti ti-user"></i>
+              </span>
+              <span class="isee-user-btn__label">Account</span>
+              <i class="ti ti-chevron-up isee-user-btn__chevron"></i>
+            </button>
+
           </div>
+
         </div>
       </nav>
     `;
 
-    this.querySelector('.navbar-toggler').addEventListener('click', () => {
-      this.querySelector('#sidebar-menu').classList.toggle('show');
+    // Toggle the pop-up menu
+    const btn  = this.querySelector('#iseeUserBtn');
+    const menu = this.querySelector('#iseeUserMenu');
+
+    btn.addEventListener('click', () => {
+      const open = !menu.hidden;
+      menu.hidden = open;
+      btn.setAttribute('aria-expanded', String(!open));
+      btn.classList.toggle('is-open', !open);
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!this.contains(e.target)) {
+        menu.hidden = true;
+        btn.setAttribute('aria-expanded', 'false');
+        btn.classList.remove('is-open');
+      }
+    });
+
+    // Mobile nav toggler — show/hide the vertical link list
+    const toggler  = this.querySelector('.isee-navbar__toggler');
+    const collapse = this.querySelector('#sidebar-menu');
+    const iconOpen  = toggler.querySelector('.isee-toggler-icon--open');
+    const iconClose = toggler.querySelector('.isee-toggler-icon--close');
+
+    toggler.addEventListener('click', () => {
+      const expanded = collapse.classList.toggle('show');
+      toggler.setAttribute('aria-expanded', String(expanded));
+      iconOpen.style.display  = expanded ? 'none'         : '';
+      iconClose.style.display = expanded ? ''             : 'none';
     });
   }
 }
