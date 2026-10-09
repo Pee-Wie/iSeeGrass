@@ -1,12 +1,648 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin | iSeeGrass</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="iSeeGrass admin — platform statistics and seagrass species catalog.">
+    <title>Reports | iSeeGrass Admin</title>
+
+    <link rel="icon" type="image/png" href="../../public/icons/favicon.png">
+
+    <!-- Tabler -->
+    <link rel="stylesheet" href="../../resources/tabler/css/tabler.css">
+    <link rel="stylesheet" href="../../resources/tabler/css/tabler.min.css">
+
+    <!-- Tabler Icons webfont -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/tabler-icons.min.css">
+
+    <!-- iSeeGrass Admin Theme -->
+    <link rel="stylesheet" href="../../public/css/admin/styles-admin.css">
+
+    <style>
+        /* ── Shared admin styles ── */
+        .admin-filter-bar {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 0.85rem 1rem;
+            background: var(--surface);
+            border: 1px solid rgba(124,203,77,0.18);
+            border-radius: 14px;
+            margin-bottom: 1rem;
+        }
+        .admin-input {
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(124,203,77,0.25);
+            border-radius: 8px;
+            color: var(--text);
+            padding: 0.5rem 0.85rem;
+            font-size: 0.88rem;
+            outline: none;
+        }
+        .admin-input:focus { border-color: var(--accent); }
+        .admin-select {
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(124,203,77,0.25);
+            border-radius: 8px;
+            color: var(--text);
+            padding: 0.5rem 0.85rem;
+            font-size: 0.88rem;
+            outline: none;
+            cursor: pointer;
+        }
+        .admin-select:focus { border-color: var(--accent); }
+        .admin-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(124,203,77,0.25);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 180ms;
+        }
+        .admin-btn--ghost { background: rgba(124,203,77,0.08); color: var(--text); }
+        .admin-btn--ghost:hover { background: rgba(124,203,77,0.18); }
+        .admin-btn--primary { background: var(--accent); color: #081908; border-color: var(--accent); }
+        .admin-btn--danger { background: rgba(220,53,69,0.15); color: #ff6b6b; border-color: rgba(220,53,69,0.3); }
+        .admin-btn--icon { padding: 0.35rem 0.5rem; border-radius: 7px; }
+        .admin-card {
+            background: var(--surface);
+            border: 1px solid rgba(124,203,77,0.18);
+            border-radius: 18px;
+            padding: 1.25rem 1.5rem;
+        }
+        .admin-table-wrapper { overflow-x: auto; border-radius: 14px; border: 1px solid rgba(124,203,77,0.18); }
+        .admin-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+        .admin-table thead tr { background: rgba(124,203,77,0.1); }
+        .admin-table th {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            border-bottom: 1px solid rgba(124,203,77,0.18);
+            white-space: nowrap;
+        }
+        .admin-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(124,203,77,0.08);
+            color: var(--text);
+            vertical-align: middle;
+        }
+        .admin-table tbody tr:hover { background: rgba(124,203,77,0.05); }
+        .admin-table tbody tr:last-child td { border-bottom: none; }
+        .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+        .badge-green  { background: rgba(124,203,77,0.18); color: #7ccb4d; }
+        .badge-muted  { background: rgba(255,255,255,0.08); color: var(--muted); }
+        .badge-red    { background: rgba(220,53,69,0.18); color: #ff6b6b; }
+        .badge-yellow { background: rgba(255,193,7,0.18); color: #ffc107; }
+        .action-btn-group { display: flex; gap: 0.35rem; align-items: center; }
+        .admin-pagination { display: flex; align-items: center; gap: 0.75rem; margin-top: 1rem; justify-content: flex-end; }
+        .admin-page-indicator { font-size: 0.84rem; color: var(--muted); }
+        /* ── Modal ── */
+        .admin-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+        .admin-modal {
+            background: var(--surface-strong);
+            border: 1px solid rgba(124,203,77,0.25);
+            border-radius: 18px;
+            width: 100%;
+            max-width: 680px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .admin-modal__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.1rem 1.4rem;
+            border-bottom: 1px solid rgba(124,203,77,0.15);
+        }
+        .admin-modal__title { margin: 0; color: #d6f0b8; font-size: 1.05rem; }
+        .admin-modal__close {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.25rem;
+            line-height: 1;
+        }
+        .admin-modal__body { flex: 1; overflow-y: auto; padding: 1.25rem 1.4rem; }
+        .admin-modal__footer {
+            padding: 0.9rem 1.4rem;
+            border-top: 1px solid rgba(124,203,77,0.12);
+            display: flex;
+            justify-content: flex-end;
+        }
+        .form-group { margin-bottom: 0.9rem; }
+        .admin-label { font-size: 0.82rem; color: var(--muted); font-weight: 500; display: block; }
+        /* ── Tabs ── */
+        .admin-tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid rgba(124,203,77,0.2);
+            margin-bottom: 1.5rem;
+        }
+        .admin-tab {
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 0.65rem 1.25rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: color 180ms, border-color 180ms;
+            margin-bottom: -1px;
+        }
+        .admin-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .admin-tab-panel { display: none; }
+        .admin-tab-panel.active { display: block; }
+        /* ── Report stats ── */
+        .report-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .report-stat-card {
+            background: rgba(124,203,77,0.07);
+            border: 1px solid rgba(124,203,77,0.18);
+            border-radius: 12px;
+            padding: 1rem 1.1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        .stat-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+        .stat-value { font-size: 1.8rem; font-weight: 800; color: #d6f0b8; line-height: 1; }
+        .stat-sub   { font-size: 0.75rem; color: var(--muted); }
+        /* ── Charts ── */
+        .report-charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+        .report-chart-panel {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(124,203,77,0.12);
+            border-radius: 12px;
+            padding: 1.1rem;
+        }
+        .report-chart-panel h4 { margin: 0 0 0.75rem; color: #d6f0b8; font-size: 0.9rem; }
+        .chart-placeholder {
+            min-height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            font-size: 0.84rem;
+            border: 1px dashed rgba(124,203,77,0.2);
+            border-radius: 8px;
+        }
+        @media (max-width: 768px) {
+            .report-stat-grid { grid-template-columns: 1fr 1fr; }
+            .report-charts-row { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
+
 <body>
-  <!-- Android back-button handler (no-op on web) -->
-  <script src="/js/back-handler.js"></script>
+    <div class="page" id="main-content">
+        <isee-navbar-admin></isee-navbar-admin>
+
+        <div class="page-wrapper">
+            <!-- Page header -->
+            <div class="page-header d-print-none">
+                <div class="container-xl">
+                    <div class="row g-2 align-items-center">
+                        <div class="col">
+                            <h2 class="page-title text-primary">&gt; Admin / Reports</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-body">
+                <div class="container-xl">
+
+                    <!-- Tab bar -->
+                    <div class="admin-tabs">
+                        <button class="admin-tab active" data-tab="stats">Platform Statistics</button>
+                        <button class="admin-tab" data-tab="catalog">Seagrass Catalog</button>
+                    </div>
+
+                    <!-- ══ Tab 1: Platform Statistics ══ -->
+                    <div class="admin-tab-panel active" id="tab-stats">
+                        <div class="admin-card">
+
+                            <!-- Date range -->
+                            <div class="admin-filter-bar" style="margin-bottom:1.25rem;">
+                                <label class="admin-label">From
+                                    <input type="date" id="reportDateFrom" class="admin-input">
+                                </label>
+                                <label class="admin-label">To
+                                    <input type="date" id="reportDateTo" class="admin-input">
+                                </label>
+                                <button id="btnGenerateReport" class="admin-btn admin-btn--primary">
+                                    <i class="ti ti-chart-bar"></i> Generate Report
+                                </button>
+                            </div>
+
+                            <!-- Stats summary -->
+                            <div class="report-stat-grid">
+                                <div class="report-stat-card">
+                                    <span class="stat-label">Total Assessments</span>
+                                    <span class="stat-value" id="rpt-assessments">—</span>
+                                    <span class="stat-sub">In selected range</span>
+                                </div>
+                                <div class="report-stat-card">
+                                    <span class="stat-label">Total Identifications</span>
+                                    <span class="stat-value" id="rpt-identifications">—</span>
+                                    <span class="stat-sub">CNN sessions</span>
+                                </div>
+                                <div class="report-stat-card">
+                                    <span class="stat-label">Active Users</span>
+                                    <span class="stat-value" id="rpt-users">—</span>
+                                    <span class="stat-sub">With activity</span>
+                                </div>
+                                <div class="report-stat-card">
+                                    <span class="stat-label">Top Species</span>
+                                    <span class="stat-value" id="rpt-top-species"
+                                        style="font-size:1rem; padding-top:0.3rem;">—</span>
+                                    <span class="stat-sub">Most identified</span>
+                                </div>
+                            </div>
+
+                            <!-- Chart placeholders -->
+                            <div class="report-charts-row">
+                                <div class="report-chart-panel">
+                                    <h4>Assessments Over Time</h4>
+                                    <div id="chartAssessments" class="chart-placeholder">
+                                        Chart will render here
+                                    </div>
+                                </div>
+                                <div class="report-chart-panel">
+                                    <h4>Species Distribution</h4>
+                                    <div id="chartSpecies" class="chart-placeholder">
+                                        Chart will render here
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Export -->
+                            <div style="display:flex; gap:0.75rem; margin-top:1.25rem; flex-wrap:wrap;">
+                                <button id="btnExportCsv" class="admin-btn admin-btn--ghost">
+                                    <i class="ti ti-file-spreadsheet"></i> Export CSV
+                                </button>
+                                <button id="btnExportPdf" class="admin-btn admin-btn--ghost">
+                                    <i class="ti ti-file-text"></i> Export PDF
+                                </button>
+                            </div>
+
+                        </div><!-- /.admin-card -->
+                    </div><!-- /#tab-stats -->
+
+                    <!-- ══ Tab 2: Seagrass Catalog ══ -->
+                    <div class="admin-tab-panel" id="tab-catalog">
+                        <div class="admin-card">
+
+                            <!-- Header row -->
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.75rem;">
+                                <h3 style="margin:0; color:#d6f0b8;">Seagrass Species Catalog</h3>
+                                <button id="btnAddSpecies" class="admin-btn admin-btn--primary"
+                                    onclick="openCatalogModal(null)">
+                                    <i class="ti ti-plus"></i> Add Species
+                                </button>
+                            </div>
+
+                            <input type="text" id="catalogSearch" class="admin-input"
+                                placeholder="Search species…" style="width:100%; margin-bottom:1rem;">
+
+                            <!-- Catalog table -->
+                            <div class="admin-table-wrapper">
+                                <table class="admin-table" id="catalogTable">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Scientific Name</th>
+                                            <th>Common Name</th>
+                                            <th>Family</th>
+                                            <th>Region</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="catalogTableBody">
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Enhalus acoroides</td>
+                                            <td>Tape Seagrass</td>
+                                            <td>Hydrocharitaceae</td>
+                                            <td>Negros</td>
+                                            <td><span class="badge badge-green">Active</span></td>
+                                            <td>
+                                                <div class="action-btn-group">
+                                                    <button class="admin-btn admin-btn--icon" title="Edit"
+                                                        onclick="openCatalogModal(this)">
+                                                        <i class="ti ti-edit"></i>
+                                                    </button>
+                                                    <button class="admin-btn admin-btn--icon admin-btn--danger" title="Delete"
+                                                        onclick="openDeleteConfirm(this)">
+                                                        <i class="ti ti-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>Thalassia hemprichii</td>
+                                            <td>Hemprich's Seagrass</td>
+                                            <td>Hydrocharitaceae</td>
+                                            <td>Negros</td>
+                                            <td><span class="badge badge-green">Active</span></td>
+                                            <td>
+                                                <div class="action-btn-group">
+                                                    <button class="admin-btn admin-btn--icon" title="Edit"
+                                                        onclick="openCatalogModal(this)">
+                                                        <i class="ti ti-edit"></i>
+                                                    </button>
+                                                    <button class="admin-btn admin-btn--icon admin-btn--danger" title="Delete"
+                                                        onclick="openDeleteConfirm(this)">
+                                                        <i class="ti ti-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td>Halophila ovalis</td>
+                                            <td>Dugong Grass</td>
+                                            <td>Hydrocharitaceae</td>
+                                            <td>Negros</td>
+                                            <td><span class="badge badge-green">Active</span></td>
+                                            <td>
+                                                <div class="action-btn-group">
+                                                    <button class="admin-btn admin-btn--icon" title="Edit"
+                                                        onclick="openCatalogModal(this)">
+                                                        <i class="ti ti-edit"></i>
+                                                    </button>
+                                                    <button class="admin-btn admin-btn--icon admin-btn--danger" title="Delete"
+                                                        onclick="openDeleteConfirm(this)">
+                                                        <i class="ti ti-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>4</td>
+                                            <td>Cymodocea rotundata</td>
+                                            <td>Rotund Cymodocea</td>
+                                            <td>Cymodoceaceae</td>
+                                            <td>Negros</td>
+                                            <td><span class="badge badge-green">Active</span></td>
+                                            <td>
+                                                <div class="action-btn-group">
+                                                    <button class="admin-btn admin-btn--icon" title="Edit"
+                                                        onclick="openCatalogModal(this)">
+                                                        <i class="ti ti-edit"></i>
+                                                    </button>
+                                                    <button class="admin-btn admin-btn--icon admin-btn--danger" title="Delete"
+                                                        onclick="openDeleteConfirm(this)">
+                                                        <i class="ti ti-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>5</td>
+                                            <td>Halodule uninervis</td>
+                                            <td>Spade Grass</td>
+                                            <td>Cymodoceaceae</td>
+                                            <td>Negros</td>
+                                            <td><span class="badge badge-green">Active</span></td>
+                                            <td>
+                                                <div class="action-btn-group">
+                                                    <button class="admin-btn admin-btn--icon" title="Edit"
+                                                        onclick="openCatalogModal(this)">
+                                                        <i class="ti ti-edit"></i>
+                                                    </button>
+                                                    <button class="admin-btn admin-btn--icon admin-btn--danger" title="Delete"
+                                                        onclick="openDeleteConfirm(this)">
+                                                        <i class="ti ti-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>6</td>
+                                            <td>Syringodium isoetifolium</td>
+                                            <td>Needle Seagrass</td>
+                                            <td>Cymodoceaceae</td>
+                                            <td>Negros</td>
+                                            <td><span class="badge badge-green">Active</span></td>
+                                            <td>
+                                                <div class="action-btn-group">
+                                                    <button class="admin-btn admin-btn--icon" title="Edit"
+                                                        onclick="openCatalogModal(this)">
+                                                        <i class="ti ti-edit"></i>
+                                                    </button>
+                                                    <button class="admin-btn admin-btn--icon admin-btn--danger" title="Delete"
+                                                        onclick="openDeleteConfirm(this)">
+                                                        <i class="ti ti-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div><!-- /.admin-card -->
+                    </div><!-- /#tab-catalog -->
+
+                </div><!-- /container-xl -->
+            </div><!-- /page-body -->
+        </div><!-- /page-wrapper -->
+    </div><!-- /page -->
+
+    <!-- ══ Add / Edit Species Modal ══ -->
+    <div class="admin-modal-backdrop" id="catalogModal" hidden>
+        <div class="admin-modal">
+            <div class="admin-modal__header">
+                <h3 class="admin-modal__title" id="catalogModalTitle">Add Species</h3>
+                <button class="admin-modal__close" onclick="closeCatalogModal()">
+                    <i class="ti ti-x"></i>
+                </button>
+            </div>
+            <div class="admin-modal__body">
+                <form id="catalogForm">
+                    <div class="form-group">
+                        <label class="admin-label">Scientific Name <span style="color:#ff6b6b">*</span>
+                            <input class="admin-input" id="fldScientific" required
+                                placeholder="e.g. Halophila ovalis"
+                                style="width:100%; margin-top:0.35rem;">
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="admin-label">Common Name
+                            <input class="admin-input" id="fldCommon"
+                                placeholder="e.g. Dugong Grass"
+                                style="width:100%; margin-top:0.35rem;">
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="admin-label">Family
+                            <input class="admin-input" id="fldFamily"
+                                placeholder="e.g. Hydrocharitaceae"
+                                style="width:100%; margin-top:0.35rem;">
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="admin-label">Region
+                            <input class="admin-input" id="fldRegion" value="Negros"
+                                style="width:100%; margin-top:0.35rem;">
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="admin-label">Description
+                            <textarea class="admin-input" id="fldDescription" rows="3"
+                                style="width:100%; margin-top:0.35rem; resize:vertical;"></textarea>
+                        </label>
+                    </div>
+                    <div class="form-group"
+                        style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+                        <label class="admin-label">Status
+                            <select class="admin-select" id="fldStatus"
+                                style="width:100%; margin-top:0.35rem;">
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </label>
+                        <label class="admin-label"
+                            style="display:flex; align-items:flex-end; gap:0.5rem; padding-bottom:0.1rem;">
+                            <input type="checkbox" id="fldCnnScope"
+                                style="width:16px; height:16px; accent-color:var(--accent);">
+                            Include in identification scope
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="admin-modal__footer" style="gap:0.75rem;">
+                <button class="admin-btn admin-btn--ghost" onclick="closeCatalogModal()">Cancel</button>
+                <button class="admin-btn admin-btn--primary" onclick="saveCatalogEntry()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ Delete Confirmation Modal ══ -->
+    <div class="admin-modal-backdrop" id="deleteConfirmModal" hidden>
+        <div class="admin-modal" style="max-width:420px;">
+            <div class="admin-modal__header">
+                <h3 class="admin-modal__title">Delete Species</h3>
+                <button class="admin-modal__close" onclick="closeDeleteConfirm()">
+                    <i class="ti ti-x"></i>
+                </button>
+            </div>
+            <div class="admin-modal__body">
+                <p style="color:var(--muted); line-height:1.65;">
+                    Are you sure you want to delete
+                    <strong id="deleteSpeciesName" style="color:#d6f0b8;"></strong>?
+                    This action cannot be undone.
+                </p>
+            </div>
+            <div class="admin-modal__footer" style="gap:0.75rem;">
+                <button class="admin-btn admin-btn--ghost" onclick="closeDeleteConfirm()">Cancel</button>
+                <button class="admin-btn admin-btn--danger" id="btnConfirmDelete"
+                    onclick="confirmDelete()">
+                    <i class="ti ti-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="../../components/navbar-admin.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
+    <!-- Android back-button handler (no-op on web) -->
+    <script src="/js/back-handler.js"></script>
+
+    <script>
+        // ── Tab switching ──
+        document.querySelectorAll('.admin-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.admin-tab-panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // ── Catalog modal ──
+        let _deleteRow = null;
+
+        function openCatalogModal(btn) {
+            const title = btn ? 'Edit Species' : 'Add Species';
+            document.getElementById('catalogModalTitle').textContent = title;
+            if (btn) {
+                const row = btn.closest('tr');
+                document.getElementById('fldScientific').value = row.cells[1].textContent.trim();
+                document.getElementById('fldCommon').value     = row.cells[2].textContent.trim();
+                document.getElementById('fldFamily').value     = row.cells[3].textContent.trim();
+                document.getElementById('fldRegion').value     = row.cells[4].textContent.trim();
+            } else {
+                document.getElementById('catalogForm').reset();
+                document.getElementById('fldRegion').value = 'Negros';
+            }
+            document.getElementById('catalogModal').hidden = false;
+        }
+
+        function closeCatalogModal() {
+            document.getElementById('catalogModal').hidden = true;
+        }
+
+        function saveCatalogEntry() {
+            closeCatalogModal();
+        }
+
+        // ── Delete modal ──
+        function openDeleteConfirm(btn) {
+            _deleteRow = btn.closest('tr');
+            document.getElementById('deleteSpeciesName').textContent =
+                _deleteRow.cells[1].textContent.trim();
+            document.getElementById('deleteConfirmModal').hidden = false;
+        }
+
+        function closeDeleteConfirm() {
+            document.getElementById('deleteConfirmModal').hidden = true;
+            _deleteRow = null;
+        }
+
+        function confirmDelete() {
+            if (_deleteRow) { _deleteRow.remove(); }
+            closeDeleteConfirm();
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                closeCatalogModal();
+                closeDeleteConfirm();
+            }
+        });
+    </script>
 </body>
+
 </html>

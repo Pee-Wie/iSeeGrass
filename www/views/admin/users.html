@@ -1,12 +1,295 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin | iSeeGrass</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="iSeeGrass admin — manage platform users.">
+    <title>Users | iSeeGrass Admin</title>
+
+    <link rel="icon" type="image/png" href="../../public/icons/favicon.png">
+
+    <!-- Tabler -->
+    <link rel="stylesheet" href="../../resources/tabler/css/tabler.css">
+    <link rel="stylesheet" href="../../resources/tabler/css/tabler.min.css">
+
+    <!-- Tabler Icons webfont -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/tabler-icons.min.css">
+
+    <!-- iSeeGrass Admin Theme -->
+    <link rel="stylesheet" href="../../public/css/admin/styles-admin.css">
+
+    <style>
+        /* ── Filter bar ── */
+        .admin-filter-bar {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 0.85rem 1rem;
+            background: var(--surface);
+            border: 1px solid rgba(124,203,77,0.18);
+            border-radius: 14px;
+            margin-bottom: 1rem;
+        }
+        /* ── Inputs & Selects ── */
+        .admin-input {
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(124,203,77,0.25);
+            border-radius: 8px;
+            color: var(--text);
+            padding: 0.5rem 0.85rem;
+            font-size: 0.88rem;
+            outline: none;
+        }
+        .admin-input:focus {
+            border-color: var(--accent);
+        }
+        .admin-select {
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(124,203,77,0.25);
+            border-radius: 8px;
+            color: var(--text);
+            padding: 0.5rem 0.85rem;
+            font-size: 0.88rem;
+            outline: none;
+            cursor: pointer;
+        }
+        .admin-select:focus {
+            border-color: var(--accent);
+        }
+        /* ── Buttons ── */
+        .admin-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(124,203,77,0.25);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 180ms;
+        }
+        .admin-btn--ghost {
+            background: rgba(124,203,77,0.08);
+            color: var(--text);
+        }
+        .admin-btn--ghost:hover {
+            background: rgba(124,203,77,0.18);
+        }
+        .admin-btn--primary {
+            background: var(--accent);
+            color: #081908;
+            border-color: var(--accent);
+        }
+        .admin-btn--danger {
+            background: rgba(220,53,69,0.15);
+            color: #ff6b6b;
+            border-color: rgba(220,53,69,0.3);
+        }
+        .admin-btn--icon {
+            padding: 0.35rem 0.5rem;
+            border-radius: 7px;
+        }
+        /* ── Table ── */
+        .admin-card {
+            background: var(--surface);
+            border: 1px solid rgba(124,203,77,0.18);
+            border-radius: 18px;
+            padding: 1.25rem 1.5rem;
+        }
+        .admin-table-wrapper {
+            overflow-x: auto;
+            border-radius: 14px;
+            border: 1px solid rgba(124,203,77,0.18);
+        }
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+        .admin-table thead tr {
+            background: rgba(124,203,77,0.1);
+        }
+        .admin-table th {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            border-bottom: 1px solid rgba(124,203,77,0.18);
+            white-space: nowrap;
+        }
+        .admin-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(124,203,77,0.08);
+            color: var(--text);
+            vertical-align: middle;
+        }
+        .admin-table tbody tr:hover {
+            background: rgba(124,203,77,0.05);
+        }
+        .admin-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        /* ── Badges ── */
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-green  { background: rgba(124,203,77,0.18); color: #7ccb4d; }
+        .badge-muted  { background: rgba(255,255,255,0.08); color: var(--muted); }
+        .badge-red    { background: rgba(220,53,69,0.18); color: #ff6b6b; }
+        .badge-yellow { background: rgba(255,193,7,0.18); color: #ffc107; }
+        /* ── Actions ── */
+        .action-btn-group {
+            display: flex;
+            gap: 0.35rem;
+            align-items: center;
+        }
+        /* ── Pagination ── */
+        .admin-pagination {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            justify-content: flex-end;
+        }
+        .admin-page-indicator {
+            font-size: 0.84rem;
+            color: var(--muted);
+        }
+    </style>
 </head>
+
 <body>
-  <!-- Android back-button handler (no-op on web) -->
-  <script src="/js/back-handler.js"></script>
+    <div class="page" id="main-content">
+        <isee-navbar-admin></isee-navbar-admin>
+
+        <div class="page-wrapper">
+            <!-- Page header -->
+            <div class="page-header d-print-none">
+                <div class="container-xl">
+                    <div class="row g-2 align-items-center">
+                        <div class="col">
+                            <h2 class="page-title text-primary">&gt; Admin / Users</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-body">
+                <div class="container-xl">
+
+                    <div class="admin-card">
+
+                        <!-- Filter bar -->
+                        <div class="admin-filter-bar">
+                            <input type="text" id="filterSearch" class="admin-input"
+                                placeholder="Search by name or email…" style="flex:1; min-width:200px;">
+                            <select id="filterRole" class="admin-select">
+                                <option value="">All Roles</option>
+                                <option value="user">User</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                            <select id="filterStatus" class="admin-select">
+                                <option value="">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                            <button id="btnResetFilters" class="admin-btn admin-btn--ghost">Reset</button>
+                        </div>
+
+                        <!-- Table -->
+                        <div class="admin-table-wrapper">
+                            <table class="admin-table" id="usersTable">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Joined</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTableBody">
+                                    <!-- JS-populated -->
+                                    <tr>
+                                        <td>1</td>
+                                        <td>Jane Santos</td>
+                                        <td>jane.santos@example.com</td>
+                                        <td><span class="badge badge-green">User</span></td>
+                                        <td><span class="badge badge-green">Active</span></td>
+                                        <td>2024-01-15</td>
+                                        <td>
+                                            <div class="action-btn-group">
+                                                <button class="admin-btn admin-btn--icon" title="Edit"><i class="ti ti-edit"></i></button>
+                                                <button class="admin-btn admin-btn--icon admin-btn--danger" title="Deactivate"><i class="ti ti-user-off"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>Marco Reyes</td>
+                                        <td>marco.reyes@example.com</td>
+                                        <td><span class="badge badge-yellow">Admin</span></td>
+                                        <td><span class="badge badge-green">Active</span></td>
+                                        <td>2023-11-02</td>
+                                        <td>
+                                            <div class="action-btn-group">
+                                                <button class="admin-btn admin-btn--icon" title="Edit"><i class="ti ti-edit"></i></button>
+                                                <button class="admin-btn admin-btn--icon admin-btn--danger" title="Deactivate"><i class="ti ti-user-off"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td>Ana Lim</td>
+                                        <td>ana.lim@example.com</td>
+                                        <td><span class="badge badge-green">User</span></td>
+                                        <td><span class="badge badge-muted">Inactive</span></td>
+                                        <td>2024-03-08</td>
+                                        <td>
+                                            <div class="action-btn-group">
+                                                <button class="admin-btn admin-btn--icon" title="Edit"><i class="ti ti-edit"></i></button>
+                                                <button class="admin-btn admin-btn--icon admin-btn--danger" title="Delete"><i class="ti ti-trash"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="admin-pagination" id="usersPagination">
+                            <button class="admin-btn admin-btn--ghost" id="btnPrevPage">
+                                <i class="ti ti-chevron-left"></i> Prev
+                            </button>
+                            <span class="admin-page-indicator" id="pageIndicator">Page 1</span>
+                            <button class="admin-btn admin-btn--ghost" id="btnNextPage">
+                                Next <i class="ti ti-chevron-right"></i>
+                            </button>
+                        </div>
+
+                    </div><!-- /.admin-card -->
+
+                </div><!-- /container-xl -->
+            </div><!-- /page-body -->
+        </div><!-- /page-wrapper -->
+    </div><!-- /page -->
+
+    <script type="module" src="../../components/navbar-admin.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
+    <!-- Android back-button handler (no-op on web) -->
+    <script src="/js/back-handler.js"></script>
 </body>
+
 </html>

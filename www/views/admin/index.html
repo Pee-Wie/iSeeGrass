@@ -1,12 +1,302 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin | iSeeGrass</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="iSeeGrass admin panel — manage users, assessments, and the seagrass catalog.">
+    <title>iSeeGrass Admin — Home</title>
+
+    <link rel="icon" type="image/png" href="../../public/icons/favicon.png">
+
+    <!-- Tabler -->
+    <link rel="stylesheet" href="../../resources/tabler/css/tabler.css">
+    <link rel="stylesheet" href="../../resources/tabler/css/tabler.min.css">
+
+    <!-- Tabler Icons webfont -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/tabler-icons.min.css">
+
+    <!-- iSeeGrass Admin Theme -->
+    <link rel="stylesheet" href="../../public/css/admin/styles-admin.css">
+
+    <style>
+        .home-hero {
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+        }
+        .home-hero__content {
+            flex: 1;
+            min-width: 0;
+        }
+        .home-hero__stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            min-width: 260px;
+        }
+        .stat-card {
+            background: rgba(124,203,77,0.07);
+            border: 1px solid rgba(124,203,77,0.18);
+            border-radius: 14px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        .stat-label {
+            font-size: 0.78rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #d6f0b8;
+            line-height: 1;
+        }
+        .stat-sub {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+        .info-section {
+            background: rgba(8,32,12,0.88);
+            border: 1px solid rgba(124,203,77,0.18);
+            border-radius: 18px;
+            padding: 1.5rem 1.75rem;
+        }
+        .info-section h3 {
+            color: #d6f0b8;
+            margin-top: 0;
+        }
+        .info-section p,
+        .info-section li {
+            color: var(--muted);
+            line-height: 1.75;
+        }
+        .fact-pill {
+            margin-top: 1rem;
+            background: rgba(124,203,77,0.08);
+            border: 1px solid rgba(124,203,77,0.22);
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            font-size: 0.82rem;
+            color: var(--muted);
+        }
+        .fact-tag {
+            display: inline-block;
+            background: var(--accent-dark);
+            color: #d6f0b8;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+        @media (max-width: 768px) {
+            .home-hero { flex-direction: column; }
+            .home-hero__stats { grid-template-columns: 1fr 1fr; width: 100%; }
+        }
+    </style>
 </head>
+
 <body>
-  <!-- Android back-button handler (no-op on web) -->
-  <script src="/js/back-handler.js"></script>
+    <div class="page" id="main-content">
+        <isee-navbar-admin></isee-navbar-admin>
+
+        <div class="page-wrapper">
+            <!-- Page header -->
+            <div class="page-header d-print-none">
+                <div class="container-xl">
+                    <div class="row g-2 align-items-center">
+                        <div class="col">
+                            <h2 class="page-title text-primary">&gt; Admin / Home</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-body">
+                <div class="container-xl">
+                    <div class="row row-deck row-cards g-3">
+
+                        <!-- ── Hero / Admin Panel + Stats (2×2) ─────────────── -->
+                        <div class="col-12">
+                            <div class="home-hero">
+                                <!-- Left: welcome text + actions -->
+                                <div class="home-hero__content">
+                                    <p class="eyebrow">ADMIN PANEL</p>
+                                    <h2>Admin Panel — iSeeGrass</h2>
+                                    <p>
+                                        Manage platform users, review all field assessments, run species identifications,
+                                        and oversee the seagrass catalog. Full platform control in one place.
+                                    </p>
+                                    <div class="hero-actions">
+                                        <a href="/views/admin/users.html" class="btn btn-primary">
+                                            <i class="ti ti-users"></i> Manage Users
+                                        </a>
+                                        <a href="/views/admin/assessment.html" class="btn btn-secondary">
+                                            <i class="ti ti-clipboard-list"></i> View Assessments
+                                        </a>
+                                        <a href="/views/admin/report.html" class="btn btn-secondary">
+                                            <i class="ti ti-chart-bar"></i> Reports &amp; Catalog
+                                        </a>
+                                        <a href="/views/admin/dashboard.html" class="btn"
+                                            style="background:rgba(0,0,0,0.35); color:#eef7eb; border-color:rgba(255,255,255,0.15);">
+                                            <i class="ti ti-layout-dashboard"></i> Dashboard
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- Right: 2×2 stat grid -->
+                                <div class="home-hero__stats">
+                                    <div class="stat-card">
+                                        <span class="stat-label">Total Users</span>
+                                        <span class="stat-value" id="stat-users">—</span>
+                                        <span class="stat-sub">Registered accounts</span>
+                                    </div>
+                                    <div class="stat-card">
+                                        <span class="stat-label">Total Assessments</span>
+                                        <span class="stat-value" id="stat-assessments">—</span>
+                                        <span class="stat-sub">Platform-wide records</span>
+                                    </div>
+                                    <div class="stat-card">
+                                        <span class="stat-label">Identifications Run</span>
+                                        <span class="stat-value" id="stat-identifications">—</span>
+                                        <span class="stat-sub">CNN sessions</span>
+                                    </div>
+                                    <div class="stat-card">
+                                        <span class="stat-label">Species in Catalog</span>
+                                        <span class="stat-value" id="stat-species">—</span>
+                                        <span class="stat-sub">Seagrass catalog entries</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── About iSeeGrass Platform ─────────────────────── -->
+                        <div class="col-lg-7">
+                            <div class="info-section">
+                                <h3>About iSeeGrass Platform</h3>
+                                <p>
+                                    iSeeGrass is a hybrid web and mobile platform for seagrass species identification
+                                    and ecological field assessment. It applies Convolutional Neural Network (CNN)
+                                    image classification to automate species identification from field photographs,
+                                    improving consistency and reducing reliance on manual expert review across surveys.
+                                </p>
+                                <p style="margin-top:0.75rem;">
+                                    The platform supports structured data collection across multiple users and field
+                                    teams. As an admin, you have full visibility into all assessments, user activity,
+                                    and system data — and you are responsible for maintaining the quality and integrity
+                                    of the seagrass catalog that powers the identification model.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- ── Admin Responsibilities ─────────────────────── -->
+                        <div class="col-lg-5">
+                            <div class="info-section" style="height:100%; display:flex; flex-direction:column; gap:1.1rem;">
+                                <div>
+                                    <h3>Admin Responsibilities</h3>
+                                    <ul>
+                                        <li>Manage user accounts and roles.</li>
+                                        <li>Review all submitted assessments.</li>
+                                        <li>Maintain the seagrass species catalog.</li>
+                                        <li>Monitor identification activity and CNN usage.</li>
+                                        <li>Generate system reports and usage statistics.</li>
+                                    </ul>
+                                </div>
+                                <div class="fact-pill">
+                                    <span class="fact-tag">ADMIN NOTE</span>
+                                    Admin actions are logged. Changes to user roles and catalog entries are permanent
+                                    and affect all platform users.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── Key Species Overview ───────────────────────── -->
+                        <div class="col-12">
+                            <div class="info-section">
+                                <h3>Seagrass Species in Scope
+                                    <span style="font-size:0.78rem; font-weight:500; color:var(--muted); margin-left:0.65rem;">
+                                        (Identification scope · Negros region · part of the broader ~60–72 species worldwide)
+                                    </span>
+                                </h3>
+                                <div class="row g-2 mt-1">
+                                    <div class="col-sm-6 col-lg-4">
+                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Enhalus acoroides</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Tape Seagrass · Largest species in the world. Forms extensive intertidal meadows across Luzon, Visayas &amp; Mindanao.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-lg-4">
+                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Thalassia hemprichii</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Hemprich's Seagrass · Dominant species in Indo-Pacific mixed meadows; common across all Philippine regions.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-lg-4">
+                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Halophila ovalis</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Dugong Grass · Pioneer coloniser with small oval leaf pairs. A primary food source for dugongs and green sea turtles.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-lg-4">
+                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Cymodocea rotundata</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Rotund Cymodocea · Common on reef flats and shallow lagoons. Recognised by its rounded leaf tip.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-lg-4">
+                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Halodule uninervis</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Spade Grass · Abundant pioneer species with a distinctive trident-shaped leaf tip. Key dugong food source.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-lg-4">
+                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Syringodium isoetifolium</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Needle Seagrass · Unique cylindrical hollow leaves. Forms monospecific beds on sandy reef flats.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── System Info Footer Row ─────────────────────── -->
+                        <div class="col-12">
+                            <div style="display:flex; flex-wrap:wrap; gap:0.75rem; padding:1rem 1.25rem; background:rgba(8,25,10,0.6); border:1px solid rgba(124,203,77,0.12); border-radius:14px; font-size:0.82rem; color:var(--muted); align-items:center; justify-content:space-between;">
+                                <span>
+                                    <strong style="color:#d6f0b8;">iSeeGrass</strong> &nbsp;·&nbsp;
+                                    Admin Panel &nbsp;·&nbsp; Platform-wide control
+                                </span>
+                                <span style="display:flex; gap:1.25rem; flex-wrap:wrap;">
+                                    <span>
+                                        <i class="ti ti-database" style="vertical-align:middle; margin-right:0.3em;"></i>~60–72 species worldwide · 12 genera · 4 families
+                                    </span>
+                                    <span>
+                                        <i class="ti ti-map-pin" style="vertical-align:middle; margin-right:0.3em;"></i>Identification scope: <strong style="color:#d6f0b8;">Negros region</strong>
+                                    </span>
+                                    <span>
+                                        <i class="ti ti-robot" style="vertical-align:middle; margin-right:0.3em;"></i>Powered by CNN Image Classification
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+
+                    </div><!-- /row -->
+                </div><!-- /container-xl -->
+            </div><!-- /page-body -->
+        </div><!-- /page-wrapper -->
+    </div><!-- /page -->
+
+    <script type="module" src="../../components/navbar-admin.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
+    <!-- Android back-button handler (no-op on web) -->
+    <script src="/js/back-handler.js"></script>
 </body>
+
 </html>

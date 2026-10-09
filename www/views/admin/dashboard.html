@@ -1,12 +1,382 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin | iSeeGrass</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="iSeeGrass admin dashboard — platform-wide statistics and activity overview.">
+    <title>Dashboard | iSeeGrass Admin</title>
+
+    <link rel="icon" type="image/png" href="../../public/icons/favicon.png">
+
+    <!-- Tabler -->
+    <link rel="stylesheet" href="../../resources/tabler/css/tabler.css">
+    <link rel="stylesheet" href="../../resources/tabler/css/tabler.min.css">
+
+    <!-- Tabler Icons webfont -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/tabler-icons.min.css">
+
+    <!-- iSeeGrass Admin Theme -->
+    <link rel="stylesheet" href="../../public/css/admin/styles-admin.css">
+
+    <style>
+        .dash-hero {
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+        .dash-hero__stats {
+            display: flex;
+            gap: 1rem;
+            flex: 1;
+            min-width: 0;
+            flex-wrap: wrap;
+        }
+        .dash-stat-card {
+            flex: 1;
+            min-width: 140px;
+            background: rgba(124,203,77,0.07);
+            border: 1px solid rgba(124,203,77,0.18);
+            border-radius: 14px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        .dash-stat-card--link {
+            text-decoration: none;
+            transition: border-color 180ms;
+        }
+        .dash-stat-card--link:hover {
+            border-color: rgba(124,203,77,0.45);
+        }
+        .stat-label {
+            font-size: 0.78rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #d6f0b8;
+            line-height: 1;
+        }
+        .stat-sub {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+        .dash-hero__divider {
+            width: 1px;
+            background: rgba(124,203,77,0.15);
+            align-self: stretch;
+            margin: 0 0.5rem;
+        }
+        .dash-hero__actions {
+            min-width: 220px;
+            max-width: 280px;
+        }
+        .section-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--muted);
+            letter-spacing: 0.08em;
+            margin: 0 0 0.75rem;
+        }
+        .quick-link-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.65rem;
+        }
+        .quick-link-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.65rem 0.85rem;
+            background: rgba(124,203,77,0.08);
+            border: 1px solid rgba(124,203,77,0.2);
+            border-radius: 10px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: background 180ms;
+        }
+        .quick-link-btn:hover {
+            background: rgba(124,203,77,0.16);
+        }
+        .ql-icon {
+            color: var(--accent);
+        }
+        .dash-panels-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        .dash-panel {
+            background: rgba(8,32,12,0.88);
+            border: 1px solid rgba(124,203,77,0.18);
+            border-radius: 18px;
+            padding: 1.5rem 1.75rem;
+        }
+        .dash-panel--tall {
+            min-height: 220px;
+        }
+        .dash-panel h3 {
+            color: #d6f0b8;
+            margin: 0 0 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+        .panel-icon {
+            color: var(--accent);
+        }
+        .activity-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .activity-list li {
+            font-size: 0.84rem;
+            color: var(--muted);
+            padding: 0.4rem 0;
+            border-bottom: 1px solid rgba(124,203,77,0.1);
+        }
+        .tip-list {
+            padding-left: 1.25rem;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .tip-list li {
+            font-size: 0.84rem;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+        .scope-notice {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            background: rgba(124,203,77,0.06);
+            border: 1px solid rgba(124,203,77,0.2);
+            border-radius: 12px;
+            padding: 0.9rem 1.1rem;
+            font-size: 0.84rem;
+            color: var(--muted);
+        }
+        .sn-tag {
+            flex-shrink: 0;
+            background: var(--accent-dark);
+            color: #d6f0b8;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            padding: 0.2rem 0.55rem;
+            border-radius: 5px;
+            text-transform: uppercase;
+        }
+        @media (max-width: 768px) {
+            .dash-hero { flex-direction: column; }
+            .dash-hero__actions { max-width: 100%; width: 100%; }
+            .dash-panels-row { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
+
 <body>
-  <!-- Android back-button handler (no-op on web) -->
-  <script src="/js/back-handler.js"></script>
+    <div class="page" id="main-content">
+        <isee-navbar-admin></isee-navbar-admin>
+
+        <div class="page-wrapper">
+            <!-- Page header -->
+            <div class="page-header d-print-none">
+                <div class="container-xl">
+                    <div class="row g-2 align-items-center">
+                        <div class="col">
+                            <h2 class="page-title text-primary">&gt; Admin / Dashboard</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-body">
+                <div class="container-xl">
+                    <div class="row row-deck row-cards g-3">
+
+                        <!-- ── Hero Card: Stat Cards + Quick Actions ── -->
+                        <div class="col-12">
+                            <div class="dash-hero">
+                                <!-- Stat cards -->
+                                <div class="dash-hero__stats">
+                                    <a href="/views/admin/users.html" class="dash-stat-card dash-stat-card--link">
+                                        <span class="stat-label">Total Users</span>
+                                        <span class="stat-value" id="stat-users">—</span>
+                                        <span class="stat-sub">Registered accounts</span>
+                                    </a>
+                                    <a href="/views/admin/assessment.html" class="dash-stat-card dash-stat-card--link">
+                                        <span class="stat-label">Total Assessments</span>
+                                        <span class="stat-value" id="stat-assessments">—</span>
+                                        <span class="stat-sub">Platform-wide records</span>
+                                    </a>
+                                    <a href="/views/admin/identify.html" class="dash-stat-card dash-stat-card--link">
+                                        <span class="stat-label">Identifications Run</span>
+                                        <span class="stat-value" id="stat-identifications">—</span>
+                                        <span class="stat-sub">CNN sessions</span>
+                                    </a>
+                                    <a href="/views/admin/report.html" class="dash-stat-card dash-stat-card--link">
+                                        <span class="stat-label">Species in Catalog</span>
+                                        <span class="stat-value" id="stat-species">—</span>
+                                        <span class="stat-sub">Seagrass catalog entries</span>
+                                    </a>
+                                </div>
+
+                                <!-- Divider -->
+                                <div class="dash-hero__divider"></div>
+
+                                <!-- Quick actions -->
+                                <div class="dash-hero__actions">
+                                    <p class="section-label">Quick Actions</p>
+                                    <div class="quick-link-grid">
+                                        <a href="/views/admin/users.html" class="quick-link-btn">
+                                            <span class="ql-icon"><i class="ti ti-users"></i></span> Manage Users
+                                        </a>
+                                        <a href="/views/admin/assessment.html" class="quick-link-btn">
+                                            <span class="ql-icon"><i class="ti ti-clipboard-list"></i></span> All Assessments
+                                        </a>
+                                        <a href="/views/admin/report.html" class="quick-link-btn">
+                                            <span class="ql-icon"><i class="ti ti-chart-bar"></i></span> Reports &amp; Catalog
+                                        </a>
+                                        <a href="/views/admin/identify.html" class="quick-link-btn">
+                                            <span class="ql-icon"><i class="ti ti-microscope"></i></span> Run Identification
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── Recent Activity + Species Breakdown 50/50 ── -->
+                        <div class="col-12">
+                            <div class="dash-panels-row">
+                                <div class="dash-panel dash-panel--tall">
+                                    <h3><span class="panel-icon"><i class="ti ti-clock"></i></span> Recent Activity</h3>
+                                    <ul class="activity-list" id="activity-list">
+                                        <!-- populated by JS -->
+                                    </ul>
+                                </div>
+                                <div class="dash-panel dash-panel--tall">
+                                    <h3><span class="panel-icon"><i class="ti ti-chart-bar"></i></span> Species Breakdown</h3>
+                                    <div class="species-bar-list" id="species-breakdown">
+                                        <!-- populated by JS -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ── System Scope Notice ────────────────────── -->
+                        <div class="col-12">
+                            <div class="scope-notice">
+                                <span class="sn-tag">SCOPE</span>
+                                <span>
+                                    Platform-wide view. Stats shown are aggregated across all users. The identification
+                                    model is scoped to the <strong style="color:#d6f0b8;">Negros region</strong> species dataset.
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- ── Tips for Admins + About the Model ─────── -->
+                        <div class="col-lg-6">
+                            <div class="dash-panel">
+                                <h3><span class="panel-icon"><i class="ti ti-bulb"></i></span> Tips for Admins</h3>
+                                <ul class="tip-list">
+                                    <li>Review flagged assessments regularly to ensure data quality.</li>
+                                    <li>Keep the seagrass catalog up to date — it affects CNN identification scope.</li>
+                                    <li>Deactivate inactive accounts to reduce clutter.</li>
+                                    <li>Use the Reports page to track platform usage over time.</li>
+                                    <li>Back up exported CSV reports periodically.</li>
+                                    <li>Monitor identification confidence trends to detect model drift.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="dash-panel">
+                                <h3><span class="panel-icon"><i class="ti ti-robot"></i></span> About the Identification Model</h3>
+                                <ul class="tip-list">
+                                    <li>Classification is performed by a <strong style="color:#d6f0b8;">Convolutional Neural Network (CNN)</strong> trained on labeled seagrass images.</li>
+                                    <li>The model outputs a species prediction alongside a <strong style="color:#d6f0b8;">confidence score</strong> — lower scores suggest ambiguous images.</li>
+                                    <li>Only species present in the <strong style="color:#d6f0b8;">Negros region dataset</strong> are within the model's trained scope.</li>
+                                    <li>Results should be reviewed by the researcher; the system does not replace expert field assessment.</li>
+                                    <li>Assessment outputs include species composition, abundance, and percentage cover estimates.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- ── Negros Species Reference ───────────────── -->
+                        <div class="col-12">
+                            <div class="dash-panel">
+                                <h3><span class="panel-icon"><i class="ti ti-plant"></i></span> Identifiable Species — Negros Region</h3>
+                                <p style="font-size:0.84rem; color:var(--muted); margin:0 0 1rem;">
+                                    These are the seagrass species the CNN model is trained to classify from
+                                    field images. Part of the broader ~60–72 species worldwide catalogue.
+                                </p>
+                                <div class="row g-2" id="negros-species-grid">
+                                    <div class="col-sm-6 col-lg-4">
+                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Enhalus acoroides</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Tape Seagrass · Largest species in the world. Forms extensive intertidal meadows.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-lg-4">
+                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Thalassia hemprichii</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Hemprich's Seagrass · Dominant species in Indo-Pacific mixed meadows.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-lg-4">
+                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Halophila ovalis</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Dugong Grass · Pioneer coloniser with small oval leaf pairs.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-lg-4">
+                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Cymodocea rotundata</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Rotund Cymodocea · Common on reef flats and shallow lagoons.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-lg-4">
+                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Halodule uninervis</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Spade Grass · Abundant pioneer with distinctive trident-shaped leaf tip.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 col-lg-4">
+                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Syringodium isoetifolium</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Needle Seagrass · Unique cylindrical hollow leaves; monospecific beds.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!-- /row -->
+                </div><!-- /container-xl -->
+            </div><!-- /page-body -->
+        </div><!-- /page-wrapper -->
+    </div><!-- /page -->
+
+    <script type="module" src="../../components/navbar-admin.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
+    <!-- Android back-button handler (no-op on web) -->
+    <script src="/js/back-handler.js"></script>
 </body>
+
 </html>
