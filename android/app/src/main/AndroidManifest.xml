@@ -29,7 +29,29 @@
         </provider>
     </application>
 
-    <!-- Permissions -->
-
+    <!-- ── Network ─────────────────────────────────────────────── -->
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- ── Camera — required for getUserMedia / live capture ───── -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera"       android:required="false" />
+    <uses-feature android:name="android.hardware.camera.front" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+
+    <!-- ── Microphone — getUserMedia may request an audio track ── -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- ── Storage: read images from gallery ───────────────────── -->
+    <!-- Android 13+ (API 33+): granular media permission -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <!-- Android ≤12 (API ≤32): legacy storage read -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <!-- Android ≤9 (API ≤28): write external storage for downloaded files -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+
+    <!-- ── Vibration — optional haptic on shutter ───────────────── -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
 </manifest>
