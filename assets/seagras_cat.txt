@@ -1,0 +1,756 @@
+
+-- ============================================================
+-- iSeeGrass: Global and Philippine Seagrass Catalog
+-- Database: MySQL / MariaDB
+-- ============================================================
+
+CREATE DATABASE IF NOT EXISTS iseagrass
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
+
+USE iseagrass;
+
+CREATE TABLE IF NOT EXISTS seagrass_species (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    species_key VARCHAR(100) NOT NULL UNIQUE,
+    common_name VARCHAR(150),
+    scientific_name VARCHAR(150) NOT NULL UNIQUE,
+    genus VARCHAR(100) NOT NULL,
+    family VARCHAR(100) NOT NULL,
+    region VARCHAR(255),
+    habitat TEXT,
+    depth_range VARCHAR(100),
+    leaf_shape VARCHAR(255),
+    leaf_length VARCHAR(100),
+    color_description VARCHAR(150),
+    iucn_status VARCHAR(50),
+    status_color VARCHAR(10),
+    description TEXT,
+    fun_fact TEXT,
+    tags JSON,
+    philippine_regions JSON,
+    is_philippine_species BOOLEAN NOT NULL DEFAULT FALSE,
+    is_cnn_supported BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Global and regional reference catalog.
+-- Do not mark a species as CNN-supported unless the model
+-- has actually been trained and evaluated for that species.
+
+INSERT INTO seagrass_species
+(
+    species_key, common_name, scientific_name, genus, family,
+    region, habitat, depth_range, leaf_shape, leaf_length,
+    color_description, iucn_status, status_color,
+    description, fun_fact, tags, philippine_regions,
+    is_philippine_species, is_cnn_supported
+)
+VALUES
+(
+    'enhalus-acoroides', 'Tape Seagrass',
+    'Enhalus acoroides', 'Enhalus', 'Hydrocharitaceae',
+    'Indo-Pacific & Southeast Asia',
+    'Sandy and muddy intertidal & subtidal flats',
+    '0 – 5 m', 'Very long, broad ribbon', '30 – 150 cm',
+    'Dark green', 'Least Concern', 'lc',
+    'The largest seagrass species by leaf size. Forms extensive meadows across Southeast Asia.',
+    'Male flowers float to the surface and drift toward surface-floating female flowers.',
+    JSON_ARRAY('Southeast Asia','Largest species','Intertidal'),
+    JSON_ARRAY('luzon','visayas','mindanao'), TRUE, FALSE
+),
+(
+    'thalassia-testudinum', 'Turtle Grass',
+    'Thalassia testudinum', 'Thalassia', 'Hydrocharitaceae',
+    'Caribbean & Gulf of Mexico',
+    'Shallow coastal lagoons, bays, clear warm water',
+    '0.5 – 10 m', 'Flat, ribbon-like', '10 – 35 cm',
+    'Bright green', 'Least Concern', 'lc',
+    'Forms dense Caribbean meadows that provide habitat for sea turtles, manatees and invertebrates.',
+    'Named for its role as a food source for green sea turtles.',
+    JSON_ARRAY('Caribbean','Tropical','Dense meadows'),
+    NULL, FALSE, FALSE
+),
+(
+    'thalassia-hemprichii', 'Hemprich''s Seagrass',
+    'Thalassia hemprichii', 'Thalassia', 'Hydrocharitaceae',
+    'Indo-Pacific & Red Sea',
+    'Intertidal and shallow subtidal sandy substrates',
+    '0 – 10 m', 'Flat, ribbon-like', '10 – 40 cm',
+    'Bright green', 'Least Concern', 'lc',
+    'Common in mixed seagrass meadows across the Indo-Pacific.',
+    'Dominates some species-rich meadows in the Coral Triangle.',
+    JSON_ARRAY('Indo-Pacific','Mixed meadows','Coral Triangle'),
+    JSON_ARRAY('luzon','visayas','mindanao'), TRUE, FALSE
+),
+(
+    'halophila-ovalis', 'Dugong Grass',
+    'Halophila ovalis', 'Halophila', 'Hydrocharitaceae',
+    'Indo-Pacific',
+    'Sandy and muddy substrates, calm coastal waters',
+    '0.5 – 30 m', 'Oval to elliptical leaf pairs', '1 – 4 cm',
+    'Light to medium green', 'Least Concern', 'lc',
+    'A pioneer species with small paired oval leaves; food for dugongs and green sea turtles.',
+    'Has been recorded at greater depths in exceptionally clear tropical waters.',
+    JSON_ARRAY('Indo-Pacific','Pioneer species','Dugong food'),
+    JSON_ARRAY('luzon','visayas','mindanao'), TRUE, FALSE
+),
+(
+    'halophila-stipulacea', 'Spoon Seagrass',
+    'Halophila stipulacea', 'Halophila', 'Hydrocharitaceae',
+    'Red Sea & Indian Ocean',
+    'Sandy and silty sediments, sheltered bays',
+    '1 – 90 m', 'Elliptical with prominent veins', '2 – 6 cm',
+    'Dark green with white veins', 'Least Concern', 'lc',
+    'Native to the Red Sea and Indian Ocean and introduced to other marine regions.',
+    'Has spread into the Mediterranean Sea.',
+    JSON_ARRAY('Red Sea','Invasive in introduced regions','Deep water'),
+    NULL, FALSE, FALSE
+),
+(
+    'halophila-decipiens', 'Paddle Weed',
+    'Halophila decipiens', 'Halophila', 'Hydrocharitaceae',
+    'Pan-tropical',
+    'Sandy substrates, deeper coastal and offshore waters',
+    '5 – 100 m', 'Oblong paired leaves with serrated margins', '1 – 2.5 cm',
+    'Light green', 'Least Concern', 'lc',
+    'A widespread tropical species with small paired leaves.',
+    'Can occur at considerable depths where sufficient light reaches the seabed.',
+    JSON_ARRAY('Pan-tropical','Deep water','Offshore'),
+    JSON_ARRAY('luzon','visayas','mindanao'), TRUE, FALSE
+),
+(
+    'halophila-spinulosa', 'Fern Seagrass',
+    'Halophila spinulosa', 'Halophila', 'Hydrocharitaceae',
+    'Indo-Pacific & Australia',
+    'Sandy and silty subtidal sediments',
+    '2 – 25 m', 'Fern-like leaflets along a stem', '0.5 – 1.5 cm per leaflet',
+    'Bright to medium green', 'Least Concern', 'lc',
+    'Recognized by its fern-like arrangement of multiple small leaflets.',
+    'Its branching leaf structure is distinctive among seagrasses.',
+    JSON_ARRAY('Australia','Indo-Pacific','Distinctive morphology'),
+    JSON_ARRAY('visayas','mindanao'), TRUE, FALSE
+),
+(
+    'halophila-beccarii', 'Beccari''s Seagrass',
+    'Halophila beccarii', 'Halophila', 'Hydrocharitaceae',
+    'Southeast Asia & Bay of Bengal',
+    'Intertidal mudflats, mangrove margins, estuaries',
+    '0 – 2 m', 'Small elliptical leaf pairs', '0.5 – 1.5 cm',
+    'Light green', 'Vulnerable', 'vu',
+    'A small species associated with intertidal mudflats and mangrove margins.',
+    'Its tiny leaves can be overlooked during field surveys.',
+    JSON_ARRAY('Southeast Asia','Intertidal','Vulnerable'),
+    JSON_ARRAY('luzon','visayas'), TRUE, FALSE
+),
+(
+    'halophila-major', 'Major Seagrass',
+    'Halophila major', 'Halophila', 'Hydrocharitaceae',
+    'Indo-Pacific',
+    'Subtidal sandy and muddy sediments',
+    '1 – 15 m', 'Large elliptical leaf pairs', '3 – 7 cm',
+    'Medium green', 'Least Concern', 'lc',
+    'An Indo-Pacific species that may be confused with other large-leaved Halophila.',
+    'Leaf size and venation help distinguish it from related species.',
+    JSON_ARRAY('Indo-Pacific','Subtidal'),
+    JSON_ARRAY('luzon','visayas','mindanao'), TRUE, FALSE
+),
+(
+    'halophila-engelmannii', 'Engelmann''s Seagrass',
+    'Halophila engelmannii', 'Halophila', 'Hydrocharitaceae',
+    'Gulf of Mexico & Caribbean',
+    'Sandy and silty subtidal sediments',
+    '2 – 30 m', 'Narrow elongated leaf pairs', '1 – 4 cm',
+    'Bright green', 'Least Concern', 'lc',
+    'An Atlantic-region Halophila species associated with soft substrates.',
+    'Occurs in Gulf of Mexico and Caribbean habitats.',
+    JSON_ARRAY('Gulf of Mexico','Caribbean','Subtidal'),
+    NULL, FALSE, FALSE
+),
+(
+    'cymodocea-rotundata', 'Rotund Cymodocea',
+    'Cymodocea rotundata', 'Cymodocea', 'Cymodoceaceae',
+    'Indo-Pacific & Red Sea',
+    'Sandy substrates, lagoons, reef flats',
+    '0.5 – 10 m', 'Narrow strap with rounded tip', '7 – 15 cm',
+    'Bright green', 'Least Concern', 'lc',
+    'Common in mixed Indo-Pacific meadows.',
+    'Its rounded leaf tip helps distinguish it from related Cymodocea.',
+    JSON_ARRAY('Indo-Pacific','Mixed meadows','Reef flat'),
+    JSON_ARRAY('luzon','visayas','mindanao'), TRUE, FALSE
+),
+(
+    'cymodocea-serrulata', 'Serrated Cymodocea',
+    'Cymodocea serrulata', 'Cymodocea', 'Cymodoceaceae',
+    'Indo-Pacific & East Africa',
+    'Sandy substrates, shallow lagoons and bays',
+    '0.5 – 8 m', 'Narrow strap with serrated margins', '7 – 20 cm',
+    'Bright to medium green', 'Least Concern', 'lc',
+    'Common in shallow Indo-Pacific seagrass communities.',
+    'Its finely serrated leaf margins distinguish it from related species.',
+    JSON_ARRAY('Indo-Pacific','East Africa','Mixed meadows'),
+    JSON_ARRAY('luzon','visayas','mindanao'), TRUE, FALSE
+),
+(
+    'cymodocea-nodosa', 'Little Neptune Grass',
+    'Cymodocea nodosa', 'Cymodocea', 'Cymodoceaceae',
+    'Mediterranean & East Atlantic',
+    'Sandy bottoms, lagoons, sheltered coastal areas',
+    '0.3 – 15 m', 'Narrow strap with rounded tip', '25 – 45 cm',
+    'Medium green', 'Least Concern', 'lc',
+    'A Mediterranean and eastern Atlantic species.',
+    'Its flowers can appear as small cream-coloured structures.',
+    JSON_ARRAY('Mediterranean','Resilient','Water quality indicator'),
+    NULL, FALSE, FALSE
+),
+(
+    'cymodocea-angustata', 'Narrow Cymodocea',
+    'Cymodocea angustata', 'Cymodocea', 'Cymodoceaceae',
+    'Northern Australia',
+    'Sandy intertidal and subtidal flats',
+    '0 – 5 m', 'Very narrow strap-like leaves', '10 – 30 cm',
+    'Medium green', 'Least Concern', 'lc',
+    'A species reported from northern Australian coastal waters.',
+    'Its distribution is concentrated in Australia.',
+    JSON_ARRAY('Australia','Endemic','Intertidal'),
+    NULL, FALSE, FALSE
+),
+(
+    'halodule-uninervis', 'Spade Grass',
+    'Halodule uninervis', 'Halodule', 'Cymodoceaceae',
+    'Indo-Pacific & Red Sea',
+    'Intertidal flats, estuaries, sandy lagoons',
+    '0 – 12 m', 'Narrow leaves with a three-pointed tip', '4 – 15 cm',
+    'Light to medium green', 'Least Concern', 'lc',
+    'A common Indo-Pacific species with distinctive leaf tips.',
+    'Its leaf tip can resemble a tiny trident.',
+    JSON_ARRAY('Indo-Pacific','Pioneer species','Dugong food'),
+    JSON_ARRAY('luzon','visayas','mindanao'), TRUE, FALSE
+),
+(
+    'halodule-pinifolia', 'Pin-leaf Shoal Grass',
+    'Halodule pinifolia', 'Halodule', 'Cymodoceaceae',
+    'Indo-Pacific & East Africa',
+    'Intertidal sandy and muddy flats',
+    '0 – 5 m', 'Very narrow pin-like leaves', '3 – 8 cm',
+    'Light green', 'Least Concern', 'lc',
+    'A small pioneer species associated with intertidal flats.',
+    'Can colonize disturbed intertidal sediment.',
+    JSON_ARRAY('Indo-Pacific','Pioneer species','Intertidal'),
+    JSON_ARRAY('luzon','visayas','mindanao'), TRUE, FALSE
+),
+(
+    'halodule-wrightii', 'Shoal Grass',
+    'Halodule wrightii', 'Halodule', 'Cymodoceaceae',
+    'Tropical & Subtropical Atlantic',
+    'Intertidal flats, estuaries, disturbed areas',
+    '0 – 5 m', 'Very narrow strap-like leaves', '5 – 20 cm',
+    'Light green', 'Least Concern', 'lc',
+    'An Atlantic pioneer species tolerant of salinity fluctuations.',
+    'Can recolonize disturbed coastal sediments.',
+    JSON_ARRAY('Caribbean','Pioneer species','Estuarine'),
+    NULL, FALSE, FALSE
+),
+(
+    'syringodium-isoetifolium', 'Needle Seagrass',
+    'Syringodium isoetifolium', 'Syringodium', 'Cymodoceaceae',
+    'Indo-Pacific & East Africa',
+    'Sandy and gravelly substrates, reef flats',
+    '0.5 – 15 m', 'Cylindrical needle-like leaves', '10 – 30 cm',
+    'Bright green', 'Least Concern', 'lc',
+    'Recognized by its cylindrical leaves.',
+    'Its round leaves distinguish it from flat-leaved seagrasses.',
+    JSON_ARRAY('Indo-Pacific','Distinctive morphology','Reef habitat'),
+    JSON_ARRAY('luzon','visayas','mindanao'), TRUE, FALSE
+),
+(
+    'syringodium-filiforme', 'Manatee Grass',
+    'Syringodium filiforme', 'Syringodium', 'Cymodoceaceae',
+    'Caribbean & Gulf of Mexico',
+    'Sandy and rocky bottoms, shallow coastal waters',
+    '0.5 – 12 m', 'Cylindrical thread-like leaves', '10 – 35 cm',
+    'Bright green', 'Least Concern', 'lc',
+    'An Atlantic seagrass that often grows alongside Turtle Grass.',
+    'It is grazed by West Indian manatees.',
+    JSON_ARRAY('Caribbean','Manatee food','Mixed meadows'),
+    NULL, FALSE, FALSE
+),
+(
+    'thalassodendron-ciliatum', 'Comb Seagrass',
+    'Thalassodendron ciliatum', 'Thalassodendron', 'Cymodoceaceae',
+    'East Africa & Indian Ocean Islands',
+    'Rocky substrates, reef slopes, exposed coasts',
+    '1 – 20 m', 'Strap-like leaves with toothed margins', '5 – 14 cm',
+    'Dark green', 'Vulnerable', 'vu',
+    'A seagrass associated with rocky substrates and reef slopes.',
+    'It can grow on hard substrates unlike many sediment-associated species.',
+    JSON_ARRAY('East Africa','Rocky habitat','Vulnerable'),
+    JSON_ARRAY('visayas','mindanao'), TRUE, FALSE
+),
+(
+    'thalassodendron-pachyrhizum', 'Thick-rooted Seagrass',
+    'Thalassodendron pachyrhizum', 'Thalassodendron', 'Cymodoceaceae',
+    'Western Australia',
+    'Rocky and coarse sandy substrates',
+    '1 – 25 m', 'Strap-like leaves with toothed margins', '4 – 12 cm',
+    'Dark green', 'Near Threatened', 'nt',
+    'An Australian species adapted to hard substrates and exposed environments.',
+    'Its thick rhizomes help anchor it to the substrate.',
+    JSON_ARRAY('Australia','Endemic','Rocky habitat'),
+    NULL, FALSE, FALSE
+),
+(
+    'amphibolis-antarctica', 'Wire Weed',
+    'Amphibolis antarctica', 'Amphibolis', 'Cymodoceaceae',
+    'Southern Australia',
+    'Rocky and sandy substrates, exposed coasts',
+    '0 – 35 m', 'Small clustered leaves at stem tips', '1 – 3 cm',
+    'Bright to olive green', 'Least Concern', 'lc',
+    'A structurally distinctive seagrass with woody wire-like stems.',
+    'Its reproductive strategy includes seedlings retained on the parent plant.',
+    JSON_ARRAY('Australia','Temperate','Woody stems'),
+    NULL, FALSE, FALSE
+),
+(
+    'amphibolis-griffithii', 'Griffin''s Seagrass',
+    'Amphibolis griffithii', 'Amphibolis', 'Cymodoceaceae',
+    'Southern & Western Australia',
+    'Rocky and sandy coasts',
+    '0 – 15 m', 'Small clustered spatula-shaped leaves', '1 – 2.5 cm',
+    'Olive green', 'Least Concern', 'lc',
+    'An Australian species that supports epiphytic communities.',
+    'Both Amphibolis species are endemic to Australia.',
+    JSON_ARRAY('Australia','Endemic','Temperate'),
+    NULL, FALSE, FALSE
+),
+(
+    'thalassodendron-leptocaule', 'Slender-stemmed Seagrass',
+    'Thalassodendron leptocaule', 'Thalassodendron', 'Cymodoceaceae',
+    'East Africa & Mozambique Channel',
+    'Sandy and rocky subtidal substrates',
+    '2 – 18 m', 'Narrow strap with slightly toothed margins', '4 – 10 cm',
+    'Dark green', 'Data Deficient', 'dd',
+    'A poorly documented species reported from East African coastal waters.',
+    'Its full distribution remains uncertain.',
+    JSON_ARRAY('East Africa','Data deficient','Subtidal'),
+    NULL, FALSE, FALSE
+),
+(
+    'halodule-beaudettei', 'Beaudette''s Shoal Grass',
+    'Halodule beaudettei', 'Halodule', 'Cymodoceaceae',
+    'Gulf of Mexico & Caribbean',
+    'Intertidal mudflats and shallow sandy estuaries',
+    '0 – 4 m', 'Narrow strap with bi-dentate tip', '5 – 15 cm',
+    'Light green', 'Least Concern', 'lc',
+    'A taxonomically debated species related to Halodule wrightii.',
+    'Some authorities treat it as a synonym.',
+    JSON_ARRAY('Caribbean','Gulf of Mexico','Pioneer species'),
+    NULL, FALSE, FALSE
+),
+(
+    'halodule-emarginata', 'Notched Shoal Grass',
+    'Halodule emarginata', 'Halodule', 'Cymodoceaceae',
+    'Brazil & South Atlantic',
+    'Sandy intertidal and shallow subtidal flats',
+    '0 – 5 m', 'Narrow strap with notched tip', '3 – 12 cm',
+    'Light green', 'Least Concern', 'lc',
+    'A South Atlantic species reported from Brazil.',
+    'Its leaf tip is distinctly notched.',
+    JSON_ARRAY('Brazil','South Atlantic','Endemic'),
+    NULL, FALSE, FALSE
+),
+(
+    'zostera-marina', 'Common Eelgrass',
+    'Zostera marina', 'Zostera', 'Zosteraceae',
+    'North Atlantic & North Pacific',
+    'Sheltered bays, estuaries, intertidal and subtidal zones',
+    '0 – 10 m', 'Narrow strap-like leaves', '20 – 120 cm',
+    'Bright to dark green', 'Least Concern', 'lc',
+    'A widespread Northern Hemisphere seagrass that supports marine food webs.',
+    'Eelgrass meadows store carbon and provide nursery habitat.',
+    JSON_ARRAY('Temperate','Nursery habitat','Carbon sequestration'),
+    NULL, FALSE, FALSE
+),
+(
+    'zostera-noltei', 'Dwarf Eelgrass',
+    'Zostera noltei', 'Zostera', 'Zosteraceae',
+    'Europe & North Africa',
+    'Intertidal mudflats, estuaries, sheltered sandy shores',
+    '0 – 2 m', 'Very narrow thread-like leaves', '3 – 20 cm',
+    'Bright green', 'Least Concern', 'lc',
+    'A small eelgrass forming dense intertidal mats.',
+    'It tolerates aerial exposure during low tide.',
+    JSON_ARRAY('Europe','Intertidal','Waterfowl food'),
+    NULL, FALSE, FALSE
+),
+(
+    'zostera-japonica', 'Asian Eelgrass',
+    'Zostera japonica', 'Zostera', 'Zosteraceae',
+    'East Asia; introduced to Pacific Northwest USA',
+    'Intertidal mudflats and sandy shores',
+    '0 – 3 m', 'Narrow strap-like leaves', '5 – 20 cm',
+    'Bright green', 'Least Concern', 'lc',
+    'Native to East Asia and introduced to parts of North America.',
+    'Its introduced populations may compete with native eelgrass.',
+    JSON_ARRAY('East Asia','Intertidal','Invasive in introduced regions'),
+    NULL, FALSE, FALSE
+),
+(
+    'zostera-muelleri', 'Mueller''s Eelgrass',
+    'Zostera muelleri', 'Zostera', 'Zosteraceae',
+    'Australia & New Zealand',
+    'Estuaries and sheltered bays',
+    '0 – 5 m', 'Narrow strap-like leaves', '10 – 60 cm',
+    'Bright to medium green', 'Least Concern', 'lc',
+    'A major component of temperate seagrass meadows in Australia and New Zealand.',
+    'Its meadows provide nursery habitat for juvenile fish.',
+    JSON_ARRAY('Australia','New Zealand','Temperate'),
+    NULL, FALSE, FALSE
+),
+(
+    'zostera-nigricaulis', 'Black-stemmed Eelgrass',
+    'Zostera nigricaulis', 'Zostera', 'Zosteraceae',
+    'Southern & Western Australia',
+    'Shallow sheltered bays and estuaries',
+    '0 – 4 m', 'Narrow strap-like leaves', '10 – 40 cm',
+    'Bright green', 'Least Concern', 'lc',
+    'An Australian species distinguished by dark stems and rhizomes.',
+    'Its dark stems can assist field identification.',
+    JSON_ARRAY('Australia','Endemic','Temperate'),
+    NULL, FALSE, FALSE
+),
+(
+    'zostera-polychlamys', 'Many-sheathed Eelgrass',
+    'Zostera polychlamys', 'Zostera', 'Zosteraceae',
+    'Southern Australia',
+    'Shallow sheltered lagoons and bays',
+    '0 – 3 m', 'Narrow strap-like leaves', '8 – 30 cm',
+    'Medium green', 'Least Concern', 'lc',
+    'A species reported from southern Australian waters.',
+    'It is associated with temperate seagrass communities.',
+    JSON_ARRAY('Australia','Endemic','Temperate'),
+    NULL, FALSE, FALSE
+),
+(
+    'zostera-tasmanica', 'Tasmanian Eelgrass',
+    'Zostera tasmanica', 'Zostera', 'Zosteraceae',
+    'Tasmania & Southern Australia',
+    'Sheltered estuaries and coastal lagoons',
+    '0 – 4 m', 'Narrow strap', '10 – 45 cm',
+    'Bright green', 'Least Concern', 'lc',
+    'Reported from Tasmanian and southern Australian coastal waters.',
+    'Its meadows support diverse invertebrate communities.',
+    JSON_ARRAY('Tasmania','Australia','Temperate'),
+    NULL, FALSE, FALSE
+),
+(
+    'zostera-capensis', 'Cape Eelgrass',
+    'Zostera capensis', 'Zostera', 'Zosteraceae',
+    'South Africa & East Africa',
+    'Estuaries, tidal flats, sheltered lagoons',
+    '0 – 3 m', 'Narrow strap-like leaves', '10 – 50 cm',
+    'Bright to medium green', 'Least Concern', 'lc',
+    'An African seagrass associated with estuarine environments.',
+    'Its meadows provide habitat for fish and invertebrates.',
+    JSON_ARRAY('South Africa','East Africa','Estuarine'),
+    NULL, FALSE, FALSE
+),
+(
+    'zostera-novazelandica', 'New Zealand Eelgrass',
+    'Zostera novazelandica', 'Zostera', 'Zosteraceae',
+    'New Zealand',
+    'Intertidal sandflats and sheltered estuaries',
+    '0 – 2 m', 'Very narrow thread-like leaves', '4 – 20 cm',
+    'Bright green', 'Least Concern', 'lc',
+    'A small eelgrass reported from New Zealand coastal habitats.',
+    'Its meadows provide habitat for shorebirds and juvenile fish.',
+    JSON_ARRAY('New Zealand','Endemic','Intertidal'),
+    NULL, FALSE, FALSE
+),
+(
+    'zostera-asiatica', 'Asian Broad-leaf Eelgrass',
+    'Zostera asiatica', 'Zostera', 'Zosteraceae',
+    'North Pacific: Russia, Japan and Korea',
+    'Rocky and sandy subtidal coasts',
+    '1 – 10 m', 'Broad strap-like leaves', '30 – 80 cm',
+    'Dark green', 'Least Concern', 'lc',
+    'A broad-leaved eelgrass reported from North Pacific waters.',
+    'Leaf width helps distinguish it from other Zostera species.',
+    JSON_ARRAY('Japan','Korea','Russia','Temperate'),
+    NULL, FALSE, FALSE
+),
+(
+    'zostera-caulescens', 'Giant Eelgrass',
+    'Zostera caulescens', 'Zostera', 'Zosteraceae',
+    'Japan & Korea',
+    'Rocky and sandy subtidal coasts',
+    '2 – 15 m', 'Long broad strap', '100 – 200 cm',
+    'Dark green', 'Near Threatened', 'nt',
+    'A large eelgrass reported from Japanese and Korean coastal waters.',
+    'Its leaves may reach two metres.',
+    JSON_ARRAY('Japan','Korea','Deepwater','Near Threatened'),
+    NULL, FALSE, FALSE
+),
+(
+    'phyllospadix-scouleri', 'Scouler''s Surfgrass',
+    'Phyllospadix scouleri', 'Phyllospadix', 'Zosteraceae',
+    'Pacific Coast of North America',
+    'Rocky intertidal and exposed subtidal coasts',
+    '0 – 10 m', 'Narrow tough strap-like leaves', '30 – 100 cm',
+    'Bright green', 'Least Concern', 'lc',
+    'A surfgrass adapted to exposed rocky Pacific shores.',
+    'Its holdfasts anchor it to rocky substrate.',
+    JSON_ARRAY('North America','Rocky habitat','Wave-exposed'),
+    NULL, FALSE, FALSE
+),
+(
+    'phyllospadix-torreyi', 'Torrey''s Surfgrass',
+    'Phyllospadix torreyi', 'Phyllospadix', 'Zosteraceae',
+    'California to Mexico',
+    'Rocky subtidal and deep intertidal zones',
+    '1 – 15 m', 'Narrow strap-like leaves', '30 – 120 cm',
+    'Dark green', 'Least Concern', 'lc',
+    'A surfgrass associated with rocky coastlines of western North America.',
+    'Its reproductive structures are adapted to underwater pollination.',
+    JSON_ARRAY('California','Rocky habitat','Subtidal'),
+    NULL, FALSE, FALSE
+),
+(
+    'phyllospadix-japonicus', 'Japanese Surfgrass',
+    'Phyllospadix japonicus', 'Phyllospadix', 'Zosteraceae',
+    'Japan, Korea & Russian Far East',
+    'Rocky intertidal and exposed subtidal coasts',
+    '0 – 8 m', 'Narrow strap', '20 – 80 cm',
+    'Bright green', 'Least Concern', 'lc',
+    'An Asian surfgrass adapted to wave-exposed rocky shores.',
+    'It is associated with diverse intertidal invertebrates.',
+    JSON_ARRAY('Japan','Korea','Rocky habitat'),
+    NULL, FALSE, FALSE
+),
+(
+    'phyllospadix-iwatensis', 'Iwate Surfgrass',
+    'Phyllospadix iwatensis', 'Phyllospadix', 'Zosteraceae',
+    'Japan & Korea',
+    'Rocky subtidal zones, cold temperate coasts',
+    '1 – 12 m', 'Narrow strap', '20 – 90 cm',
+    'Dark green', 'Least Concern', 'lc',
+    'A surfgrass reported from cold-temperate rocky coasts of East Asia.',
+    'Its range includes Japan and Korea.',
+    JSON_ARRAY('Japan','Korea','Rocky habitat','Subtidal'),
+    NULL, FALSE, FALSE
+),
+(
+    'phyllospadix-serrulatus', 'Serrated Surfgrass',
+    'Phyllospadix serrulatus', 'Phyllospadix', 'Zosteraceae',
+    'Alaska to Oregon',
+    'Rocky intertidal zones',
+    '0 – 5 m', 'Narrow strap with serrated margins', '20 – 60 cm',
+    'Bright green', 'Least Concern', 'lc',
+    'A surfgrass reported from cool North American rocky shores.',
+    'Its toothed leaf margins are a distinguishing feature.',
+    JSON_ARRAY('North America','Alaska','Rocky habitat'),
+    NULL, FALSE, FALSE
+),
+(
+    'posidonia-oceanica', 'Neptune Grass',
+    'Posidonia oceanica', 'Posidonia', 'Posidoniaceae',
+    'Mediterranean Sea',
+    'Rocky and sandy bottoms, clear oligotrophic water',
+    '1 – 40 m', 'Long ribbon-like leaves', '30 – 120 cm',
+    'Dark green', 'Least Concern', 'lc',
+    'A Mediterranean species that forms dense mats and stores substantial carbon.',
+    'Some clonal colonies are estimated to be exceptionally old.',
+    JSON_ARRAY('Mediterranean','Slow-growing','Carbon storage'),
+    NULL, FALSE, FALSE
+),
+(
+    'posidonia-australis', 'Ribbon Weed',
+    'Posidonia australis', 'Posidonia', 'Posidoniaceae',
+    'Southern Australia',
+    'Sandy substrates, sheltered coastal waters',
+    '1 – 15 m', 'Wide flat ribbon', '30 – 80 cm',
+    'Dark green', 'Least Concern', 'lc',
+    'An Australian species forming extensive southern coastal meadows.',
+    'Shark Bay supports extensive Posidonia meadows.',
+    JSON_ARRAY('Australia','Shark Bay','UNESCO heritage'),
+    NULL, FALSE, FALSE
+),
+(
+    'posidonia-sinuosa', 'Sinuous Posidonia',
+    'Posidonia sinuosa', 'Posidonia', 'Posidoniaceae',
+    'Southern Australia',
+    'Sandy and gravelly coastal waters',
+    '1 – 20 m', 'Narrow strap with wavy margins', '20 – 50 cm',
+    'Medium green', 'Least Concern', 'lc',
+    'An abundant southern Australian species that can occur in mixed meadows.',
+    'Its leaves may have wavy margins.',
+    JSON_ARRAY('Australia','Temperate','Mixed meadows'),
+    NULL, FALSE, FALSE
+),
+(
+    'posidonia-coriacea', 'Tough Posidonia',
+    'Posidonia coriacea', 'Posidonia', 'Posidoniaceae',
+    'Western & Southern Australia',
+    'Sandy substrates, exposed to semi-exposed coasts',
+    '1 – 10 m', 'Short broad leathery leaves', '10 – 30 cm',
+    'Olive to dark green', 'Least Concern', 'lc',
+    'An Australian species adapted to exposed coastal environments.',
+    'Its tough leaves may contribute to fibrous beach-cast material.',
+    JSON_ARRAY('Australia','Endemic','Wave-exposed'),
+    NULL, FALSE, FALSE
+),
+(
+    'posidonia-angustifolia', 'Narrow-leaf Posidonia',
+    'Posidonia angustifolia', 'Posidonia', 'Posidoniaceae',
+    'Southern & Western Australia',
+    'Sandy substrates, sheltered to semi-exposed coasts',
+    '1 – 15 m', 'Narrow strap-like leaves', '15 – 45 cm',
+    'Medium green', 'Least Concern', 'lc',
+    'A narrow-leaved Posidonia reported from Australian waters.',
+    'It forms part of diverse temperate meadow communities.',
+    JSON_ARRAY('Australia','Endemic','Mixed meadows'),
+    NULL, FALSE, FALSE
+),
+(
+    'posidonia-ostenfeldii', 'Ostenfeld''s Posidonia',
+    'Posidonia ostenfeldii', 'Posidonia', 'Posidoniaceae',
+    'Southern Australia',
+    'Sandy substrates in sheltered coastal waters',
+    '1 – 12 m', 'Narrow strap', '10 – 35 cm',
+    'Olive green', 'Least Concern', 'lc',
+    'A less-studied Posidonia entry reported from southern Australian waters.',
+    'The name commemorates botanist Carl Emil Hansen Ostenfeld.',
+    JSON_ARRAY('Australia','Endemic','Temperate'),
+    NULL, FALSE, FALSE
+),
+(
+    'posidonia-robertsoniae', 'Robertson''s Posidonia',
+    'Posidonia robertsoniae', 'Posidonia', 'Posidoniaceae',
+    'Western Australia',
+    'Sandy substrates in sheltered bays',
+    '1 – 10 m', 'Flat strap-like leaves', '15 – 40 cm',
+    'Green', 'Least Concern', 'lc',
+    'A Posidonia entry reported from Western Australia.',
+    'Its taxonomic status and distribution should be verified before publication.',
+    JSON_ARRAY('Australia','Endemic','Western Australia'),
+    NULL, FALSE, FALSE
+),
+(
+    'posidonia-denhartogii', 'Den Hartog''s Posidonia',
+    'Posidonia denhartogii', 'Posidonia', 'Posidoniaceae',
+    'Western Australia',
+    'Sandy coastal substrates',
+    '1 – 12 m', 'Strap-like leaves', '10 – 30 cm',
+    'Green', 'Least Concern', 'lc',
+    'A Posidonia entry named after seagrass researcher Cornelis den Hartog.',
+    'The name references a major contributor to seagrass taxonomy.',
+    JSON_ARRAY('Australia','Endemic','Western Australia'),
+    NULL, FALSE, FALSE
+),
+(
+    'posidonia-kirkmanii', 'Kirkman''s Posidonia',
+    'Posidonia kirkmanii', 'Posidonia', 'Posidoniaceae',
+    'Western Australia',
+    'Sandy and gravelly substrates',
+    '1 – 10 m', 'Narrow strap', '10 – 30 cm',
+    'Medium green', 'Least Concern', 'lc',
+    'A Posidonia entry associated with Western Australia.',
+    'The species name commemorates marine biologist Hugh Kirkman.',
+    JSON_ARRAY('Australia','Endemic','Western Australia'),
+    NULL, FALSE, FALSE
+),
+(
+    'halophila-johnsonii', 'Johnson''s Seagrass',
+    'Halophila johnsonii', 'Halophila', 'Hydrocharitaceae',
+    'Southeast Florida, USA',
+    'Shallow estuaries, lagoons, mangrove-fringed shores',
+    '0 – 2 m', 'Elongated narrow elliptical leaf pairs', '1.5 – 3 cm',
+    'Light to medium green', 'Endangered', 'en',
+    'A geographically restricted seagrass reported from southeastern Florida.',
+    'Its distribution and conservation status should be checked against current authorities.',
+    JSON_ARRAY('Florida','USA','Endangered'),
+    NULL, FALSE, FALSE
+),
+(
+    'halophila-minor', 'Small Paddle Weed',
+    'Halophila minor', 'Halophila', 'Hydrocharitaceae',
+    'Indo-Pacific & Southeast Asia',
+    'Sandy and muddy intertidal and shallow subtidal flats',
+    '0 – 10 m', 'Small oval to oblong leaf pairs', '0.8 – 2 cm',
+    'Light green', 'Least Concern', 'lc',
+    'A small Halophila species associated with Indo-Pacific coastal flats.',
+    'Small leaf size makes careful observation important.',
+    JSON_ARRAY('Indo-Pacific','Pioneer species','Southeast Asia'),
+    JSON_ARRAY('luzon','visayas','mindanao'), TRUE, FALSE
+),
+(
+    'halophila-tricostata', 'Three-ribbed Seagrass',
+    'Halophila tricostata', 'Halophila', 'Hydrocharitaceae',
+    'Northern Australia',
+    'Sandy subtidal sediments, clear coastal waters',
+    '2 – 25 m', 'Elliptical leaf pairs with three veins', '1 – 3 cm',
+    'Bright green', 'Least Concern', 'lc',
+    'An Australian Halophila entry characterized by three prominent leaf veins.',
+    'Leaf venation is useful for distinguishing related species.',
+    JSON_ARRAY('Australia','Great Barrier Reef','Endemic'),
+    NULL, FALSE, FALSE
+),
+(
+    'halophila-australis', 'Southern Seagrass',
+    'Halophila australis', 'Halophila', 'Hydrocharitaceae',
+    'Southern Australia & New Zealand',
+    'Subtidal sandy and muddy sediments',
+    '1 – 30 m', 'Elliptical leaf pairs', '1.5 – 4 cm',
+    'Medium green', 'Least Concern', 'lc',
+    'A Halophila entry reported from southern Australian and New Zealand waters.',
+    'It is associated with cooler coastal habitats.',
+    JSON_ARRAY('Australia','New Zealand','Temperate'),
+    NULL, FALSE, FALSE
+),
+(
+    'ruppia-maritima', 'Widgeon Grass',
+    'Ruppia maritima', 'Ruppia', 'Ruppiaceae',
+    'Cosmopolitan',
+    'Brackish to saline lagoons, estuaries, coastal ponds',
+    '0.1 – 3 m', 'Hair-like thread-like leaves', '4 – 15 cm',
+    'Olive-green to bright green', 'Least Concern', 'lc',
+    'A widespread aquatic plant occurring in brackish and saline habitats.',
+    'It is an important food source for waterfowl.',
+    JSON_ARRAY('Cosmopolitan','Brackish water','Waterfowl food'),
+    NULL, FALSE, FALSE
+);
+
+-- ============================================================
+-- Filter dropdowns
+-- ============================================================
+
+CREATE OR REPLACE VIEW v_seagrass_families AS
+SELECT DISTINCT family
+FROM seagrass_species
+ORDER BY family;
+
+CREATE OR REPLACE VIEW v_seagrass_genera AS
+SELECT DISTINCT genus
+FROM seagrass_species
+ORDER BY genus;
+
+CREATE OR REPLACE VIEW v_philippine_seagrass_species AS
+SELECT *
+FROM seagrass_species
+WHERE is_philippine_species = TRUE;
+
+CREATE OR REPLACE VIEW v_cnn_supported_species AS
+SELECT *
+FROM seagrass_species
+WHERE is_cnn_supported = TRUE;
+
+-- Verify imported rows
+SELECT COUNT(*) AS catalog_species_count
+FROM seagrass_species;
+
+SELECT family, COUNT(*) AS species_count
+FROM seagrass_species
+GROUP BY family
+ORDER BY family;

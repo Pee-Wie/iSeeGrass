@@ -35,6 +35,11 @@
                         <div class="col">
                             <h2 class="page-title text-primary">&gt; Admin / Users</h2>
                         </div>
+                        <div class="col-auto ms-auto">
+                            <button id="btnCreateAccount" class="btn btn-primary">
+                                <i class="ti ti-user-plus"></i> Create Account
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -49,9 +54,11 @@
                             <input type="text" id="filterSearch" class="admin-input"
                                 placeholder="Search by name or email…" style="flex:1; min-width:200px;">
                             <select id="filterRole" class="admin-select">
-                                <option value="">All Roles</option>
-                                <option value="user">User</option>
-                                <option value="admin">Admin</option>
+                                <option value="">All Positions</option>
+                                <option value="Researcher">Researcher</option>
+                                <option value="Student">Student</option>
+                                <option value="Class Instructor">Class Instructor</option>
+                                <option value="Other">Other</option>
                             </select>
                             <select id="filterStatus" class="admin-select">
                                 <option value="">All Status</option>
@@ -69,7 +76,7 @@
                                         <th>#</th>
                                         <th>Name</th>
                                         <th>Email</th>
-                                        <th>Role</th>
+                                        <th>Position</th>
                                         <th>Status</th>
                                         <th>Joined</th>
                                         <th>Actions</th>
@@ -81,7 +88,7 @@
                                         <td>1</td>
                                         <td>Jane Santos</td>
                                         <td>jane.santos@example.com</td>
-                                        <td><span class="badge badge-green">User</span></td>
+                                        <td><span class="badge badge-green">Researcher</span></td>
                                         <td><span class="badge badge-green">Active</span></td>
                                         <td>2024-01-15</td>
                                         <td>
@@ -95,7 +102,7 @@
                                         <td>2</td>
                                         <td>Marco Reyes</td>
                                         <td>marco.reyes@example.com</td>
-                                        <td><span class="badge badge-yellow">Admin</span></td>
+                                        <td><span class="badge badge-yellow">Class Instructor</span></td>
                                         <td><span class="badge badge-green">Active</span></td>
                                         <td>2023-11-02</td>
                                         <td>
@@ -109,7 +116,7 @@
                                         <td>3</td>
                                         <td>Ana Lim</td>
                                         <td>ana.lim@example.com</td>
-                                        <td><span class="badge badge-green">User</span></td>
+                                        <td><span class="badge badge-green">Student</span></td>
                                         <td><span class="badge badge-muted">Inactive</span></td>
                                         <td>2024-03-08</td>
                                         <td>
@@ -140,6 +147,112 @@
             </div><!-- /page-body -->
         </div><!-- /page-wrapper -->
     </div><!-- /page -->
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         CREATE ACCOUNT MODAL
+         ═══════════════════════════════════════════════════════════════ -->
+    <div class="ca-backdrop" id="createAccountBackdrop" hidden aria-hidden="true"></div>
+    <div class="ca-modal" id="createAccountModal" role="dialog" aria-modal="true"
+        aria-labelledby="caModalTitle" hidden>
+
+        <div class="ca-modal__header">
+            <div class="ca-modal__title" id="caModalTitle">
+                <i class="ti ti-user-plus"></i> Create Account
+            </div>
+            <button class="ca-modal__close" id="btnCloseCreateModal" type="button" aria-label="Close">
+                <i class="ti ti-x"></i>
+            </button>
+        </div>
+
+        <form class="ca-modal__body" id="createAccountForm" novalidate autocomplete="off">
+
+            <!-- Name row -->
+            <div class="ca-row ca-row--2">
+                <div class="ca-group">
+                    <label class="ca-label" for="caFirstName">First Name <span class="ca-req">*</span></label>
+                    <input class="ca-input" type="text" id="caFirstName" name="firstName"
+                        placeholder="e.g. Maria" maxlength="60" required>
+                    <span class="ca-error" id="errCaFirstName" hidden>Required.</span>
+                </div>
+                <div class="ca-group">
+                    <label class="ca-label" for="caLastName">Last Name <span class="ca-req">*</span></label>
+                    <input class="ca-input" type="text" id="caLastName" name="lastName"
+                        placeholder="e.g. Santos" maxlength="60" required>
+                    <span class="ca-error" id="errCaLastName" hidden>Required.</span>
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="ca-group">
+                <label class="ca-label" for="caEmail">Email Address <span class="ca-req">*</span></label>
+                <input class="ca-input" type="email" id="caEmail" name="email"
+                    placeholder="e.g. maria@example.com" maxlength="120" required>
+                <span class="ca-error" id="errCaEmail" hidden>Enter a valid email address.</span>
+            </div>
+
+            <!-- Username -->
+            <div class="ca-group">
+                <label class="ca-label" for="caUsername">
+                    Username <span class="ca-req">*</span>
+                    <span class="ca-hint">Used to log in</span>
+                </label>
+                <input class="ca-input" type="text" id="caUsername" name="username"
+                    placeholder="e.g. mariasantos" maxlength="40"
+                    pattern="[A-Za-z0-9_\-]{3,40}" required>
+                <span class="ca-error" id="errCaUsername" hidden>3–40 chars; letters, numbers, _ and - only.</span>
+            </div>
+
+            <!-- Position -->
+            <div class="ca-group">
+                <label class="ca-label" for="caRole">Position / Affiliation <span class="ca-req">*</span></label>
+                <select class="ca-input ca-select" id="caRole" name="role" required>
+                    <option value="" disabled selected>Select a position…</option>
+                    <option value="Researcher">Researcher</option>
+                    <option value="Student">Student</option>
+                    <option value="Class Instructor">Class Instructor</option>
+                    <option value="Other">Other</option>
+                </select>
+                <span class="ca-error" id="errCaRole" hidden>Please select a position.</span>
+            </div>
+
+            <!-- Password -->
+            <div class="ca-group">
+                <label class="ca-label" for="caPassword">Password <span class="ca-req">*</span></label>
+                <div class="ca-pw-wrap">
+                    <input class="ca-input" type="password" id="caPassword" name="password"
+                        placeholder="Min. 8 characters" minlength="8" required>
+                    <button type="button" class="ca-pw-toggle" aria-label="Show/hide password"
+                        data-target="caPassword">
+                        <i class="ti ti-eye"></i>
+                    </button>
+                </div>
+                <span class="ca-error" id="errCaPassword" hidden>At least 8 characters required.</span>
+            </div>
+
+            <!-- Confirm password -->
+            <div class="ca-group">
+                <label class="ca-label" for="caConfirmPassword">Confirm Password <span class="ca-req">*</span></label>
+                <div class="ca-pw-wrap">
+                    <input class="ca-input" type="password" id="caConfirmPassword" name="confirmPassword"
+                        placeholder="Re-enter password" required>
+                    <button type="button" class="ca-pw-toggle" aria-label="Show/hide password"
+                        data-target="caConfirmPassword">
+                        <i class="ti ti-eye"></i>
+                    </button>
+                </div>
+                <span class="ca-error" id="errCaConfirmPassword" hidden>Passwords do not match.</span>
+            </div>
+
+        </form>
+
+        <div class="ca-modal__footer">
+            <button class="ca-btn ca-btn--ghost" id="btnCancelCreate" type="button">Cancel</button>
+            <button class="ca-btn ca-btn--primary" id="btnSubmitCreate" type="button">
+                <i class="ti ti-user-plus"></i> Create Account
+            </button>
+        </div>
+
+    </div><!-- /#createAccountModal -->
 
     <script type="module" src="../../components/navbar-admin.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
