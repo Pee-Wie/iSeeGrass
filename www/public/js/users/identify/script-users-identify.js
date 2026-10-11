@@ -40,6 +40,9 @@ const mainBody     = document.getElementById('speciesResults');
 const directUploadBtn   = document.getElementById('directUploadBtn');
 const directUploadInput = document.getElementById('directUploadInput');
 
+// ID title input
+const idTitleInput = document.getElementById('idTitleInput');
+
 // Camera
 const captureBtn    = document.getElementById('captureBtn');
 const captureInput  = document.getElementById('captureInput');
@@ -351,6 +354,7 @@ identifyBtn.addEventListener('click', async () => {
   // Push a pending entry to history right away
   const histId   = crypto.randomUUID();
   const thumbUrl = URL.createObjectURL(target.file);
+  const idTitle  = idTitleInput?.value.trim() || null;
   if (window.identifyHistory) {
     window.identifyHistory.push({
       id:         histId,
@@ -359,19 +363,21 @@ identifyBtn.addEventListener('click', async () => {
       thumbUrl,
       topSpecies: '',
       confidence: 0,
+      title:      idTitle,
       status:     'pending',
       errorMsg:   null,
     });
   }
 
   try {
-    const result = await identifyImage(target.file);
+    const result = await identifyImage(target.file, idTitle);
     renderIdentifyResults(result);
     if (window.identifyHistory) {
       window.identifyHistory.update(histId, {
         dbId:       result.identification_id ?? null,
         topSpecies: result.top_result  || '—',
         confidence: result.top_confidence ?? (result.scores?.[0]?.confidence ?? 0),
+        title:      result.title ?? idTitle,
         status:     'done',
       });
     }
@@ -469,6 +475,7 @@ function renderDirectPreview() {
       // Push a pending entry to history right away
       const histId   = crypto.randomUUID();
       const thumbUrl = URL.createObjectURL(directPhoto.file);
+      const idTitle  = idTitleInput?.value.trim() || null;
       if (window.identifyHistory) {
         window.identifyHistory.push({
           id:         histId,
@@ -477,19 +484,21 @@ function renderDirectPreview() {
           thumbUrl,
           topSpecies: '',
           confidence: 0,
+          title:      idTitle,
           status:     'pending',
           errorMsg:   null,
         });
       }
 
       try {
-        const result = await identifyImage(directPhoto.file);
+        const result = await identifyImage(directPhoto.file, idTitle);
         renderIdentifyResults(result);
         if (window.identifyHistory) {
           window.identifyHistory.update(histId, {
             dbId:       result.identification_id ?? null,
             topSpecies: result.top_result  || '—',
             confidence: result.top_confidence ?? (result.scores?.[0]?.confidence ?? 0),
+            title:      result.title ?? idTitle,
             status:     'done',
           });
         }
@@ -557,6 +566,7 @@ function clearDirect() {
   updateUI();
 
   document.getElementById('uploadPrompt').hidden = false;
+  if (idTitleInput) idTitleInput.value = '';
 }
 
 // ─── Left panel – drop target ─────────────────────────────────────

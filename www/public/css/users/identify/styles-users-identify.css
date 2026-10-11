@@ -1541,3 +1541,127 @@
     to   { transform: translateY(100%); opacity: 0; }
   }
 }
+
+/* ─── Card title (rename inline) ───────────────────────────────── */
+
+.hist-card__title {
+  margin: 0 0 0.2rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #c8e8a0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  border-bottom: 1px dashed transparent;
+  transition: border-color 140ms ease, color 140ms ease;
+}
+
+.hist-card__title:hover {
+  color: #d6f0b8;
+  border-bottom-color: rgba(124, 203, 77, 0.4);
+}
+
+.hist-card__title--empty {
+  font-style: italic;
+  font-weight: 400;
+  color: rgba(255,255,255,0.25);
+}
+
+.hist-card__title-input {
+  width: 100%;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(124, 203, 77, 0.5);
+  border-radius: 4px;
+  color: #d6f0b8;
+  font-size: 0.78rem;
+  padding: 0.15rem 0.35rem;
+  outline: none;
+  margin-bottom: 0.2rem;
+}
+
+.hist-card__title-input:focus {
+  border-color: rgba(124, 203, 77, 0.85);
+  box-shadow: 0 0 0 2px rgba(124, 203, 77, 0.15);
+}
+
+/* ─── Card delete button ────────────────────────────────────────── */
+
+.hist-card__delete {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 140ms ease, background 140ms ease, color 140ms ease;
+  padding: 0;
+}
+
+.hist-card:hover .hist-card__delete,
+.hist-card:focus-within .hist-card__delete {
+  opacity: 1;
+}
+
+.hist-card__delete:hover {
+  background: rgba(220, 55, 55, 0.25);
+  border-color: rgba(220, 55, 55, 0.45);
+  color: #ffa0a0;
+}
+
+.hist-card__delete:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.hist-card--delete-error {
+  border-color: rgba(220, 55, 55, 0.6) !important;
+  animation: hist-card-error-flash 0.9s ease;
+}
+
+@keyframes hist-card-error-flash {
+  0%, 100% { background: rgba(10, 35, 12, 0.75); }
+  40%       { background: rgba(80, 15, 15, 0.75); }
+}
+
+/* ─── ID title input in 75% left panel ─────────────────────────── */
+
+.id-title-row {
+  margin-top: 0.6rem;
+}
+
+.id-title-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(124, 203, 77, 0.2);
+  border-radius: 6px;
+  color: #d6f0b8;
+  font-size: 0.85rem;
+  padding: 0.45rem 0.75rem;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.id-title-input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.id-title-input:focus {
+  border-color: rgba(124, 203, 77, 0.55);
+  box-shadow: 0 0 0 3px rgba(124, 203, 77, 0.1);
+}
+
+/* Reposition the × remove button so it doesn't overlap the trash delete button */
+/* Trash (delete) stays top-right; × (remove from view) sits bottom-right */
+.hist-card__remove {
+  top: auto;
+  bottom: 6px;
+}

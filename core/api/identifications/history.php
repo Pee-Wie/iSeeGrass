@@ -56,6 +56,7 @@ $records = array_map(static function (array $row): array {
                                 ? (float) $row['top_confidence']
                                 : null,
         'created_at'     => $row['created_at'],
+        'title'          => $row['title'] ?? null,
     ];
 }, $rows);
 

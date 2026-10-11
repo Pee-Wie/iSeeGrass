@@ -17,6 +17,7 @@ class IdentificationModel
      * @param int         $userId         Who ran the identification.
      * @param int         $imageCount     Number of images submitted.
      * @param string|null $imageFilename  Original filename of the uploaded image.
+     * @param string|null $title          Optional user-supplied title (max 120 chars).
      * @param string|null $topResult      Scientific name of the top prediction.
      * @param float|null  $topConfidence  Confidence percent (e.g. 94.75).
      * @param string|null $modelType      Engine track key ('original' | 'improved_original' | '6_species_proto').
@@ -25,25 +26,61 @@ class IdentificationModel
         int     $userId,
         int     $imageCount    = 1,
         ?string $imageFilename = null,
+        ?string $title         = null,
         ?string $topResult     = null,
         ?float  $topConfidence = null,
         ?string $modelType     = 'improved_original'
     ): int {
         $stmt = $this->pdo->prepare(
             'INSERT INTO identifications
-               (user_id, image_count, image_filename, top_result, top_confidence, model_type)
+               (user_id, image_count, image_filename, title, top_result, top_confidence, model_type)
              VALUES
-               (:user_id, :image_count, :image_filename, :top_result, :top_confidence, :model_type)'
+               (:user_id, :image_count, :image_filename, :title, :top_result, :top_confidence, :model_type)'
         );
         $stmt->execute([
             ':user_id'        => $userId,
             ':image_count'    => $imageCount,
             ':image_filename' => $imageFilename,
+            ':title'          => $title,
             ':top_result'     => $topResult,
             ':top_confidence' => $topConfidence,
             ':model_type'     => $modelType,
         ]);
         return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
+     * Update the title of an identification run.
+     * Scoped to $userId so users cannot rename each other's records.
+     *
+     * @param int         $id     The identification run ID.
+     * @param int         $userId The user who owns the record.
+     * @param string|null $title  New title (trimmed, max 120 chars), or null to clear.
+     */
+    public function updateTitle(int $id, int $userId, ?string $title): bool
+    {
+        $stmt = $this->pdo->prepare(
+            'UPDATE identifications SET title = :title
+              WHERE id = :id AND user_id = :uid'
+        );
+        $stmt->execute([':title' => $title, ':id' => $id, ':uid' => $userId]);
+        return $stmt->rowCount() > 0;
+    }
+
+    /**
+     * Hard-delete an identification run and its result rows (via FK cascade).
+     * Scoped to $userId.
+     *
+     * @param int $id     The identification run ID.
+     * @param int $userId The user who owns the record.
+     */
+    public function delete(int $id, int $userId): bool
+    {
+        $stmt = $this->pdo->prepare(
+            'DELETE FROM identifications WHERE id = :id AND user_id = :uid'
+        );
+        $stmt->execute([':id' => $id, ':uid' => $userId]);
+        return $stmt->rowCount() > 0;
     }
 
     /**

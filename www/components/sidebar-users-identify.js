@@ -193,6 +193,7 @@ class ISeeIdentifyHistory extends HTMLElement {
       thumbUrl:   null,                    // no thumbnail for persisted records
       topSpecies: rec.top_result    ?? '—',
       confidence: rec.top_confidence ?? 0,
+      title:      rec.title ?? null,
       status:     'done',
       errorMsg:   null,
     };
@@ -378,6 +379,13 @@ class ISeeIdentifyHistory extends HTMLElement {
 
       <div class="hist-card__body">
 
+        <!-- Title row — click to rename -->
+        <p class="hist-card__title" data-field="title">
+          ${entry.title
+            ? entry.title
+            : '<em class="hist-card__title--empty">Untitled</em>'}
+        </p>
+
         <!-- Meta row: #seq · filename · species -->
         <p class="hist-card__meta" title="${entry.fileName} — ${species}">
           <span class="hist-card__seq">#${entry._seq}</span>
@@ -391,7 +399,8 @@ class ISeeIdentifyHistory extends HTMLElement {
         <div class="hist-card__conf-row" aria-label="Confidence ${pct}%">
           <div class="hist-card__conf-bar">
             <div class="hist-card__conf-fill" style="width:${pct}%"
-              aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" role="progressbar"></div>
+              aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"
+              role="progressbar"></div>
           </div>
           <span class="hist-card__conf-pct">${pct}%</span>
         </div>` : ''}
@@ -410,8 +419,21 @@ class ISeeIdentifyHistory extends HTMLElement {
           <line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
       </button>
+
+      <button class="hist-card__delete" type="button"
+        aria-label="Delete this identification" title="Delete">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14H6L5 6"/>
+          <path d="M10 11v6M14 11v6"/>
+          <path d="M9 6V4h6v2"/>
+        </svg>
+      </button>
     `;
 
+    // ── In-session remove (hide only) ──────────────────────────────
     card.querySelector('.hist-card__remove').addEventListener('click', () => {
       this._records = this._records.filter(r => r.id !== entry.id);
       card.remove();
@@ -421,7 +443,73 @@ class ISeeIdentifyHistory extends HTMLElement {
       }
     });
 
+    // ── Trash (hard DB delete) ─────────────────────────────────────
+    card.querySelector('.hist-card__delete').addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (!entry.dbId) {
+        this._records = this._records.filter(r => r.id !== entry.id);
+        card.remove();
+        if (this._records.length === 0) { this._empty.hidden = false; this._clearBtn.hidden = true; }
+        return;
+      }
+      const btn = card.querySelector('.hist-card__delete');
+      btn.disabled = true;
+      try {
+        const { deleteIdentification } = await import('../public/js/api/identify.api.js');
+        await deleteIdentification(entry.dbId);
+        this._records = this._records.filter(r => r.id !== entry.id);
+        card.remove();
+        if (this._records.length === 0) { this._empty.hidden = false; this._clearBtn.hidden = true; }
+      } catch {
+        btn.disabled = false;
+        card.classList.add('hist-card--delete-error');
+        setTimeout(() => card.classList.remove('hist-card--delete-error'), 1000);
+      }
+    });
+
+    // ── Inline title rename ────────────────────────────────────────
+    card.querySelector('[data-field="title"]').addEventListener('click', () => this._startRename(entry, card));
+
     return card;
+  }
+
+  _startRename(entry, card) {
+    const titleEl = card.querySelector('[data-field="title"]');
+    if (!titleEl || titleEl.tagName === 'INPUT') return; // already editing
+    const input = document.createElement('input');
+    input.className = 'hist-card__title-input';
+    input.type = 'text';
+    input.value = entry.title || '';
+    input.maxLength = 120;
+    input.placeholder = 'Untitled';
+    titleEl.replaceWith(input);
+    input.focus();
+    input.select();
+
+    const commit = async () => {
+      const newTitle = input.value.trim() || null;
+      entry.title = newTitle;
+      const newTitleEl = document.createElement('p');
+      newTitleEl.className = 'hist-card__title';
+      newTitleEl.dataset.field = 'title';
+      newTitleEl.innerHTML = newTitle
+        ? newTitle
+        : '<em class="hist-card__title--empty">Untitled</em>';
+      newTitleEl.addEventListener('click', () => this._startRename(entry, card));
+      input.replaceWith(newTitleEl);
+      if (entry.dbId) {
+        try {
+          const { updateIdentificationTitle } = await import('../public/js/api/identify.api.js');
+          await updateIdentificationTitle(entry.dbId, newTitle);
+        } catch { /* silently ignore */ }
+      }
+    };
+
+    input.addEventListener('blur', commit);
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+      if (e.key === 'Escape') { input.value = entry.title || ''; input.blur(); }
+    });
   }
 }
 

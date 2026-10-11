@@ -21,7 +21,7 @@
  *   - If the settings API is unreachable, fall back to 'improved_original'.
  */
 
-import { get, upload } from './client.js';
+import { get, put, del, upload } from './client.js';
 import { getEngineTrack } from './settings.api.js';
 
 /**
@@ -52,17 +52,19 @@ async function resolveTrack(explicit) {
  * so changes made in the admin panel take effect without a page refresh.
  *
  * @param  {File}            imageFile   The image to identify (JPEG / PNG / WebP, max 5 MB)
+ * @param  {string|null}     [title]     Optional title for this identification run (max 120 chars).
  * @param  {ModelType|null}  [modelType] Explicit track override (admin use only).
  *                                       Omit to use the admin-configured setting.
  * @returns {Promise<{identification_id:number|null, model_type:string, top_result:string, top_confidence:number, scores:Array}>}
  */
-export async function identifyImage(imageFile, modelType) {
+export async function identifyImage(imageFile, title, modelType) {
   const track = await resolveTrack(modelType ?? null);
 
   const form = new FormData();
   form.append('image', imageFile);
   form.append('model_type', track);
   form.append('image_filename', imageFile.name);   // explicit filename field
+  form.append('image_title', title ?? '');
   return upload('/identify', form);
 }
 
@@ -78,4 +80,21 @@ export async function listIdentificationHistory(params = {}) {
   if (params.offset != null) qs.set('offset', String(params.offset));
   const query = qs.toString() ? `?${qs.toString()}` : '';
   return get(`/identifications/history${query}`);
+}
+
+/**
+ * Rename an identification run's title.
+ * @param {number} id
+ * @param {string|null} title
+ */
+export async function updateIdentificationTitle(id, title) {
+  return put('/identifications/update-title', { id, title });
+}
+
+/**
+ * Hard-delete an identification run from the database.
+ * @param {number} id
+ */
+export async function deleteIdentification(id) {
+  return del(`/identifications/delete?id=${id}`);
 }

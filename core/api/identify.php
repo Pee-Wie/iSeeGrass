@@ -82,6 +82,10 @@ $modelType = $rawModelType;
 $rawFilename   = trim((string) ($_POST['image_filename'] ?? $_FILES['image']['name'] ?? ''));
 $imageFilename = $rawFilename !== '' ? substr($rawFilename, 0, 255) : null;
 
+// ── Optional identification title ─────────────────────────────────────────────
+$title = isset($_POST['image_title']) ? substr(trim($_POST['image_title']), 0, 120) : null;
+if ($title === '') $title = null;
+
 // ── Optional auth ─────────────────────────────────────────────────────────────
 $currentUser = null;
 $token       = getSessionTokenFromCookie();
@@ -250,6 +254,7 @@ if ($currentUser !== null) {
         (int) $currentUser['id'],
         1,                // image_count
         $imageFilename,   // original filename
+        $title,           // optional run title
         $topLabel,
         $topConfidence,
         $activeTrack      // model_type — stored for history/reporting
@@ -280,4 +285,5 @@ jsonSuccess([
     'top_result'        => $topLabel,
     'top_confidence'    => $topConfidence,
     'scores'            => $scores,
+    'title'             => $title ?? null,
 ]);
