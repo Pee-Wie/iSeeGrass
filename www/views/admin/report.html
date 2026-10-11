@@ -50,6 +50,10 @@
                             <i class="ti ti-cpu" aria-hidden="true"></i>
                             Model Engine
                         </button>
+                        <button class="admin-tab" data-tab="admin-info">
+                            <i class="ti ti-user-shield" aria-hidden="true"></i>
+                            Admin Info
+                        </button>
                     </div>
 
                     <!-- ══ Tab 1: Platform Statistics ══ -->
@@ -367,6 +371,144 @@
                         </div><!-- /.admin-card -->
                     </div><!-- /#tab-engine -->
 
+                    <!-- ══ Tab 4: Admin Info ══ -->
+                    <div class="admin-tab-panel" id="tab-admin-info">
+
+                        <!-- Account Info card -->
+                        <div class="admin-card" style="margin-bottom:1.5rem;">
+                            <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.4rem;">
+                                <i class="ti ti-shield-check" style="font-size:1.2rem; color:var(--accent);" aria-hidden="true"></i>
+                                <h3 style="margin:0; color:#d6f0b8;">Admin Account</h3>
+                            </div>
+                            <p style="color:var(--muted); font-size:0.875rem; margin:0 0 1.25rem;">Your administrator account details.</p>
+
+                            <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1rem;">
+                                <div>
+                                    <span class="admin-label" style="display:block; margin-bottom:0.25rem;">Display Name</span>
+                                    <span id="adminInfoDisplayName" style="color:var(--text); font-size:0.95rem;">—</span>
+                                </div>
+                                <div>
+                                    <span class="admin-label" style="display:block; margin-bottom:0.25rem;">Username</span>
+                                    <span id="adminInfoUsername" style="color:var(--text); font-size:0.95rem;">—</span>
+                                </div>
+                                <div>
+                                    <span class="admin-label" style="display:block; margin-bottom:0.25rem;">Email</span>
+                                    <span id="adminInfoEmail" style="color:var(--text); font-size:0.95rem;">—</span>
+                                </div>
+                                <div>
+                                    <span class="admin-label" style="display:block; margin-bottom:0.25rem;">Role</span>
+                                    <span style="display:inline-block; background:rgba(124,203,77,0.15); color:#84d64f; border:1px solid rgba(124,203,77,0.3); border-radius:20px; padding:0.15rem 0.75rem; font-size:0.8rem; font-weight:600;">Administrator</span>
+                                </div>
+                                <div>
+                                    <span class="admin-label" style="display:block; margin-bottom:0.25rem;">Member Since</span>
+                                    <span id="adminInfoMemberSince" style="color:var(--text); font-size:0.95rem;">—</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Change Password card -->
+                        <div class="admin-card" style="margin-bottom:1.5rem;">
+                            <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.4rem;">
+                                <i class="ti ti-lock" style="font-size:1.2rem; color:var(--accent);" aria-hidden="true"></i>
+                                <h3 style="margin:0; color:#d6f0b8;">Change Password</h3>
+                            </div>
+                            <p style="color:var(--muted); font-size:0.875rem; margin:0 0 1.25rem;">Update your admin account password.</p>
+
+                            <div style="max-width:480px; display:flex; flex-direction:column; gap:1rem;">
+
+                                <!-- Current Password -->
+                                <div>
+                                    <label class="admin-label" for="adminCurrentPassword" style="display:block; margin-bottom:0.35rem;">
+                                        Current Password
+                                    </label>
+                                    <div style="position:relative;">
+                                        <input type="password" id="adminCurrentPassword" class="admin-input"
+                                            placeholder="Enter current password"
+                                            autocomplete="current-password"
+                                            style="width:100%; padding-right:2.8rem;">
+                                        <button type="button" class="admin-pw-toggle" data-target="adminCurrentPassword"
+                                            aria-label="Show password"
+                                            style="position:absolute; right:0.6rem; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--muted); padding:0;">
+                                            <i class="ti ti-eye"></i>
+                                        </button>
+                                    </div>
+                                    <span id="errAdminCurrentPw" style="color:#e05252; font-size:0.8rem; margin-top:0.25rem; display:none;">Current password is required.</span>
+                                </div>
+
+                                <!-- New Password -->
+                                <div>
+                                    <label class="admin-label" for="adminNewPassword" style="display:block; margin-bottom:0.35rem;">
+                                        New Password
+                                    </label>
+                                    <div style="position:relative;">
+                                        <input type="password" id="adminNewPassword" class="admin-input"
+                                            placeholder="Min. 8 characters"
+                                            autocomplete="new-password"
+                                            style="width:100%; padding-right:2.8rem;">
+                                        <button type="button" class="admin-pw-toggle" data-target="adminNewPassword"
+                                            aria-label="Show password"
+                                            style="position:absolute; right:0.6rem; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--muted); padding:0;">
+                                            <i class="ti ti-eye"></i>
+                                        </button>
+                                    </div>
+                                    <!-- Strength meter -->
+                                    <div id="adminPwStrengthWrap" style="margin-top:0.5rem; display:none;">
+                                        <div style="height:4px; border-radius:4px; background:rgba(255,255,255,0.1); overflow:hidden;">
+                                            <div id="adminPwStrengthFill" style="height:100%; width:0%; border-radius:4px; transition:width 250ms, background-color 250ms;"></div>
+                                        </div>
+                                        <span id="adminPwStrengthLabel" style="font-size:0.78rem; color:var(--muted); margin-top:0.2rem; display:block;"></span>
+                                    </div>
+                                    <span id="errAdminNewPw" style="color:#e05252; font-size:0.8rem; margin-top:0.25rem; display:none;">Password must be at least 8 characters.</span>
+                                </div>
+
+                                <!-- Confirm New Password -->
+                                <div>
+                                    <label class="admin-label" for="adminConfirmPassword" style="display:block; margin-bottom:0.35rem;">
+                                        Confirm New Password
+                                    </label>
+                                    <div style="position:relative;">
+                                        <input type="password" id="adminConfirmPassword" class="admin-input"
+                                            placeholder="Repeat new password"
+                                            autocomplete="new-password"
+                                            style="width:100%; padding-right:2.8rem;">
+                                        <button type="button" class="admin-pw-toggle" data-target="adminConfirmPassword"
+                                            aria-label="Show password"
+                                            style="position:absolute; right:0.6rem; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--muted); padding:0;">
+                                            <i class="ti ti-eye"></i>
+                                        </button>
+                                    </div>
+                                    <span id="errAdminConfirmPw" style="color:#e05252; font-size:0.8rem; margin-top:0.25rem; display:none;">Passwords do not match.</span>
+                                </div>
+
+                                <!-- Requirements hint -->
+                                <p style="color:var(--muted); font-size:0.8rem; margin:0;">
+                                    Min. 8 characters &middot; at least one uppercase &middot; one number &middot; one special character
+                                </p>
+
+                                <!-- Inline feedback -->
+                                <div id="adminPwFeedback" style="display:none; padding:0.6rem 0.85rem; border-radius:8px; font-size:0.875rem;"></div>
+
+                                <!-- Submit -->
+                                <div>
+                                    <button type="button" id="btnUpdateAdminPassword" class="admin-btn admin-btn--primary">
+                                        <i class="ti ti-lock-check"></i>
+                                        Update Password
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Security note -->
+                        <div style="display:flex; align-items:flex-start; gap:0.75rem; padding:1rem 1.25rem; background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.2); border-left:4px solid var(--accent); border-radius:10px;">
+                            <i class="ti ti-shield-lock" style="font-size:1.3rem; color:var(--accent); flex-shrink:0; margin-top:0.1rem;" aria-hidden="true"></i>
+                            <p style="margin:0; color:var(--muted); font-size:0.875rem; line-height:1.6;">
+                                For your account&#39;s security, use a strong unique password and update it periodically.
+                                Admin credentials cannot be recovered by other users.
+                            </p>
+                        </div>
+
+                    </div><!-- /#tab-admin-info -->
+
                 </div><!-- /container-xl -->
             </div><!-- /page-body -->
         </div><!-- /page-wrapper -->
@@ -509,57 +651,199 @@
             });
         });
 
-        // ── Catalog modal ──
-        let _deleteRow = null;
-
-        function openCatalogModal(btn) {
-            const title = btn ? 'Edit Species' : 'Add Species';
-            document.getElementById('catalogModalTitle').textContent = title;
-            if (btn) {
-                const row = btn.closest('tr');
-                document.getElementById('fldScientific').value = row.cells[1].textContent.trim();
-                document.getElementById('fldCommon').value     = row.cells[2].textContent.trim();
-                document.getElementById('fldFamily').value     = row.cells[3].textContent.trim();
-                document.getElementById('fldRegion').value     = row.cells[4].textContent.trim();
-            } else {
-                document.getElementById('catalogForm').reset();
-                document.getElementById('fldRegion').value = 'Negros';
-            }
-            document.getElementById('catalogModal').hidden = false;
-        }
-
-        function closeCatalogModal() {
-            document.getElementById('catalogModal').hidden = true;
-        }
-
-        function saveCatalogEntry() {
-            closeCatalogModal();
-        }
-
-        // ── Delete modal ──
-        function openDeleteConfirm(btn) {
-            _deleteRow = btn.closest('tr');
-            document.getElementById('deleteSpeciesName').textContent =
-                _deleteRow.cells[1].textContent.trim();
-            document.getElementById('deleteConfirmModal').hidden = false;
-        }
-
-        function closeDeleteConfirm() {
-            document.getElementById('deleteConfirmModal').hidden = true;
-            _deleteRow = null;
-        }
-
-        function confirmDelete() {
-            if (_deleteRow) { _deleteRow.remove(); }
-            closeDeleteConfirm();
-        }
+        // ── Stub placeholders — real implementations are in script-admin-report.js (module).
+        //    These are intentionally empty; the module overwrites them on window after load.
+        //    Do NOT add logic here — it will be silently replaced and create confusion.
+        function openCatalogModal(btn)  { /* replaced by module */ }
+        function closeCatalogModal()    { /* replaced by module */ }
+        function saveCatalogEntry()     { /* replaced by module */ }
+        function openDeleteConfirm(btn) { /* replaced by module */ }
+        function closeDeleteConfirm()   { /* replaced by module */ }
+        function confirmDelete()        { /* replaced by module */ }
+        function openTileModal(id)      { /* replaced by module */ }
+        function closeTileModal()       { /* replaced by module */ }
 
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') {
-                closeCatalogModal();
-                closeDeleteConfirm();
+                if (window.closeCatalogModal) window.closeCatalogModal();
+                if (window.closeDeleteConfirm) window.closeDeleteConfirm();
+                if (window.closeTileModal) window.closeTileModal();
             }
         });
+    </script>
+
+    <script type="module">
+        // ── Admin Info tab ─────────────────────────────────────────────────────
+        // Build API base URL the same way api.config.js does.
+        const _IS_CAP    = window.location.protocol === 'capacitor:';
+        const _BASE      = _IS_CAP ? 'http://10.0.2.2/iSeeGrass' : 'http://localhost/iSeeGrass';
+        const _apiUrl    = path => {
+            const clean = path.replace(/^\/+/, '');
+            const qIdx  = clean.indexOf('?');
+            const file  = qIdx === -1 ? clean : clean.slice(0, qIdx);
+            const query = qIdx === -1 ? ''    : clean.slice(qIdx);
+            return `${_BASE}/core/api/${file}.php${query}`;
+        };
+
+        let adminUserId = null;
+
+        // ── Populate Account Info on load ─────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res  = await fetch(_apiUrl('/auth/me'), { credentials: 'include' });
+                const json = await res.json();
+                if (!res.ok || !json.success) return;
+                const u = json.data;
+                adminUserId = u.id;
+
+                const displayName = ([u.first_name, u.last_name].filter(Boolean).join(' ').trim())
+                    || u.display_name || u.username || '—';
+
+                const el = id => document.getElementById(id);
+                if (el('adminInfoDisplayName')) el('adminInfoDisplayName').textContent = displayName;
+                if (el('adminInfoUsername'))    el('adminInfoUsername').textContent    = u.username  || '—';
+                if (el('adminInfoEmail'))       el('adminInfoEmail').textContent       = u.email     || '—';
+                if (el('adminInfoMemberSince') && u.created_at) {
+                    try {
+                        el('adminInfoMemberSince').textContent = new Date(u.created_at)
+                            .toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                    } catch { el('adminInfoMemberSince').textContent = u.created_at; }
+                }
+            } catch { /* non-critical */ }
+        });
+
+        // ── Password strength meter ────────────────────────────────────────────
+        const adminNewPwInput = document.getElementById('adminNewPassword');
+        if (adminNewPwInput) {
+            adminNewPwInput.addEventListener('input', () => {
+                const pw         = adminNewPwInput.value;
+                const wrapEl     = document.getElementById('adminPwStrengthWrap');
+                const fillEl     = document.getElementById('adminPwStrengthFill');
+                const labelEl    = document.getElementById('adminPwStrengthLabel');
+
+                if (!pw) {
+                    if (wrapEl) wrapEl.style.display = 'none';
+                    return;
+                }
+                if (wrapEl) wrapEl.style.display = '';
+
+                let score = 0;
+                if (pw.length >= 8)          score++;
+                if (pw.length >= 12)         score++;
+                if (/[A-Z]/.test(pw))        score++;
+                if (/\d/.test(pw))           score++;
+                if (/[^A-Za-z0-9]/.test(pw)) score++;
+
+                let width, color, label;
+                if (score <= 1) {
+                    width = '25%';  color = '#e05252'; label = 'Weak';
+                } else if (score === 2) {
+                    width = '50%';  color = '#f08c00'; label = 'Fair';
+                } else if (score <= 4) {
+                    width = '75%';  color = '#84d64f'; label = 'Strong';
+                } else {
+                    width = '100%'; color = '#2fb344'; label = 'Very Strong';
+                }
+
+                if (fillEl)  { fillEl.style.width = width; fillEl.style.backgroundColor = color; }
+                if (labelEl) { labelEl.textContent = label; labelEl.style.color = color; }
+            });
+        }
+
+        // ── Show/hide password toggles (scoped to #tab-admin-info) ────────────
+        document.querySelectorAll('#tab-admin-info .admin-pw-toggle').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const input = document.getElementById(btn.dataset.target);
+                if (!input) return;
+                const hiding = input.type === 'password';
+                input.type   = hiding ? 'text' : 'password';
+                const icon   = btn.querySelector('i');
+                if (icon) icon.className = hiding ? 'ti ti-eye-off' : 'ti ti-eye';
+                btn.setAttribute('aria-label', hiding ? 'Hide password' : 'Show password');
+            });
+        });
+
+        // ── Update Password button ─────────────────────────────────────────────
+        const btnUpdatePw = document.getElementById('btnUpdateAdminPassword');
+        if (btnUpdatePw) {
+            btnUpdatePw.addEventListener('click', async () => {
+                const curPwEl   = document.getElementById('adminCurrentPassword');
+                const newPwEl   = document.getElementById('adminNewPassword');
+                const confPwEl  = document.getElementById('adminConfirmPassword');
+                const errCur    = document.getElementById('errAdminCurrentPw');
+                const errNew    = document.getElementById('errAdminNewPw');
+                const errConf   = document.getElementById('errAdminConfirmPw');
+                const feedbackEl = document.getElementById('adminPwFeedback');
+
+                const curPw  = curPwEl  ? curPwEl.value  : '';
+                const newPw  = newPwEl  ? newPwEl.value  : '';
+                const confPw = confPwEl ? confPwEl.value : '';
+
+                // Reset errors
+                if (errCur)  errCur.style.display  = 'none';
+                if (errNew)  errNew.style.display   = 'none';
+                if (errConf) errConf.style.display  = 'none';
+                if (feedbackEl) feedbackEl.style.display = 'none';
+
+                let valid = true;
+
+                if (!curPw)  { if (errCur)  errCur.style.display  = 'block'; valid = false; }
+
+                const pwOk = newPw.length >= 8
+                    && /[A-Z]/.test(newPw)
+                    && /\d/.test(newPw)
+                    && /[^A-Za-z0-9]/.test(newPw);
+                if (!pwOk)   { if (errNew)  errNew.style.display   = 'block'; valid = false; }
+
+                if (!confPw || newPw !== confPw) { if (errConf) errConf.style.display = 'block'; valid = false; }
+
+                if (!valid) return;
+
+                // Loading state
+                const origHTML = btnUpdatePw.innerHTML;
+                btnUpdatePw.disabled   = true;
+                btnUpdatePw.innerHTML  = '<i class="ti ti-loader-2"></i> Updating…';
+
+                try {
+                    const res  = await fetch(_apiUrl(`/users/change_password?id=${adminUserId}`), {
+                        method:      'POST',
+                        credentials: 'include',
+                        headers:     { 'Content-Type': 'application/json' },
+                        body:        JSON.stringify({ current_password: curPw, new_password: newPw }),
+                    });
+                    const json = await res.json();
+
+                    if (res.ok && (json.success !== false)) {
+                        if (feedbackEl) {
+                            feedbackEl.style.cssText = 'display:block; padding:0.6rem 0.85rem; border-radius:8px; font-size:0.875rem; background:rgba(46,125,50,0.2); border:1px solid #2fb344; color:#84d64f;';
+                            feedbackEl.textContent   = 'Password updated successfully.';
+                        }
+                        // Clear fields and reset strength meter
+                        if (curPwEl)  curPwEl.value  = '';
+                        if (newPwEl)  newPwEl.value  = '';
+                        if (confPwEl) confPwEl.value = '';
+                        const wrapEl = document.getElementById('adminPwStrengthWrap');
+                        if (wrapEl) wrapEl.style.display = 'none';
+                        const fillEl = document.getElementById('adminPwStrengthFill');
+                        if (fillEl) { fillEl.style.width = '0%'; }
+                    } else {
+                        const msg = (json.error || json.message) || 'Failed to update password. Please try again.';
+                        if (feedbackEl) {
+                            feedbackEl.style.cssText = 'display:block; padding:0.6rem 0.85rem; border-radius:8px; font-size:0.875rem; background:rgba(176,0,0,0.15); border:1px solid #e05252; color:#e05252;';
+                            feedbackEl.textContent   = msg;
+                        }
+                    }
+                } catch {
+                    if (feedbackEl) {
+                        feedbackEl.style.cssText = 'display:block; padding:0.6rem 0.85rem; border-radius:8px; font-size:0.875rem; background:rgba(176,0,0,0.15); border:1px solid #e05252; color:#e05252;';
+                        feedbackEl.textContent   = 'Network error — check your connection and try again.';
+                    }
+                } finally {
+                    btnUpdatePw.disabled  = false;
+                    btnUpdatePw.innerHTML = origHTML;
+                }
+            });
+        }
     </script>
 </body>
 

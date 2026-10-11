@@ -78,6 +78,10 @@ class UserModel
             $params[':status']    = $filters['status'];
         }
 
+        if (!empty($filters['exclude_admin'])) {
+            $where[] = "role != 'admin'";
+        }
+
         $whereClause = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
         $sql = "SELECT id, username, email, first_name, last_name, middle_name,
@@ -118,6 +122,10 @@ class UserModel
         if (!empty($filters['status'])) {
             $where[]           = 'status = :status';
             $params[':status'] = $filters['status'];
+        }
+
+        if (!empty($filters['exclude_admin'])) {
+            $where[] = "role != 'admin'";
         }
 
         $whereClause = $where ? 'WHERE ' . implode(' AND ', $where) : '';
@@ -177,7 +185,7 @@ class UserModel
     public function update(int $id, array $data): bool
     {
         $allowed = [
-            'first_name', 'last_name', 'middle_name', 'email',
+            'username', 'first_name', 'last_name', 'middle_name', 'email',
             'position', 'institution', 'phone', 'bio', 'avatar_url', 'status',
         ];
 
