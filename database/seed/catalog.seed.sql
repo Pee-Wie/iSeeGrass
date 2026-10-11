@@ -1,6 +1,6 @@
 -- ============================================================
--- iSeeGrass — seagrass_catalog full seed
--- Target table: seagrass_catalog (from iseegrass_full_setup.sql)
+-- iSeeGrass — seagrass full seed
+-- Target table: seagrass (from iseegrass_full_setup.sql)
 -- Source: www/public/js/species-data.js
 -- Run: USE iseegrass; then execute this file.
 -- ON DUPLICATE KEY UPDATE fills in description/iucn for the
@@ -9,7 +9,7 @@
 
 USE iseegrass;
 
-INSERT INTO seagrass_catalog
+INSERT INTO seagrass
     (slug, scientific_name, common_name, family, genus, region, description, iucn_status, in_cnn_scope, status)
 VALUES
 
@@ -371,6 +371,6 @@ ON DUPLICATE KEY UPDATE
     status           = VALUES(status);
 
 -- ── Verify ───────────────────────────────────────────────────────
-SELECT COUNT(*)              AS total_species     FROM seagrass_catalog;
-SELECT COUNT(*)              AS cnn_scope_species FROM seagrass_catalog WHERE in_cnn_scope = 1;
-SELECT family, COUNT(*)      AS species_count     FROM seagrass_catalog GROUP BY family ORDER BY family;
+SELECT COUNT(*)              AS total_species     FROM seagrass;
+SELECT COUNT(*)              AS cnn_scope_species FROM seagrass WHERE in_cnn_scope = 1;
+SELECT family, COUNT(*)      AS species_count     FROM seagrass GROUP BY family ORDER BY family;
