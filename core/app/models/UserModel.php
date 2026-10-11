@@ -186,7 +186,7 @@ class UserModel
     {
         $allowed = [
             'username', 'first_name', 'last_name', 'middle_name', 'email',
-            'position', 'institution', 'phone', 'bio', 'avatar_url', 'status',
+            'position', 'institution', 'phone', 'bio', 'avatar_url', 'status', 'role',
         ];
 
         $setClauses = [];
