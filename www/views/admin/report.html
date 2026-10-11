@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="iSeeGrass admin — platform statistics and seagrass species catalog.">
-    <title>Reports | iSeeGrass Admin</title>
+    <title>Operations | iSeeGrass Admin</title>
 
     <link rel="icon" type="image/png" href="../../public/icons/favicon.png">
 
@@ -33,7 +33,7 @@
                 <div class="container-xl">
                     <div class="row g-2 align-items-center">
                         <div class="col">
-                            <h2 class="page-title text-primary">&gt; Admin / Reports</h2>
+                            <h2 class="page-title text-primary">&gt; Admin / Operations</h2>
                         </div>
                     </div>
                 </div>
@@ -46,6 +46,10 @@
                     <div class="admin-tabs">
                         <button class="admin-tab active" data-tab="stats">Platform Statistics</button>
                         <button class="admin-tab" data-tab="catalog">Seagrass Catalog</button>
+                        <button class="admin-tab" data-tab="engine">
+                            <i class="ti ti-cpu" aria-hidden="true"></i>
+                            Model Engine
+                        </button>
                     </div>
 
                     <!-- ══ Tab 1: Platform Statistics ══ -->
@@ -99,7 +103,7 @@
                                     </div>
                                 </div>
                                 <div class="report-chart-panel">
-                                    <h4>Species Distribution</h4>
+                                    <h4>Top Identified Species</h4>
                                     <div id="chartSpecies" class="chart-placeholder">
                                         Chart will render here
                                     </div>
@@ -141,141 +145,152 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Scientific Name</th>
                                             <th>Common Name</th>
+                                            <th>Scientific Name</th>
                                             <th>Family</th>
+                                            <th>Genus</th>
                                             <th>Region</th>
                                             <th>Status</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="catalogTableBody">
-                                        <tr>
-                                            <td>1</td>
-                                            <td>Enhalus acoroides</td>
-                                            <td>Tape Seagrass</td>
-                                            <td>Hydrocharitaceae</td>
-                                            <td>Negros</td>
-                                            <td><span class="badge badge-green">Active</span></td>
-                                            <td>
-                                                <div class="action-btn-group">
-                                                    <button class="admin-btn admin-btn--icon" title="Edit"
-                                                        onclick="openCatalogModal(this)">
-                                                        <i class="ti ti-edit"></i>
-                                                    </button>
-                                                    <button class="admin-btn admin-btn--icon admin-btn--danger" title="Delete"
-                                                        onclick="openDeleteConfirm(this)">
-                                                        <i class="ti ti-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>2</td>
-                                            <td>Thalassia hemprichii</td>
-                                            <td>Hemprich's Seagrass</td>
-                                            <td>Hydrocharitaceae</td>
-                                            <td>Negros</td>
-                                            <td><span class="badge badge-green">Active</span></td>
-                                            <td>
-                                                <div class="action-btn-group">
-                                                    <button class="admin-btn admin-btn--icon" title="Edit"
-                                                        onclick="openCatalogModal(this)">
-                                                        <i class="ti ti-edit"></i>
-                                                    </button>
-                                                    <button class="admin-btn admin-btn--icon admin-btn--danger" title="Delete"
-                                                        onclick="openDeleteConfirm(this)">
-                                                        <i class="ti ti-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>3</td>
-                                            <td>Halophila ovalis</td>
-                                            <td>Dugong Grass</td>
-                                            <td>Hydrocharitaceae</td>
-                                            <td>Negros</td>
-                                            <td><span class="badge badge-green">Active</span></td>
-                                            <td>
-                                                <div class="action-btn-group">
-                                                    <button class="admin-btn admin-btn--icon" title="Edit"
-                                                        onclick="openCatalogModal(this)">
-                                                        <i class="ti ti-edit"></i>
-                                                    </button>
-                                                    <button class="admin-btn admin-btn--icon admin-btn--danger" title="Delete"
-                                                        onclick="openDeleteConfirm(this)">
-                                                        <i class="ti ti-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>4</td>
-                                            <td>Cymodocea rotundata</td>
-                                            <td>Rotund Cymodocea</td>
-                                            <td>Cymodoceaceae</td>
-                                            <td>Negros</td>
-                                            <td><span class="badge badge-green">Active</span></td>
-                                            <td>
-                                                <div class="action-btn-group">
-                                                    <button class="admin-btn admin-btn--icon" title="Edit"
-                                                        onclick="openCatalogModal(this)">
-                                                        <i class="ti ti-edit"></i>
-                                                    </button>
-                                                    <button class="admin-btn admin-btn--icon admin-btn--danger" title="Delete"
-                                                        onclick="openDeleteConfirm(this)">
-                                                        <i class="ti ti-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>5</td>
-                                            <td>Halodule uninervis</td>
-                                            <td>Spade Grass</td>
-                                            <td>Cymodoceaceae</td>
-                                            <td>Negros</td>
-                                            <td><span class="badge badge-green">Active</span></td>
-                                            <td>
-                                                <div class="action-btn-group">
-                                                    <button class="admin-btn admin-btn--icon" title="Edit"
-                                                        onclick="openCatalogModal(this)">
-                                                        <i class="ti ti-edit"></i>
-                                                    </button>
-                                                    <button class="admin-btn admin-btn--icon admin-btn--danger" title="Delete"
-                                                        onclick="openDeleteConfirm(this)">
-                                                        <i class="ti ti-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>6</td>
-                                            <td>Syringodium isoetifolium</td>
-                                            <td>Needle Seagrass</td>
-                                            <td>Cymodoceaceae</td>
-                                            <td>Negros</td>
-                                            <td><span class="badge badge-green">Active</span></td>
-                                            <td>
-                                                <div class="action-btn-group">
-                                                    <button class="admin-btn admin-btn--icon" title="Edit"
-                                                        onclick="openCatalogModal(this)">
-                                                        <i class="ti ti-edit"></i>
-                                                    </button>
-                                                    <button class="admin-btn admin-btn--icon admin-btn--danger" title="Delete"
-                                                        onclick="openDeleteConfirm(this)">
-                                                        <i class="ti ti-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
 
                         </div><!-- /.admin-card -->
                     </div><!-- /#tab-catalog -->
+
+                    <!-- ══ Tab 3: Model Engine ══ -->
+                    <div class="admin-tab-panel" id="tab-engine">
+                        <div class="admin-card">
+
+                            <!-- Section header -->
+                            <div class="engine-section-header">
+                                <div class="engine-section-title-group">
+                                    <h3 class="engine-section-title">
+                                        <i class="ti ti-cpu" aria-hidden="true"></i>
+                                        CNN Taxonomy Engine Track
+                                    </h3>
+                                    <p class="engine-section-desc">
+                                        Sets the default classification engine used across the entire platform —
+                                        for all users running identifications.
+                                    </p>
+                                </div>
+                                <!-- Live status pill -->
+                                <div class="engine-active-status" id="engineActiveStatus" aria-live="polite">
+                                    <span class="engine-status-dot" aria-hidden="true"></span>
+                                    <span class="engine-status-text" id="engineStatusText">Loading…</span>
+                                </div>
+                            </div>
+
+                            <!-- Track selection cards -->
+                            <div class="engine-track-grid" role="radiogroup"
+                                aria-labelledby="engineTrackGroupLabel"
+                                id="engineTrackGrid">
+
+                                <!-- Track 1: original -->
+                                <label class="engine-track-card" data-track="original">
+                                    <input type="radio" name="admin_engine_track"
+                                        value="original" class="engine-track-radio"
+                                        aria-describedby="track-desc-original">
+                                    <div class="engine-track-card__inner">
+                                        <div class="engine-track-card__top">
+                                            <span class="engine-track-card__icon" aria-hidden="true">
+                                                <i class="ti ti-shape"></i>
+                                            </span>
+                                            <span class="engine-track-card__check" aria-hidden="true">
+                                                <i class="ti ti-check"></i>
+                                            </span>
+                                        </div>
+                                        <h4 class="engine-track-card__name">Original</h4>
+                                        <p class="engine-track-card__desc" id="track-desc-original">
+                                            Baseline morphological output. Returns 3 broad shape classes.
+                                        </p>
+                                        <ul class="engine-track-card__classes">
+                                            <li>Ferny</li>
+                                            <li>Rounded</li>
+                                            <li>Strappy</li>
+                                        </ul>
+                                    </div>
+                                </label>
+
+                                <!-- Track 2: improved_original (default) -->
+                                <label class="engine-track-card engine-track-card--recommended"
+                                    data-track="improved_original">
+                                    <input type="radio" name="admin_engine_track"
+                                        value="improved_original" class="engine-track-radio"
+                                        aria-describedby="track-desc-improved">
+                                    <div class="engine-track-card__inner">
+                                        <div class="engine-track-card__top">
+                                            <span class="engine-track-card__icon" aria-hidden="true">
+                                                <i class="ti ti-plant-2"></i>
+                                            </span>
+                                            <span class="engine-track-card__check" aria-hidden="true">
+                                                <i class="ti ti-check"></i>
+                                            </span>
+                                        </div>
+                                        <div class="engine-track-card__name-row">
+                                            <h4 class="engine-track-card__name">Scientific Names</h4>
+                                            <span class="engine-track-recommended-badge">Recommended</span>
+                                        </div>
+                                        <p class="engine-track-card__desc" id="track-desc-improved">
+                                            Maps predictions to verified scientific taxonomic names. 3 main species output.
+                                        </p>
+                                        <ul class="engine-track-card__classes">
+                                            <li><em>Halophila spinulosa</em></li>
+                                            <li><em>Cymodocea rotundata</em></li>
+                                            <li><em>Halodule pinifolia</em></li>
+                                        </ul>
+                                    </div>
+                                </label>
+
+                                <!-- Track 3: 6_species_proto -->
+                                <label class="engine-track-card" data-track="6_species_proto">
+                                    <input type="radio" name="admin_engine_track"
+                                        value="6_species_proto" class="engine-track-radio"
+                                        aria-describedby="track-desc-proto">
+                                    <div class="engine-track-card__inner">
+                                        <div class="engine-track-card__top">
+                                            <span class="engine-track-card__icon" aria-hidden="true">
+                                                <i class="ti ti-flask"></i>
+                                            </span>
+                                            <span class="engine-track-card__check" aria-hidden="true">
+                                                <i class="ti ti-check"></i>
+                                            </span>
+                                        </div>
+                                        <div class="engine-track-card__name-row">
+                                            <h4 class="engine-track-card__name">6-Species Prototype</h4>
+                                            <span class="engine-track-proto-badge">Experimental</span>
+                                        </div>
+                                        <p class="engine-track-card__desc" id="track-desc-proto">
+                                            Interpolation matrix distributing parent shape scores into 6 species classes.
+                                        </p>
+                                        <ul class="engine-track-card__classes">
+                                            <li><em>Halophila spinulosa</em> (Ferny Full)</li>
+                                            <li><em>Halophila decipiens</em> (Ferny Sub)</li>
+                                            <li><em>Halophila ovalis</em> (Rounded Oval)</li>
+                                            <li><em>Cymodocea rotundata</em> (Rounded Pure)</li>
+                                            <li><em>Enhalus acoroides</em> (Strappy Long)</li>
+                                            <li><em>Halodule pinifolia</em> (Strappy Short)</li>
+                                        </ul>
+                                    </div>
+                                </label>
+
+                            </div><!-- /.engine-track-grid -->
+
+                            <!-- Save row -->
+                            <div class="engine-save-row">
+                                <span class="engine-save-hint" id="engineSaveHint" aria-live="polite"></span>
+                                <button class="admin-btn admin-btn--primary" id="btnSaveEngine" disabled>
+                                    <i class="ti ti-device-floppy"></i>
+                                    Save Engine Track
+                                </button>
+                            </div>
+
+                        </div><!-- /.admin-card -->
+                    </div><!-- /#tab-engine -->
 
                 </div><!-- /container-xl -->
             </div><!-- /page-body -->
@@ -379,7 +394,7 @@
 
     <script type="module" src="../../components/navbar-admin.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
-    <script src="../../public/js/admin/report/script-admin-report.js"></script>
+    <script type="module" src="../../public/js/admin/report/script-admin-report.js"></script>
     <!-- Android back-button handler (no-op on web) -->
     <script src="/js/back-handler.js"></script>
 
