@@ -31,6 +31,8 @@ $updateData = [];
 $allowed = [
     'slug', 'scientific_name', 'common_name', 'family', 'genus',
     'region', 'description', 'iucn_status', 'in_cnn_scope', 'status',
+    'ph_regions', 'habitat', 'depth', 'leaf_shape', 'leaf_length',
+    'color', 'fun_fact', 'status_color', 'tags',
 ];
 
 foreach ($allowed as $field) {

@@ -15,7 +15,16 @@
  *     "description":     "...",
  *     "iucn_status":     "Least Concern",
  *     "in_cnn_scope":    1,
- *     "status":          "active"
+ *     "status":          "active",
+ *     "ph_regions":      "Visayas",
+ *     "habitat":         "Shallow coastal",
+ *     "depth":           "0-5m",
+ *     "leaf_shape":      "Oval",
+ *     "leaf_length":     "2-4cm",
+ *     "color":           "Green",
+ *     "fun_fact":        "...",
+ *     "status_color":    "#00cc00",
+ *     "tags":            "intertidal,subtidal"
  *   }
  */
 

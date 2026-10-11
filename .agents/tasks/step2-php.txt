@@ -1,0 +1,41 @@
+PHP Update — Results
+====================
+
+Files modified:
+  core/app/models/CatalogModel.php
+  core/api/catalog/update.php
+  core/api/catalog/create.php (docblock only)
+
+Changes made:
+  - Replaced ALL seagrass_catalog references with seagrass in CatalogModel.php
+  - Changed ORDER BY in getAll() from scientific_name ASC to id ASC
+  - Added new columns to create(): ph_regions, habitat, depth, leaf_shape,
+    leaf_length, color, fun_fact, status_color, tags (all default ?? null)
+  - Added new columns to update() $allowed list
+  - Updated update.php $allowed list to include the 9 new fields
+
+Sanity check (grep seagrass_catalog /core/):
+  Only benign matches remain:
+    - IdentificationModel.php: comment/docblock only (no SQL)
+    - 009_rename_catalog_add_columns.php: migration script referencing old name intentionally
+
+API test — curl http://localhost/iSeeGrass/core/api/catalog/index.php?limit=3
+----------------------------------------------------------------------------
+{"success":true,"data":{"catalog":[
+  {"id":1,"slug":"enhalus-acoroides","scientific_name":"Enhalus acoroides",
+   "common_name":"Tape Seagrass","family":"Hydrocharitaceae","genus":"Enhalus",
+   "region":"Indo-Pacific & Southeast Asia","ph_regions":null,"habitat":null,
+   "depth":null,"leaf_shape":null,"leaf_length":null,"color":null,
+   "fun_fact":null,"status_color":null,"tags":null, ...},
+  {"id":2,...},
+  {"id":3,...}
+],"total":57,"page":1,"limit":3}}
+
+Fields confirmed: id, common_name, scientific_name, family, genus,
+                  ph_regions, habitat, depth, leaf_shape, leaf_length,
+                  color, fun_fact, status_color, tags
+
+Order: id ASC (1, 2, 3 ✓)
+Total rows: 57 ✓
+
+STATUS: SUCCESS

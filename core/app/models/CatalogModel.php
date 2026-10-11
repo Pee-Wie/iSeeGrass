@@ -2,7 +2,7 @@
 /**
  * core/app/models/CatalogModel.php
  *
- * Data-access layer for the `seagrass_catalog` table.
+ * Data-access layer for the `seagrass` table.
  */
 
 class CatalogModel
@@ -22,9 +22,9 @@ class CatalogModel
         [$where, $params] = $this->buildFilters($filters);
         $whereClause = $where ? "WHERE {$where}" : '';
 
-        $sql = "SELECT * FROM seagrass_catalog
+        $sql = "SELECT * FROM seagrass
                 {$whereClause}
-                ORDER BY scientific_name ASC
+                ORDER BY id ASC
                 LIMIT :limit OFFSET :offset";
 
         $stmt = $this->pdo->prepare($sql);
@@ -46,7 +46,7 @@ class CatalogModel
         $whereClause = $where ? "WHERE {$where}" : '';
 
         $stmt = $this->pdo->prepare(
-            "SELECT COUNT(*) FROM seagrass_catalog {$whereClause}"
+            "SELECT COUNT(*) FROM seagrass {$whereClause}"
         );
         foreach ($params as $k => $v) {
             $stmt->bindValue($k, $v);
@@ -61,7 +61,7 @@ class CatalogModel
     public function findById(int $id): ?array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT * FROM seagrass_catalog WHERE id = :id LIMIT 1'
+            'SELECT * FROM seagrass WHERE id = :id LIMIT 1'
         );
         $stmt->execute([':id' => $id]);
         $row = $stmt->fetch();
@@ -74,7 +74,7 @@ class CatalogModel
     public function findBySlug(string $slug): ?array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT * FROM seagrass_catalog WHERE slug = :slug LIMIT 1'
+            'SELECT * FROM seagrass WHERE slug = :slug LIMIT 1'
         );
         $stmt->execute([':slug' => $slug]);
         $row = $stmt->fetch();
@@ -87,29 +87,44 @@ class CatalogModel
      * Insert a new catalog entry. Returns the new ID.
      *
      * @param array $data  Keys: slug, scientific_name, common_name?, family?, genus?,
-     *                     region?, description?, iucn_status?, in_cnn_scope?
+     *                     region?, description?, iucn_status?, in_cnn_scope?,
+     *                     ph_regions?, habitat?, depth?, leaf_shape?, leaf_length?,
+     *                     color?, fun_fact?, status_color?, tags?
      */
     public function create(array $data): int
     {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO seagrass_catalog
+            'INSERT INTO seagrass
                (slug, scientific_name, common_name, family, genus, region,
-                description, iucn_status, in_cnn_scope, status)
+                description, iucn_status, in_cnn_scope, status,
+                ph_regions, habitat, depth, leaf_shape, leaf_length,
+                color, fun_fact, status_color, tags)
              VALUES
                (:slug, :scientific_name, :common_name, :family, :genus, :region,
-                :description, :iucn_status, :in_cnn_scope, :status)'
+                :description, :iucn_status, :in_cnn_scope, :status,
+                :ph_regions, :habitat, :depth, :leaf_shape, :leaf_length,
+                :color, :fun_fact, :status_color, :tags)'
         );
         $stmt->execute([
             ':slug'            => $data['slug'],
             ':scientific_name' => $data['scientific_name'],
-            ':common_name'     => $data['common_name']   ?? null,
-            ':family'          => $data['family']         ?? null,
-            ':genus'           => $data['genus']          ?? null,
-            ':region'          => $data['region']         ?? null,
-            ':description'     => $data['description']    ?? null,
-            ':iucn_status'     => $data['iucn_status']    ?? null,
+            ':common_name'     => $data['common_name']    ?? null,
+            ':family'          => $data['family']          ?? null,
+            ':genus'           => $data['genus']           ?? null,
+            ':region'          => $data['region']          ?? null,
+            ':description'     => $data['description']     ?? null,
+            ':iucn_status'     => $data['iucn_status']     ?? null,
             ':in_cnn_scope'    => isset($data['in_cnn_scope']) ? (int) $data['in_cnn_scope'] : 0,
-            ':status'          => $data['status']         ?? 'active',
+            ':status'          => $data['status']          ?? 'active',
+            ':ph_regions'      => $data['ph_regions']      ?? null,
+            ':habitat'         => $data['habitat']         ?? null,
+            ':depth'           => $data['depth']           ?? null,
+            ':leaf_shape'      => $data['leaf_shape']      ?? null,
+            ':leaf_length'     => $data['leaf_length']     ?? null,
+            ':color'           => $data['color']           ?? null,
+            ':fun_fact'        => $data['fun_fact']        ?? null,
+            ':status_color'    => $data['status_color']    ?? null,
+            ':tags'            => $data['tags']            ?? null,
         ]);
         return (int) $this->pdo->lastInsertId();
     }
@@ -124,6 +139,8 @@ class CatalogModel
         $allowed = [
             'slug', 'scientific_name', 'common_name', 'family', 'genus',
             'region', 'description', 'iucn_status', 'in_cnn_scope', 'status',
+            'ph_regions', 'habitat', 'depth', 'leaf_shape', 'leaf_length',
+            'color', 'fun_fact', 'status_color', 'tags',
         ];
 
         $setClauses = [];
@@ -141,7 +158,7 @@ class CatalogModel
         }
 
         $stmt = $this->pdo->prepare(
-            'UPDATE seagrass_catalog SET ' . implode(', ', $setClauses) . ' WHERE id = :id'
+            'UPDATE seagrass SET ' . implode(', ', $setClauses) . ' WHERE id = :id'
         );
         $stmt->execute($params);
         return $stmt->rowCount() > 0;
@@ -154,7 +171,7 @@ class CatalogModel
      */
     public function delete(int $id): bool
     {
-        $stmt = $this->pdo->prepare('DELETE FROM seagrass_catalog WHERE id = :id');
+        $stmt = $this->pdo->prepare('DELETE FROM seagrass WHERE id = :id');
         $stmt->execute([':id' => $id]);
         return $stmt->rowCount() > 0;
     }
@@ -179,8 +196,9 @@ class CatalogModel
             $params[':region']  = $filters['region'];
         }
         if (!empty($filters['search'])) {
-            $clauses[]          = '(scientific_name LIKE :search OR common_name LIKE :search)';
-            $params[':search']  = '%' . $filters['search'] . '%';
+            $clauses[]           = '(scientific_name LIKE :search1 OR common_name LIKE :search2)';
+            $params[':search1']  = '%' . $filters['search'] . '%';
+            $params[':search2']  = '%' . $filters['search'] . '%';
         }
 
         return [implode(' AND ', $clauses), $params];
