@@ -955,3 +955,461 @@
     aspect-ratio: 3 / 4; /* portrait on phones */
   }
 }
+
+/* ─── Identification results (replaces the "pending" alert) ────── */
+
+.id-results {
+  width: 100%;
+  padding: 0 0.25rem;
+  animation: id-results-in 260ms ease;
+}
+
+@keyframes id-results-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Loading */
+.id-results__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+  padding: 2rem 0;
+}
+
+.id-results__spinner {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border: 2.5px solid rgba(124, 203, 77, 0.2);
+  border-top-color: rgba(124, 203, 77, 0.85);
+  border-radius: 50%;
+  animation: id-spin 0.75s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes id-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error */
+.id-results__error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  background: rgba(220, 55, 55, 0.1);
+  border: 1px solid rgba(220, 55, 55, 0.3);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  color: #ffa0a0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.id-results__error svg {
+  color: #ff7070;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.id-results__error p {
+  margin: 0;
+}
+
+/* Inner wrapper */
+.id-results__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Top result row */
+.id-results__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: rgba(124, 203, 77, 0.07);
+  border: 1px solid rgba(124, 203, 77, 0.2);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+}
+
+.id-results__top-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.id-results__label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(124, 203, 77, 0.65);
+}
+
+.id-results__species {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #d6f0b8;
+  font-style: italic;
+  line-height: 1.2;
+}
+
+/* Confidence badge */
+.id-badge {
+  font-size: 1.1rem;
+  font-weight: 800;
+  border-radius: 10px;
+  padding: 0.45rem 0.85rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.id-badge--high {
+  background: rgba(76, 175, 80, 0.18);
+  color: #8edf73;
+  border: 1px solid rgba(76, 175, 80, 0.4);
+}
+
+.id-badge--mid {
+  background: rgba(220, 160, 30, 0.15);
+  color: #e6c86a;
+  border: 1px solid rgba(220, 160, 30, 0.35);
+}
+
+.id-badge--low {
+  background: rgba(220, 55, 55, 0.12);
+  color: #ff9090;
+  border: 1px solid rgba(220, 55, 55, 0.3);
+}
+
+/* Scores section */
+.id-results__scores {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.id-results__scores-title {
+  margin: 0;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.id-score-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.id-score-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.id-score-label {
+  font-size: 0.84rem;
+  color: rgba(255, 255, 255, 0.78);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-style: italic;
+}
+
+.id-score-bar-wrap {
+  width: 120px;
+  height: 7px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.id-score-bar {
+  height: 100%;
+  border-radius: 99px;
+  background: rgba(124, 203, 77, 0.45);
+  transition: width 500ms ease;
+}
+
+.id-score-bar.id-bar--top {
+  background: linear-gradient(90deg, #4fa825, #8edf73);
+}
+
+.id-score-pct {
+  font-size: 0.78rem;
+  color: var(--muted);
+  width: 3.5rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 600px) {
+  .id-results__species { font-size: 1.1rem; }
+  .id-score-bar-wrap   { width: 72px; }
+}
+
+/* ─── Engine track selector (taxonomy track radio group) ────────── */
+
+.aid-engine-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.aid-engine-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(124, 203, 77, 0.6);
+  white-space: nowrap;
+  padding-top: 0.35rem;   /* align with chip text */
+  flex-shrink: 0;
+}
+
+.aid-engine-label svg {
+  flex-shrink: 0;
+}
+
+.aid-engine-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+/* Hide the actual radio visually but keep it keyboard-focusable */
+.aid-engine-radio {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.aid-engine-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9px;
+  border: 1.5px solid rgba(124, 203, 77, 0.22);
+  background: rgba(124, 203, 77, 0.05);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 150ms ease, background 150ms ease, color 150ms ease;
+  line-height: 1.2;
+}
+
+.aid-engine-chip__sub {
+  font-size: 0.67rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.35);
+  transition: color 150ms ease;
+}
+
+/* Hover state */
+.aid-engine-option:hover .aid-engine-chip {
+  border-color: rgba(124, 203, 77, 0.5);
+  background: rgba(124, 203, 77, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.aid-engine-option:hover .aid-engine-chip__sub {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Checked state */
+.aid-engine-radio:checked + .aid-engine-chip {
+  border-color: rgba(124, 203, 77, 0.75);
+  background: rgba(124, 203, 77, 0.15);
+  color: #d6f0b8;
+  box-shadow: 0 0 0 1px rgba(124, 203, 77, 0.3);
+}
+
+.aid-engine-radio:checked + .aid-engine-chip .aid-engine-chip__sub {
+  color: rgba(214, 240, 184, 0.65);
+}
+
+/* Default badge on the recommended chip (purely decorative ring) */
+.aid-engine-chip--default {
+  border-color: rgba(124, 203, 77, 0.38);
+}
+
+/* Focus-visible ring on keyboard navigation */
+.aid-engine-radio:focus-visible + .aid-engine-chip {
+  outline: 2px solid rgba(124, 203, 77, 0.8);
+  outline-offset: 2px;
+}
+
+/* ─── Track badge shown in results ─────────────────────────────── */
+
+.id-results__track-badge {
+  display: inline-block;
+  margin-top: 0.2rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 5px;
+  background: rgba(124, 203, 77, 0.1);
+  border: 1px solid rgba(124, 203, 77, 0.25);
+  color: rgba(124, 203, 77, 0.7);
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-style: normal;
+}
+
+@media (max-width: 600px) {
+  .aid-engine-row {
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  .aid-engine-options {
+    gap: 0.4rem;
+  }
+}
+
+/* ─── No-seagrass result state ──────────────────────────────────── */
+
+.id-results__no-seagrass {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1rem 1.25rem;
+  background: rgba(220, 160, 30, 0.08);
+  border: 1px solid rgba(220, 160, 30, 0.28);
+  border-radius: 14px;
+}
+
+.id-results__no-seagrass svg {
+  color: rgba(220, 160, 30, 0.85);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.id-results__no-seagrass-title {
+  margin: 0 0 0.3rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #e0b060;
+}
+
+.id-results__no-seagrass-sub {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* ─── Score list without bars (users / Aid view) ────────────────── */
+
+.id-score-list--no-bars .id-score-row {
+  /* Override the 3-column grid — just label + percentage */
+  grid-template-columns: 1fr auto;
+}
+
+/* Hide the bar column entirely when list has no-bars modifier */
+.id-score-list--no-bars .id-score-bar-wrap {
+  display: none;
+}
+
+/* Slightly larger percentage text without the bar competing for space */
+.id-score-list--no-bars .id-score-pct {
+  width: auto;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ─── Species catalog match card ───────────────────────────────── */
+
+.species-catalog-card {
+  margin-top: 1rem;
+  padding: 0.9rem 1.1rem;
+  background: rgba(20, 50, 15, 0.6);
+  border: 1px solid rgba(124, 203, 77, 0.2);
+  border-radius: 10px;
+  animation: id-results-in 220ms ease;
+}
+
+.species-catalog-card__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(124, 203, 77, 0.15);
+}
+
+.species-catalog-card__title {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(124, 203, 77, 0.7);
+  margin: 0;
+  font-weight: 600;
+}
+
+.species-catalog-card__sci-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #d6f0b8;
+  font-style: italic;
+}
+
+.species-catalog-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.species-catalog-card__row {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.species-catalog-card__label {
+  flex-shrink: 0;
+  width: 90px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.73rem;
+}
+
+.species-catalog-card__value {
+  color: #c8e8a0;
+  flex: 1;
+  min-width: 0;
+}
+
+.species-catalog-card__desc {
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.55;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 0.4rem;
+}

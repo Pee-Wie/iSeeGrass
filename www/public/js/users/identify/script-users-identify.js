@@ -18,7 +18,7 @@
 
 'use strict';
 
-import { identifyImage } from '../../api/identify.api.js';
+import { identifyImage, findCatalogMatch } from '../../api/identify.api.js';
 
 // ─── Constants ───────────────────────────────────────────────────
 
@@ -562,6 +562,9 @@ function clearDirect() {
   const resultsPanel = document.getElementById('identifyResultsPanel');
   if (resultsPanel) resultsPanel.remove();
 
+  // Clear any catalog match card
+  document.getElementById('speciesCatalogCard')?.remove();
+
   photoGrid.classList.remove('pc-locked');
   updateUI();
 
@@ -850,4 +853,114 @@ function renderIdentifyResults(result) {
       ${scoresHtml}
     </div>` : ''}
     ${result.identification_id ? `<div style="margin-top:.6rem;font-size:.75rem;color:#555">Saved to history · ID #${result.identification_id}</div>` : ''}`;
+
+  // Defer the catalog lookup so the result panel paints first
+  setTimeout(() => fetchAndRenderCatalogMatch(topResult), 0);
+}
+
+// ─── Species catalog match card ────────────────────────────────────────────────
+
+/**
+ * After a successful identification, look up the top result's scientific
+ * name in the public seagrass catalog. If a match is found, render a
+ * "Species Info" card below the results panel. Silently no-ops for
+ * background/no-seagrass results or when no catalog match exists.
+ *
+ * @param {string} topResult  The model's top species name (or background class)
+ */
+async function fetchAndRenderCatalogMatch(topResult) {
+  // Clear any previous card first (handles re-identification)
+  document.getElementById('speciesCatalogCard')?.remove();
+
+  // Skip empty / background / no-seagrass results
+  if (!topResult || BACKGROUND_RE.test(topResult)) return;
+
+  let entry;
+  try {
+    entry = await findCatalogMatch(topResult);
+  } catch {
+    return;
+  }
+  if (!entry) return;
+
+  // Build the card with the DOM API — never innerHTML for data values
+  const card = document.createElement('div');
+  card.id        = 'speciesCatalogCard';
+  card.className = 'species-catalog-card';
+
+  const header = document.createElement('div');
+  header.className = 'species-catalog-card__header';
+
+  const title = document.createElement('h4');
+  title.className   = 'species-catalog-card__title';
+  title.textContent = 'Species Info';
+
+  const sciName = document.createElement('span');
+  sciName.className   = 'species-catalog-card__sci-name';
+  sciName.textContent = entry.scientific_name || '';
+
+  header.appendChild(title);
+  header.appendChild(sciName);
+
+  const body = document.createElement('div');
+  body.className = 'species-catalog-card__body';
+
+  /** Append a label/value row only when the value is non-empty. */
+  const addRow = (label, value) => {
+    if (!value) return;
+    const row = document.createElement('div');
+    row.className = 'species-catalog-card__row';
+
+    const lab = document.createElement('span');
+    lab.className   = 'species-catalog-card__label';
+    lab.textContent = label;
+
+    const val = document.createElement('span');
+    val.className   = 'species-catalog-card__value';
+    val.textContent = value;
+
+    row.appendChild(lab);
+    row.appendChild(val);
+    body.appendChild(row);
+  };
+
+  addRow('Common Name',  entry.common_name);
+  addRow('Family',       entry.family);
+  addRow('Habitat',      entry.habitat);
+  addRow('Depth',         entry.depth);
+  addRow('Leaf Shape',   entry.leaf_shape);
+  addRow('Leaf Length',  entry.leaf_length);
+  addRow('IUCN Status',  entry.iucn_status);
+
+  // ph_regions is a JSON column — normalise to a comma-joined string
+  if (entry.ph_regions) {
+    let regions = '';
+    try {
+      const parsed = typeof entry.ph_regions === 'string'
+        ? JSON.parse(entry.ph_regions)
+        : entry.ph_regions;
+      regions = Array.isArray(parsed) ? parsed.join(', ') : String(parsed ?? '');
+    } catch {
+      regions = String(entry.ph_regions ?? '');
+    }
+    addRow('PH Regions', regions);
+  }
+
+  card.appendChild(header);
+  card.appendChild(body);
+
+  // Description — last item in the body, truncated to 200 chars
+  if (entry.description) {
+    const desc = document.createElement('p');
+    desc.className = 'species-catalog-card__desc';
+    const text = entry.description;
+    desc.textContent = text.length > 200 ? `${text.slice(0, 200)}…` : text;
+    body.appendChild(desc);
+  }
+
+  // Insert as a sibling after the results panel
+  const resultsPanel = document.getElementById('identifyResultsPanel');
+  if (resultsPanel) {
+    resultsPanel.insertAdjacentElement('afterend', card);
+  }
 }

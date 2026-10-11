@@ -1,9 +1,12 @@
 /**
  * Photo Collector – Aid page
- * Features: drag-and-drop upload, thumbnail preview, single-select, rename, remove.
+ * Features: drag-and-drop upload, thumbnail preview, single-select, rename, remove,
+ *           and CNN species identification via the /api/identify endpoint.
  * Rename format: newName(originalName).ext
  * Max 12 images, 5 MB each.
  */
+
+import { identifyImage, findCatalogMatch } from '../api/identify.api.js';
 
 const MAX_PHOTOS = 12;
 const MAX_BYTES  = 5 * 1024 * 1024; // 5 MB
@@ -287,19 +290,19 @@ dropzone.addEventListener('keydown', e => {
 
 clearBtn.addEventListener('click', clearAll);
 
-identifyBtn.addEventListener('click', () => {
+identifyBtn.addEventListener('click', async () => {
   const selected = photos.filter(p => p.selected);
   if (selected.length !== 1) return;
 
   const target = selected[0];
-  // TODO: send target.file to identification API
-  console.log('Identify:', { name: target.label, file: target.file.name });
-  modalAlert(
-    `Identifying "${target.label}"…\n\nAPI integration is pending — results will appear here once the model is connected.`,
-    'Identification Pending',
-    'info'
-  );
+
+  // Load the selected PC photo into the MID panel so the user sees what's
+  // being identified, then run inference.
+  loadMidPhoto(target.file);
+  await runIdentification(target.file, target.label);
 });
+
+
 
 // ─── MID – direct upload to the 75% panel ───────────────────────
 // MID opens a file picker; the chosen image loads straight into the
@@ -377,15 +380,9 @@ function renderMidPreview() {
     midCircle.innerHTML = `
       <img src="../icons/favicon.png" alt="" aria-hidden="true">
       <span class="mid-preview__mid-label">Identify</span>`;
-    midCircle.addEventListener('click', () => {
+    midCircle.addEventListener('click', async () => {
       if (!midPhoto) return;
-      // TODO: send midPhoto.file to identification API
-      console.log('MID Identify:', midPhoto.file.name);
-      modalAlert(
-        `Identifying "${midPhoto.file.name}"…\n\nAPI integration is pending — results will appear here once the model is connected.`,
-        'Identification Pending',
-        'info'
-      );
+      await runIdentification(midPhoto.file, midPhoto.file.name);
     });
 
     // Filename
@@ -429,6 +426,13 @@ function clearMid() {
 
   const preview = document.getElementById('midPreview');
   if (preview) preview.remove();
+
+  // Clear any identification results
+  const idResults = document.getElementById('idResultsContainer');
+  if (idResults) idResults.remove();
+
+  // Clear any catalog match card
+  document.getElementById('speciesCatalogCard')?.remove();
 
   // Unlock the PC
   photoGrid.classList.remove('pc-locked');
@@ -666,3 +670,264 @@ cameraShutterBtn.addEventListener('click', () => {
     shutterLocked = false;
   }, 'image/jpeg', 0.92);
 });
+
+// ─── Species Identification ──────────────────────────────────────────────────
+
+/**
+ * Send a file to the CNN identification endpoint and render the results
+ * in the left panel (below the MID preview image).
+ * The engine track is resolved automatically from admin system settings.
+ *
+ * @param {File}   file   The image file to identify
+ * @param {string} label  Display name used in the loading/error states
+ */
+async function runIdentification(file, label) {
+  // Show a loading state in the results panel
+  renderIdLoading(label);
+
+  try {
+    // identifyImage resolves the engine track from admin settings automatically
+    const result = await identifyImage(file, null, null, true);  // guest=true: never saved to DB
+    renderIdResults(result);
+  } catch (err) {
+    renderIdError(err.message || 'Identification failed. Please try again.');
+  }
+}
+
+// ── Helpers: find or create the results container ───────────────────────────
+
+function getOrCreateResultsContainer() {
+  let container = document.getElementById('idResultsContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'idResultsContainer';
+    container.className = 'id-results';
+    mainBody.appendChild(container);
+  }
+  return container;
+}
+
+// ── Loading state ────────────────────────────────────────────────────────────
+
+function renderIdLoading(label) {
+  const c = getOrCreateResultsContainer();
+  c.innerHTML = `
+    <div class="id-results__loading" aria-live="polite" aria-busy="true">
+      <span class="id-results__spinner" aria-hidden="true"></span>
+      <span>Identifying <em>${escHtml(label)}</em>…</span>
+    </div>`;
+}
+
+// ── Error state ──────────────────────────────────────────────────────────────
+
+function renderIdError(message) {
+  const c = getOrCreateResultsContainer();
+  c.innerHTML = `
+    <div class="id-results__error" role="alert">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <p>${escHtml(message)}</p>
+    </div>`;
+}
+
+// ── Success state ────────────────────────────────────────────────────────────
+
+/** Labels that indicate a background / no-seagrass result. */
+const BACKGROUND_RE = /background/i;
+
+/**
+ * Cap a confidence value so it never displays as 100%.
+ * Values at or above 100 are shown as 98.0.
+ * @param {number} pct
+ * @returns {number}
+ */
+function capConfidence(pct) {
+  return pct >= 100 ? 98.0 : pct;
+}
+
+/**
+ * Render identification results in the Aid panel.
+ * - Background class is filtered from the scores list (but still in the data).
+ * - If top result is background, show a "no seagrass" message instead of a name.
+ * - No bar graphs — percentages only.
+ * - Confidence is capped at 98% for display.
+ *
+ * @param {{ identification_id:number|null, model_type:string, top_result:string, top_confidence:number, scores:Array }} result
+ */
+function renderIdResults(result) {
+  const { top_result, top_confidence, scores, model_type } = result;
+  const c = getOrCreateResultsContainer();
+
+  const isBackground = BACKGROUND_RE.test(top_result);
+  const displayConf  = capConfidence(top_confidence);
+
+  // Confidence badge colour (only shown for seagrass results)
+  const badgeClass = displayConf >= 75
+    ? 'id-badge--high'
+    : displayConf >= 50
+      ? 'id-badge--mid'
+      : 'id-badge--low';
+
+  if (isBackground) {
+    // ── No seagrass found ──────────────────────────────────────────────────
+    c.innerHTML = `
+      <div class="id-results__inner" role="region" aria-label="Identification results">
+        <div class="id-results__no-seagrass">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="1.75"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <div>
+            <p class="id-results__no-seagrass-title">No seagrass found</p>
+            <p class="id-results__no-seagrass-sub">
+              The model did not detect seagrass in this image.
+              Try a clearer underwater photo with visible leaf structures.
+            </p>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ── Seagrass detected ──────────────────────────────────────────────────────
+  c.innerHTML = `
+    <div class="id-results__inner" role="region" aria-label="Identification results">
+
+      <div class="id-results__top">
+        <div class="id-results__top-info">
+          <span class="id-results__label">Result(s)</span>
+          <h3 class="id-results__species">${escHtml(top_result)}</h3>
+        </div>
+        <span class="id-badge ${badgeClass}" aria-label="Confidence: ${displayConf.toFixed(1)}%">
+          ${displayConf.toFixed(1)}%
+        </span>
+      </div>
+
+    </div>`;
+
+  // Defer the catalog lookup so the result panel paints first
+  if (!isBackground) {
+    setTimeout(() => fetchAndRenderCatalogMatch(top_result), 0);
+  }
+}
+
+// ─── Species catalog match card ────────────────────────────────────────────────
+
+/**
+ * After a successful identification, look up the top result's scientific
+ * name in the public seagrass catalog. If a match is found, render a
+ * "Species Info" card inside the results container. Silently no-ops for
+ * background/no-seagrass results or when no catalog match exists.
+ *
+ * @param {string} topResult  The model's top species name (or background class)
+ */
+async function fetchAndRenderCatalogMatch(topResult) {
+  // Clear any previous card first (handles re-identification)
+  document.getElementById('speciesCatalogCard')?.remove();
+
+  // Skip empty / background / no-seagrass results
+  if (!topResult || BACKGROUND_RE.test(topResult)) return;
+
+  let entry;
+  try {
+    entry = await findCatalogMatch(topResult);
+  } catch {
+    return;
+  }
+  if (!entry) return;
+
+  // Build the card with the DOM API — never innerHTML for data values
+  const card = document.createElement('div');
+  card.id        = 'speciesCatalogCard';
+  card.className = 'species-catalog-card';
+
+  const header = document.createElement('div');
+  header.className = 'species-catalog-card__header';
+
+  const title = document.createElement('h4');
+  title.className   = 'species-catalog-card__title';
+  title.textContent = 'Species Info';
+
+  const sciName = document.createElement('span');
+  sciName.className   = 'species-catalog-card__sci-name';
+  sciName.textContent = entry.scientific_name || '';
+
+  header.appendChild(title);
+  header.appendChild(sciName);
+
+  const body = document.createElement('div');
+  body.className = 'species-catalog-card__body';
+
+  /** Append a label/value row only when the value is non-empty. */
+  const addRow = (label, value) => {
+    if (!value) return;
+    const row = document.createElement('div');
+    row.className = 'species-catalog-card__row';
+
+    const lab = document.createElement('span');
+    lab.className   = 'species-catalog-card__label';
+    lab.textContent = label;
+
+    const val = document.createElement('span');
+    val.className   = 'species-catalog-card__value';
+    val.textContent = value;
+
+    row.appendChild(lab);
+    row.appendChild(val);
+    body.appendChild(row);
+  };
+
+  addRow('Common Name',  entry.common_name);
+  addRow('Family',       entry.family);
+  addRow('Habitat',      entry.habitat);
+  addRow('Depth',         entry.depth);
+  addRow('Leaf Shape',   entry.leaf_shape);
+  addRow('Leaf Length',  entry.leaf_length);
+  addRow('IUCN Status',  entry.iucn_status);
+
+  // ph_regions is a JSON column — normalise to a comma-joined string
+  if (entry.ph_regions) {
+    let regions = '';
+    try {
+      const parsed = typeof entry.ph_regions === 'string'
+        ? JSON.parse(entry.ph_regions)
+        : entry.ph_regions;
+      regions = Array.isArray(parsed) ? parsed.join(', ') : String(parsed ?? '');
+    } catch {
+      regions = String(entry.ph_regions ?? '');
+    }
+    addRow('PH Regions', regions);
+  }
+
+  card.appendChild(header);
+  card.appendChild(body);
+
+  // Description — last item in the body, truncated to 200 chars
+  if (entry.description) {
+    const desc = document.createElement('p');
+    desc.className = 'species-catalog-card__desc';
+    const text = entry.description;
+    desc.textContent = text.length > 200 ? `${text.slice(0, 200)}…` : text;
+    body.appendChild(desc);
+  }
+
+  // Append inside the results container, after the existing content
+  getOrCreateResultsContainer().appendChild(card);
+}
+
+// ── Utility ──────────────────────────────────────────────────────────────────
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}

@@ -1693,3 +1693,75 @@
   opacity: 0.35;
   cursor: not-allowed;
 }
+
+/* ─── Species catalog match card ───────────────────────────────── */
+
+.species-catalog-card {
+  margin-top: 1rem;
+  padding: 0.9rem 1.1rem;
+  background: rgba(20, 50, 15, 0.6);
+  border: 1px solid rgba(124, 203, 77, 0.2);
+  border-radius: 10px;
+  animation: hist-card-in 220ms ease;
+}
+
+.species-catalog-card__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(124, 203, 77, 0.15);
+}
+
+.species-catalog-card__title {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(124, 203, 77, 0.7);
+  margin: 0;
+  font-weight: 600;
+}
+
+.species-catalog-card__sci-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #d6f0b8;
+  font-style: italic;
+}
+
+.species-catalog-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.species-catalog-card__row {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.species-catalog-card__label {
+  flex-shrink: 0;
+  width: 90px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.73rem;
+}
+
+.species-catalog-card__value {
+  color: #c8e8a0;
+  flex: 1;
+  min-width: 0;
+}
+
+.species-catalog-card__desc {
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.55;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 0.4rem;
+}

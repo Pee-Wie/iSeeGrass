@@ -146,3 +146,22 @@ export function deleteAllIdentifications() {
 export function deleteAllUserIdentifications() {
   return del('/identifications/user-delete-all');
 }
+
+/**
+ * Search the public seagrass catalog for a species by name.
+ * The catalog endpoint is public (no auth) and matches on either
+ * scientific_name or common_name. Returns the first active match,
+ * or null on no match / error.
+ *
+ * @param  {string} scientificName
+ * @returns {Promise<object|null>}
+ */
+export async function findCatalogMatch(scientificName) {
+  if (!scientificName) return null;
+  try {
+    const data = await get(`/catalog?search=${encodeURIComponent(scientificName)}&limit=1&status=active`);
+    return data.catalog?.[0] ?? null;
+  } catch {
+    return null;
+  }
+}
