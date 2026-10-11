@@ -60,7 +60,7 @@ const connection = await mysql.createConnection({
 });
 
 const sql = `
-INSERT INTO seagrass_catalog (
+INSERT INTO seagrass (
   slug, scientific_name, common_name, family, genus, region,
   habitat, depth, leaf_shape, leaf_length, color,
   description, fun_fact, iucn_status, status_color, ph_regions, tags,

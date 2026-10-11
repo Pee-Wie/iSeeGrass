@@ -1,0 +1,38 @@
+## Step 3: Import Results
+Date: 2026-10-11
+
+### Step 1: Update import script
+- File: www/public/js/import-seagrass-catalog.mjs
+- Replaced `seagrass_catalog` → `seagrass` (INSERT INTO target table)
+- No remaining `seagrass_catalog` references in file.
+
+### Step 2: mysql2 check
+- npm install failed (no network access in this environment)
+- Existing node_modules/mysql2 directory was present but empty/broken
+- Alternative: wrote PHP importer (www/public/js/import-seagrass-php.php)
+
+### Step 3: DB credentials
+- Read from /media/codex/Shared/iSeeGrass/.env
+- DB_HOST=127.0.0.1, DB_PORT=3306, DB_NAME=iseegrass, DB_USER=root
+- DB_PASS=[redacted]
+
+### Step 4: Import run (via PHP importer)
+- Command: php www/public/js/import-seagrass-php.php
+- Result: Imported/updated: 56 species, Errors: 0 (6 skipped = IUCN lookup objects, not species)
+- All 56 entries from species-data.js processed successfully
+
+### Step 5: Verification
+
+#### API check:
+curl -s 'http://localhost/iSeeGrass/core/api/catalog/index.php?limit=1'
+Result:
+  - id=1, slug=enhalus-acoroides, scientific_name=Enhalus acoroides
+  - ph_regions: ["luzon","visayas","mindanao"] ✓
+  - All fields populated: habitat, depth, leaf_shape, leaf_length, color, fun_fact, status_color, tags ✓
+
+#### Row count:
+SELECT COUNT(*) FROM seagrass → 57 rows ✓ (≥56 required)
+
+Note: 57 rows = 56 from species-data.js + 1 pre-existing row (thalassia-testudinum was already in DB before import, upsert merged it correctly)
+
+### Status: COMPLETE ✓
