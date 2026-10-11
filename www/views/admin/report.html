@@ -130,10 +130,20 @@
                             <!-- Header row -->
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.75rem;">
                                 <h3 style="margin:0; color:#d6f0b8;">Seagrass Species Catalog</h3>
-                                <button id="btnAddSpecies" class="admin-btn admin-btn--primary"
-                                    onclick="openCatalogModal(null)">
-                                    <i class="ti ti-plus"></i> Add Species
-                                </button>
+                                <div style="display:flex; align-items:center; gap:0.75rem;">
+                                    <div class="catalog-view-toggle" role="group" aria-label="View mode">
+                                        <button class="view-toggle-btn active" id="btnViewTable" aria-pressed="true">
+                                            <i class="ti ti-table"></i> Table
+                                        </button>
+                                        <button class="view-toggle-btn" id="btnViewTiles" aria-pressed="false">
+                                            <i class="ti ti-layout-grid"></i> Tiles
+                                        </button>
+                                    </div>
+                                    <button id="btnAddSpecies" class="admin-btn admin-btn--primary"
+                                        onclick="openCatalogModal(null)">
+                                        <i class="ti ti-plus"></i> Add Species
+                                    </button>
+                                </div>
                             </div>
 
                             <input type="text" id="catalogSearch" class="admin-input"
@@ -158,6 +168,71 @@
                                     </tbody>
                                 </table>
                             </div>
+
+                            <!-- Tile filter controls — hidden until tile view is active -->
+                            <div id="catalogTileControls" style="display:none;">
+                                <div class="cat-filter-bar">
+                                    <div class="cat-search-wrap">
+                                        <i class="ti ti-search" aria-hidden="true"></i>
+                                        <input type="text" id="tileSearch" class="admin-input cat-search-input"
+                                            placeholder="Search name, genus, family, region…" autocomplete="off">
+                                    </div>
+                                    <div class="cat-region-scope">
+                                        <div class="cat-scope-toggle" role="radiogroup">
+                                            <label class="cat-scope-radio">
+                                                <input type="radio" name="cat-scope" value="global" checked>
+                                                <span>Global</span>
+                                            </label>
+                                            <label class="cat-scope-radio">
+                                                <input type="radio" name="cat-scope" value="local">
+                                                <span>Local (Philippines)</span>
+                                            </label>
+                                        </div>
+                                        <div class="cat-pills" id="catPillsGlobal">
+                                            <button class="cat-pill active" data-region="all">All regions</button>
+                                            <button class="cat-pill" data-region="caribbean">Caribbean</button>
+                                            <button class="cat-pill" data-region="mediterranean">Mediterranean</button>
+                                            <button class="cat-pill" data-region="indo-pacific">Indo-Pacific</button>
+                                            <button class="cat-pill" data-region="temperate">Temperate</button>
+                                        </div>
+                                        <div class="cat-pills hidden" id="catPillsLocal">
+                                            <button class="cat-pill active" data-local="all">All Philippines</button>
+                                            <button class="cat-pill" data-local="luzon">Luzon</button>
+                                            <button class="cat-pill" data-local="visayas">Visayas</button>
+                                            <button class="cat-pill" data-local="mindanao">Mindanao</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="cat-filter-selects">
+                                    <div class="cat-select-wrap">
+                                        <label class="cat-select-label">Family</label>
+                                        <select id="catFilterFamily" class="admin-select"><option value="">All families</option></select>
+                                    </div>
+                                    <div class="cat-select-wrap">
+                                        <label class="cat-select-label">Genus</label>
+                                        <select id="catFilterGenus" class="admin-select"><option value="">All genera</option></select>
+                                    </div>
+                                    <div class="cat-select-wrap">
+                                        <label class="cat-select-label">IUCN Status</label>
+                                        <select id="catFilterIucn" class="admin-select"><option value="">All IUCN statuses</option></select>
+                                    </div>
+                                    <div class="cat-select-wrap">
+                                        <label class="cat-select-label">Sort by</label>
+                                        <select id="catSort" class="admin-select">
+                                            <option value="name-az">Name A → Z</option>
+                                            <option value="name-za">Name Z → A</option>
+                                            <option value="scientific">Scientific name</option>
+                                            <option value="family">Family</option>
+                                            <option value="genus">Genus</option>
+                                            <option value="iucn">IUCN status</option>
+                                        </select>
+                                    </div>
+                                    <button id="catClearFilters" class="admin-btn admin-btn--ghost">Clear filters</button>
+                                </div>
+                                <p id="catTileCount" style="color:var(--muted); font-size:.85rem; margin:.5rem 0 .75rem;"></p>
+                            </div>
+                            <!-- cat-species-card tiles rendered here by JS -->
+                            <div id="catalogTileGrid" class="cat-species-grid" style="display:none;"></div>
 
                         </div><!-- /.admin-card -->
                     </div><!-- /#tab-catalog -->
@@ -386,6 +461,31 @@
                 <button class="admin-btn admin-btn--ghost" onclick="closeDeleteConfirm()">Cancel</button>
                 <button class="admin-btn admin-btn--danger" id="btnConfirmDelete"
                     onclick="confirmDelete()">
+                    <i class="ti ti-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ Tile View — Species Detail Modal ══ -->
+    <div class="admin-modal-backdrop" id="catalogTileModal" hidden>
+        <div class="admin-modal admin-modal--wide">
+            <div class="admin-modal__header">
+                <div>
+                    <p class="sg-modal-eyebrow">Seagrass Species</p>
+                    <h3 class="admin-modal__title" id="tileModalTitle">—</h3>
+                </div>
+                <button class="admin-modal__close" onclick="closeTileModal()">
+                    <i class="ti ti-x"></i>
+                </button>
+            </div>
+            <div class="admin-modal__body" id="tileModalBody"></div>
+            <div class="admin-modal__footer" style="gap:.75rem;">
+                <button class="admin-btn admin-btn--ghost" onclick="closeTileModal()">Close</button>
+                <button class="admin-btn admin-btn--ghost" id="tileModalEditBtn">
+                    <i class="ti ti-edit"></i> Edit
+                </button>
+                <button class="admin-btn admin-btn--danger" id="tileModalDeleteBtn">
                     <i class="ti ti-trash"></i> Delete
                 </button>
             </div>

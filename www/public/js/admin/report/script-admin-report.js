@@ -34,6 +34,10 @@ async function loadCatalog(search = '') {
     const data = await listCatalog({ search, limit: 200 });
     catalogEntries = data.catalog || [];
     renderCatalog(catalogEntries);
+    if (viewMode === 'tiles') {
+      renderTileGrid();
+      populateTileDropdowns();
+    }
   } catch (err) {
     catalogBody.innerHTML = `<tr><td colspan="8" style="color:#b00;text-align:center;padding:2rem">${esc(err.message)}</td></tr>`;
   }
@@ -190,11 +194,448 @@ window.confirmDelete = async function() {
 };
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { window.closeCatalogModal(); window.closeDeleteConfirm(); }
+  if (e.key === 'Escape') {
+    window.closeCatalogModal();
+    window.closeDeleteConfirm();
+    closeTileModal();
+  }
 });
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Catalog Tile View
+// ══════════════════════════════════════════════════════════════════════════════
+
+let viewMode = 'table';
+
+let tileState = {
+  search: '', family: '', genus: '', iucn: '',
+  region: 'all', localRegion: 'all', scope: 'global', sort: 'name-az'
+};
+
+let tileDropdownsPopulated = false;
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function parseJsonField(val) {
+  if (!val) return [];
+  if (Array.isArray(val)) return val;
+  try { return JSON.parse(val) || []; } catch { return []; }
+}
+
+function iucnClass(raw) {
+  const s = String(raw || '').toLowerCase();
+  if (s === 'lc' || s === 'least concern')                                    return 'lc';
+  if (s === 'nt' || s === 'near threatened')                                  return 'nt';
+  if (s === 'vu' || s.includes('vulnerable'))                                 return 'vu';
+  if ((s === 'en' || s.includes('endangered')) && !s.includes('critically'))  return 'en';
+  if (s === 'cr' || s.includes('critically'))                                 return 'cr';
+  if (s === 'dd' || s.includes('data deficient'))                             return 'dd';
+  return 'unknown';
+}
+
+const IUCN_SEVERITY = { cr: 0, en: 1, vu: 2, nt: 3, lc: 4, dd: 5, unknown: 6 };
+
+// ── Populate dropdowns ────────────────────────────────────────────────────────
+
+function populateTileDropdowns() {
+  const families = [...new Set(catalogEntries.map(e => e.family).filter(Boolean))].sort();
+  const genusAll = [...new Set(catalogEntries.map(e => e.genus).filter(Boolean))].sort();
+  const iucns    = [...new Set(catalogEntries.map(e => e.iucn_status).filter(Boolean))].sort();
+
+  const famSel = document.getElementById('catFilterFamily');
+  if (famSel) {
+    famSel.innerHTML = '<option value="">All families</option>' +
+      families.map(f => `<option value="${esc(f)}">${esc(f)}</option>`).join('');
+  }
+
+  rebuildGenusDropdown(tileState.family);
+
+  const iucnSel = document.getElementById('catFilterIucn');
+  if (iucnSel) {
+    iucnSel.innerHTML = '<option value="">All IUCN statuses</option>' +
+      iucns.map(i => `<option value="${esc(i)}">${esc(i)}</option>`).join('');
+    if (tileState.iucn) iucnSel.value = tileState.iucn;
+  }
+
+  tileDropdownsPopulated = true;
+}
+
+function rebuildGenusDropdown(forFamily) {
+  const genSel = document.getElementById('catFilterGenus');
+  if (!genSel) return;
+  const source = forFamily
+    ? catalogEntries.filter(e => e.family === forFamily)
+    : catalogEntries;
+  const genera = [...new Set(source.map(e => e.genus).filter(Boolean))].sort();
+  genSel.innerHTML = '<option value="">All genera</option>' +
+    genera.map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join('');
+  if (tileState.genus) genSel.value = tileState.genus;
+}
+
+// ── Filter + sort ─────────────────────────────────────────────────────────────
+
+function getTileFiltered() {
+  let list = catalogEntries.filter(e => {
+    // Region scope
+    if (tileState.scope === 'local') {
+      const ph = parseJsonField(e.ph_regions);
+      if (!ph.length) return false;
+      if (tileState.localRegion !== 'all') {
+        if (!ph.map(r => String(r).toLowerCase()).includes(tileState.localRegion)) return false;
+      }
+    } else {
+      if (tileState.region !== 'all') {
+        const reg = String(e.region || '').toLowerCase();
+        if (tileState.region === 'caribbean'     && !reg.includes('caribbean'))    return false;
+        if (tileState.region === 'mediterranean' && !reg.includes('mediterranean'))return false;
+        if (tileState.region === 'indo-pacific'  && !(reg.includes('indo-pacific') || reg.includes('indo pacific'))) return false;
+        if (tileState.region === 'temperate'     && !(reg.includes('temperate') || reg.includes('southern') || reg.includes('north pacific') || reg.includes('north atlantic'))) return false;
+      }
+    }
+
+    // Dropdown filters
+    if (tileState.family && e.family !== tileState.family) return false;
+    if (tileState.genus  && e.genus  !== tileState.genus)  return false;
+    if (tileState.iucn && String(e.iucn_status || '').toLowerCase() !== tileState.iucn.toLowerCase()) return false;
+
+    // Text search
+    if (tileState.search) {
+      const q  = tileState.search.toLowerCase();
+      const ph = parseJsonField(e.ph_regions).join(' ');
+      const hay = [
+        e.common_name, e.scientific_name, e.family, e.genus, e.region, ph
+      ].map(v => String(v || '').toLowerCase()).join(' ');
+      if (!hay.includes(q)) return false;
+    }
+
+    return true;
+  });
+
+  list.sort((a, b) => {
+    switch (tileState.sort) {
+      case 'name-za':
+        return String(b.common_name || b.scientific_name || '').localeCompare(String(a.common_name || a.scientific_name || ''));
+      case 'scientific':
+        return String(a.scientific_name || '').localeCompare(String(b.scientific_name || ''));
+      case 'family': {
+        const fc = String(a.family || '').localeCompare(String(b.family || ''));
+        return fc !== 0 ? fc : String(a.common_name || '').localeCompare(String(b.common_name || ''));
+      }
+      case 'genus': {
+        const gc = String(a.genus || '').localeCompare(String(b.genus || ''));
+        return gc !== 0 ? gc : String(a.common_name || '').localeCompare(String(b.common_name || ''));
+      }
+      case 'iucn': {
+        const ai = IUCN_SEVERITY[iucnClass(a.iucn_status)] ?? 6;
+        const bi = IUCN_SEVERITY[iucnClass(b.iucn_status)] ?? 6;
+        return ai !== bi ? ai - bi : String(a.common_name || '').localeCompare(String(b.common_name || ''));
+      }
+      default: // name-az
+        return String(a.common_name || a.scientific_name || '').localeCompare(String(b.common_name || b.scientific_name || ''));
+    }
+  });
+
+  return list;
+}
+
+// ── Render tile card HTML ─────────────────────────────────────────────────────
+
+function renderTileCard(entry) {
+  const cls        = iucnClass(entry.iucn_status);
+  const tags       = parseJsonField(entry.tags);
+  const ph         = parseJsonField(entry.ph_regions);
+  const regionText = ph.length > 0
+    ? 'Philippines'
+    : String(entry.region || '').slice(0, 40) + (String(entry.region || '').length > 40 ? '…' : '');
+  const descRaw   = String(entry.description || '');
+  const descShort = descRaw.slice(0, 120) + (descRaw.length > 120 ? '…' : '');
+
+  return `
+    <div class="cat-species-card" data-id="${entry.id}" tabindex="0" role="button"
+         aria-label="${esc(entry.common_name || entry.scientific_name)}">
+      <div class="cat-card-actions">
+        <button class="admin-btn admin-btn--icon cat-card-edit" data-id="${entry.id}"
+                title="Edit" aria-label="Edit ${esc(entry.common_name || entry.scientific_name)}">
+          <i class="ti ti-edit"></i>
+        </button>
+        <button class="admin-btn admin-btn--icon admin-btn--danger cat-card-del"
+                data-id="${entry.id}" data-name="${esc(entry.common_name || entry.scientific_name)}"
+                title="Delete" aria-label="Delete ${esc(entry.common_name || entry.scientific_name)}">
+          <i class="ti ti-trash"></i>
+        </button>
+      </div>
+      <span class="cat-status-badge cat-status-${cls}">${esc(entry.iucn_status || 'Unknown')}</span>
+      <h3 class="cat-card-name">${esc(entry.common_name || entry.scientific_name)}</h3>
+      <p class="cat-card-sci">${esc(entry.scientific_name)}</p>
+      ${entry.family ? `<span class="cat-card-family">${esc(entry.family)}</span>` : ''}
+      ${regionText ? `<div class="cat-card-region"><span class="cat-meta-chip">${esc(regionText)}</span></div>` : ''}
+      <div class="cat-card-meta">
+        ${entry.depth       ? `<span class="cat-meta-chip">↕ ${esc(entry.depth)}</span>`       : ''}
+        ${entry.leaf_length ? `<span class="cat-meta-chip">⌇ ${esc(entry.leaf_length)}</span>` : ''}
+      </div>
+      ${descShort ? `<p class="cat-card-desc">${esc(descShort)}</p>` : ''}
+      ${tags.length > 0 ? `<div class="cat-card-tags">${tags.map(t => `<span class="cat-tag">${esc(t)}</span>`).join('')}</div>` : ''}
+      <div class="cat-card-footer">View details →</div>
+    </div>`;
+}
+
+// ── Render tile grid ──────────────────────────────────────────────────────────
+
+function renderTileGrid() {
+  const grid    = document.getElementById('catalogTileGrid');
+  const countEl = document.getElementById('catTileCount');
+  if (!grid) return;
+
+  const filtered = getTileFiltered();
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="cat-empty-state">No species match the current filters.</div>';
+  } else {
+    grid.innerHTML = filtered.map(e => renderTileCard(e)).join('');
+
+    grid.querySelectorAll('.cat-species-card').forEach(card => {
+      card.addEventListener('click', ev => {
+        if (ev.target.closest('.cat-card-actions')) return;
+        openTileModal(parseInt(card.dataset.id, 10));
+      });
+      card.addEventListener('keydown', ev => {
+        if (ev.key === 'Enter' || ev.key === ' ') {
+          ev.preventDefault();
+          openTileModal(parseInt(card.dataset.id, 10));
+        }
+      });
+    });
+
+    grid.querySelectorAll('.cat-card-edit').forEach(btn => {
+      btn.addEventListener('click', ev => {
+        ev.stopPropagation();
+        openEditModal(parseInt(btn.dataset.id, 10));
+      });
+    });
+
+    grid.querySelectorAll('.cat-card-del').forEach(btn => {
+      btn.addEventListener('click', ev => {
+        ev.stopPropagation();
+        window.openDeleteConfirm(parseInt(btn.dataset.id, 10), btn.dataset.name);
+      });
+    });
+  }
+
+  if (countEl) {
+    countEl.textContent = `Showing ${filtered.length} of ${catalogEntries.length} species`;
+  }
+}
+
+// ── Tile detail modal ─────────────────────────────────────────────────────────
+
+function openTileModal(id) {
+  const entry = catalogEntries.find(e => String(e.id) === String(id));
+  if (!entry) return;
+
+  const titleEl = document.getElementById('tileModalTitle');
+  const bodyEl  = document.getElementById('tileModalBody');
+  const editBtn = document.getElementById('tileModalEditBtn');
+  const delBtn  = document.getElementById('tileModalDeleteBtn');
+  if (!titleEl || !bodyEl) return;
+
+  titleEl.textContent = entry.common_name || entry.scientific_name;
+
+  const cls  = iucnClass(entry.iucn_status);
+  const tags = parseJsonField(entry.tags);
+
+  const facts = [
+    ['Family',       entry.family],
+    ['Genus',        entry.genus],
+    ['Habitat',      entry.habitat],
+    ['Depth range',  entry.depth],
+    ['Leaf shape',   entry.leaf_shape],
+    ['Leaf length',  entry.leaf_length],
+    ['Colour',       entry.color],
+    ['Region',       entry.region],
+    ['IUCN Status',  entry.iucn_status],
+  ].filter(([, v]) => v);
+
+  bodyEl.innerHTML = `
+    <p class="sg-modal-scientific"><em>${esc(entry.scientific_name)}</em></p>
+    <span class="cat-status-badge cat-status-${cls}">${esc(entry.iucn_status || 'Unknown')}</span>
+    <hr class="sg-modal-divider">
+    ${entry.description ? `
+      <p class="sg-modal-section-title">DESCRIPTION</p>
+      <p class="sg-modal-description">${esc(entry.description)}</p>
+    ` : ''}
+    ${facts.length > 0 ? `
+      <p class="sg-modal-section-title">KEY FACTS</p>
+      <div class="sg-modal-facts">
+        ${facts.map(([label, val]) => `
+          <div class="sg-fact-item">
+            <span class="sg-fact-label">${esc(label)}</span>
+            <span class="sg-fact-value">${esc(val)}</span>
+          </div>`).join('')}
+      </div>
+    ` : ''}
+    ${entry.fun_fact ? `
+      <hr class="sg-modal-divider">
+      <div class="sg-modal-funfact">
+        <span>💡</span>
+        <p>${esc(entry.fun_fact)}</p>
+      </div>
+    ` : ''}
+    ${tags.length > 0 ? `
+      <div class="cat-card-tags" style="margin-top:.75rem;">
+        ${tags.map(t => `<span class="cat-tag">${esc(t)}</span>`).join('')}
+      </div>
+    ` : ''}
+  `;
+
+  editBtn.onclick = () => { closeTileModal(); openEditModal(entry.id); };
+  delBtn.onclick  = () => { closeTileModal(); window.openDeleteConfirm(entry.id, entry.common_name || entry.scientific_name); };
+
+  const modal = document.getElementById('catalogTileModal');
+  modal.removeAttribute('hidden');
+  modal.addEventListener('click', ev => { if (ev.target === modal) closeTileModal(); }, { once: true });
+}
+
+function closeTileModal() {
+  const modal = document.getElementById('catalogTileModal');
+  if (modal) modal.setAttribute('hidden', '');
+}
+
+window.openTileModal  = openTileModal;
+window.closeTileModal = closeTileModal;
+
+// ── View toggle ───────────────────────────────────────────────────────────────
+
+function initViewToggle() {
+  const btnTable     = document.getElementById('btnViewTable');
+  const btnTiles     = document.getElementById('btnViewTiles');
+  const tableWrapper = document.querySelector('#tab-catalog .admin-table-wrapper');
+  const tileControls = document.getElementById('catalogTileControls');
+  const tileGrid     = document.getElementById('catalogTileGrid');
+  if (!btnTable || !btnTiles) return;
+
+  function setView(mode) {
+    viewMode = mode;
+    if (mode === 'tiles') {
+      if (tableWrapper)  tableWrapper.style.display  = 'none';
+      if (tileControls)  tileControls.style.display  = '';
+      if (tileGrid)      tileGrid.style.display       = '';
+      btnTable.classList.remove('active'); btnTable.setAttribute('aria-pressed', 'false');
+      btnTiles.classList.add('active');    btnTiles.setAttribute('aria-pressed', 'true');
+      if (!tileDropdownsPopulated) populateTileDropdowns();
+      renderTileGrid();
+    } else {
+      if (tableWrapper)  tableWrapper.style.display  = '';
+      if (tileControls)  tileControls.style.display  = 'none';
+      if (tileGrid)      tileGrid.style.display       = 'none';
+      btnTable.classList.add('active');    btnTable.setAttribute('aria-pressed', 'true');
+      btnTiles.classList.remove('active'); btnTiles.setAttribute('aria-pressed', 'false');
+    }
+  }
+
+  btnTable.addEventListener('click', () => setView('table'));
+  btnTiles.addEventListener('click', () => setView('tiles'));
+}
+
+// ── Tile filter event wiring ──────────────────────────────────────────────────
+
+function initTileFilters() {
+  let searchTimer;
+  const tileSearchEl = document.getElementById('tileSearch');
+  if (tileSearchEl) {
+    tileSearchEl.addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => { tileState.search = tileSearchEl.value; renderTileGrid(); }, 300);
+    });
+  }
+
+  document.querySelectorAll('input[name="cat-scope"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      tileState.scope       = radio.value;
+      tileState.region      = 'all';
+      tileState.localRegion = 'all';
+      const globalPills = document.getElementById('catPillsGlobal');
+      const localPills  = document.getElementById('catPillsLocal');
+      if (radio.value === 'local') {
+        if (globalPills) globalPills.classList.add('hidden');
+        if (localPills)  localPills.classList.remove('hidden');
+      } else {
+        if (globalPills) globalPills.classList.remove('hidden');
+        if (localPills)  localPills.classList.add('hidden');
+      }
+      // reset active pills
+      document.querySelectorAll('#catPillsGlobal .cat-pill').forEach(p => p.classList.toggle('active', p.dataset.region === 'all'));
+      document.querySelectorAll('#catPillsLocal .cat-pill').forEach(p  => p.classList.toggle('active', p.dataset.local === 'all'));
+      renderTileGrid();
+    });
+  });
+
+  document.querySelectorAll('#catPillsGlobal .cat-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('#catPillsGlobal .cat-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      tileState.region = pill.dataset.region;
+      renderTileGrid();
+    });
+  });
+
+  document.querySelectorAll('#catPillsLocal .cat-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('#catPillsLocal .cat-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      tileState.localRegion = pill.dataset.local;
+      renderTileGrid();
+    });
+  });
+
+  const famSel = document.getElementById('catFilterFamily');
+  if (famSel) {
+    famSel.addEventListener('change', () => {
+      tileState.family = famSel.value;
+      tileState.genus  = '';
+      rebuildGenusDropdown(tileState.family);
+      renderTileGrid();
+    });
+  }
+
+  const genSel = document.getElementById('catFilterGenus');
+  if (genSel) {
+    genSel.addEventListener('change', () => { tileState.genus = genSel.value; renderTileGrid(); });
+  }
+
+  const iucnSel = document.getElementById('catFilterIucn');
+  if (iucnSel) {
+    iucnSel.addEventListener('change', () => { tileState.iucn = iucnSel.value; renderTileGrid(); });
+  }
+
+  const sortSel = document.getElementById('catSort');
+  if (sortSel) {
+    sortSel.addEventListener('change', () => { tileState.sort = sortSel.value; renderTileGrid(); });
+  }
+
+  const clearBtn = document.getElementById('catClearFilters');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      tileState = { search: '', family: '', genus: '', iucn: '', region: 'all', localRegion: 'all', scope: 'global', sort: 'name-az' };
+      if (tileSearchEl) tileSearchEl.value = '';
+      if (sortSel) sortSel.value = 'name-az';
+      document.querySelectorAll('#catPillsGlobal .cat-pill').forEach(p => p.classList.toggle('active', p.dataset.region === 'all'));
+      document.querySelectorAll('#catPillsLocal .cat-pill').forEach(p  => p.classList.toggle('active', p.dataset.local === 'all'));
+      document.querySelectorAll('input[name="cat-scope"]').forEach(r => { r.checked = r.value === 'global'; });
+      const globalPills = document.getElementById('catPillsGlobal');
+      const localPills  = document.getElementById('catPillsLocal');
+      if (globalPills) globalPills.classList.remove('hidden');
+      if (localPills)  localPills.classList.add('hidden');
+      tileDropdownsPopulated = false;
+      populateTileDropdowns();
+      renderTileGrid();
+    });
+  }
+}
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 loadCatalog();
+initViewToggle();
+initTileFilters();
 
 // ══════════════════════════════════════════════════════════════════════════════
 // Engine Track Tab

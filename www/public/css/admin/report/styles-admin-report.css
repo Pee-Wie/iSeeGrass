@@ -560,3 +560,443 @@
     .engine-section-header { flex-direction: column; gap: 0.75rem; }
     .engine-active-status { align-self: flex-start; }
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   Catalog Tile View
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── View toggle buttons ── */
+.catalog-view-toggle {
+    display: flex;
+    gap: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(124, 203, 77, 0.25);
+}
+
+.view-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.9rem;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 180ms, color 180ms;
+}
+
+.view-toggle-btn:first-child { border-right: 1px solid rgba(124, 203, 77, 0.2); }
+
+.view-toggle-btn.active,
+.view-toggle-btn[aria-pressed="true"] {
+    background: var(--accent);
+    color: #081908;
+}
+
+.view-toggle-btn:not(.active):hover {
+    background: rgba(124, 203, 77, 0.1);
+    color: var(--text);
+}
+
+/* ── Filter bar ── */
+.cat-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.cat-search-wrap {
+    position: relative;
+    flex: 0 0 auto;
+    min-width: 240px;
+}
+
+.cat-search-wrap .ti-search {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+    font-size: 0.9rem;
+}
+
+.cat-search-input {
+    padding-left: 2.25rem;
+    width: 100%;
+}
+
+.cat-region-scope {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.cat-scope-toggle {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.cat-scope-radio {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.cat-scope-radio input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 0.95rem;
+    height: 0.95rem;
+    border: 2px solid rgba(124, 203, 77, 0.4);
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    transition: border-color 180ms, background 180ms;
+    flex-shrink: 0;
+}
+
+.cat-scope-radio input[type="radio"]:checked {
+    border-color: var(--accent);
+    background: radial-gradient(circle, var(--accent) 45%, transparent 46%);
+}
+
+.cat-scope-radio span {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--muted);
+    transition: color 180ms;
+}
+
+.cat-scope-radio:has(input:checked) span { color: var(--text); }
+
+.cat-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.cat-pills.hidden { display: none !important; }
+
+.cat-pill {
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid rgba(124, 203, 77, 0.25);
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 180ms, color 180ms, border-color 180ms;
+}
+
+.cat-pill:hover {
+    border-color: rgba(124, 203, 77, 0.5);
+    color: var(--text);
+}
+
+.cat-pill.active {
+    background: rgba(124, 203, 77, 0.18);
+    border-color: rgba(124, 203, 77, 0.55);
+    color: var(--accent);
+}
+
+/* ── Filter selects row ── */
+.cat-filter-selects {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: flex-end;
+    margin-bottom: 0.5rem;
+}
+
+.cat-select-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    flex: 1 1 140px;
+    min-width: 130px;
+    max-width: 200px;
+}
+
+.cat-select-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(124, 203, 77, 0.6);
+}
+
+/* ── Species grid ── */
+.cat-species-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+/* ── Species card ── */
+.cat-species-card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid rgba(124, 203, 77, 0.18);
+    border-radius: 16px;
+    padding: 1.1rem 1.2rem 1rem;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.cat-species-card:hover,
+.cat-species-card:focus-visible {
+    transform: translateY(-3px);
+    border-color: rgba(124, 203, 77, 0.45);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
+    outline: none;
+}
+
+.cat-species-card:focus-visible {
+    outline: 2px solid rgba(124, 203, 77, 0.7);
+    outline-offset: 2px;
+}
+
+/* ── Card action buttons (edit/delete), shown on hover ── */
+.cat-card-actions {
+    position: absolute;
+    top: 0.65rem;
+    right: 0.7rem;
+    display: flex;
+    gap: 0.3rem;
+    opacity: 0;
+    transition: opacity 160ms ease;
+    z-index: 2;
+}
+
+.cat-species-card:hover .cat-card-actions,
+.cat-species-card:focus-within .cat-card-actions {
+    opacity: 1;
+}
+
+/* ── IUCN status badge ── */
+.cat-status-badge {
+    display: inline-block;
+    padding: 0.18rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.67rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    align-self: flex-start;
+}
+
+.cat-status-lc      { background: rgba(76,175,80,0.18);   color: #81c784; border: 1px solid rgba(76,175,80,0.35); }
+.cat-status-nt      { background: rgba(139,195,74,0.18);  color: #aed581; border: 1px solid rgba(139,195,74,0.32); }
+.cat-status-vu      { background: rgba(255,152,0,0.18);   color: #ffb74d; border: 1px solid rgba(255,152,0,0.35); }
+.cat-status-en      { background: rgba(244,67,54,0.15);   color: #ef9a9a; border: 1px solid rgba(244,67,54,0.3); }
+.cat-status-cr      { background: rgba(156,39,176,0.15);  color: #ce93d8; border: 1px solid rgba(156,39,176,0.3); }
+.cat-status-dd      { background: rgba(158,158,158,0.15); color: #bdbdbd; border: 1px solid rgba(158,158,158,0.3); }
+.cat-status-unknown { background: rgba(96,125,139,0.15);  color: #b0bec5; border: 1px solid rgba(96,125,139,0.3); }
+
+/* ── Card text ── */
+.cat-card-name {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1.2;
+}
+
+.cat-card-sci {
+    margin: 0;
+    font-size: 0.8rem;
+    font-style: italic;
+    color: var(--muted);
+}
+
+.cat-card-family {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.72rem;
+    font-style: italic;
+    color: rgba(183, 230, 140, 0.85);
+    background: rgba(124, 203, 77, 0.09);
+    border: 1px solid rgba(124, 203, 77, 0.2);
+    border-radius: 5px;
+    align-self: flex-start;
+}
+
+.cat-card-region {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.cat-meta-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    padding: 0.18rem 0.5rem;
+}
+
+.cat-card-desc {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.65;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.cat-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: auto;
+}
+
+.cat-tag {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: rgba(124, 203, 77, 0.8);
+    background: rgba(124, 203, 77, 0.08);
+    border: 1px solid rgba(124, 203, 77, 0.18);
+    border-radius: 4px;
+    padding: 0.12rem 0.42rem;
+}
+
+.cat-card-footer {
+    border-top: 1px solid rgba(124, 203, 77, 0.1);
+    padding-top: 0.55rem;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: rgba(124, 203, 77, 0.55);
+    text-align: right;
+    transition: color 180ms;
+}
+
+.cat-species-card:hover .cat-card-footer,
+.cat-species-card:focus-visible .cat-card-footer {
+    color: var(--accent);
+}
+
+/* ── Empty state ── */
+.cat-empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3.5rem 1rem;
+    color: var(--muted);
+    font-size: 0.92rem;
+}
+
+/* ── Tile modal width override ── */
+.admin-modal--wide { max-width: 600px; }
+
+/* ── Modal body elements ── */
+.sg-modal-eyebrow {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 0.25rem;
+}
+
+.sg-modal-scientific {
+    font-style: italic;
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin: 0.15rem 0 0.85rem;
+}
+
+.sg-modal-divider {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    margin: 0.9rem 0;
+}
+
+.sg-modal-section-title {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(124, 203, 77, 0.6);
+    margin: 0 0 0.6rem;
+}
+
+.sg-modal-description {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.8;
+    margin: 0 0 0.85rem;
+}
+
+.sg-modal-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.6rem;
+    margin-bottom: 0.85rem;
+}
+
+.sg-fact-item {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 9px;
+    padding: 0.6rem 0.8rem;
+}
+
+.sg-fact-label {
+    display: block;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(124, 203, 77, 0.55);
+    margin-bottom: 0.18rem;
+}
+
+.sg-fact-value {
+    font-size: 0.85rem;
+    color: var(--text);
+    line-height: 1.4;
+}
+
+.sg-modal-funfact {
+    background: rgba(124, 203, 77, 0.07);
+    border: 1px solid rgba(124, 203, 77, 0.22);
+    border-radius: 10px;
+    padding: 0.8rem 0.95rem;
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    font-size: 0.84rem;
+    color: var(--muted);
+    line-height: 1.7;
+}
+
+.sg-modal-funfact p { margin: 0; }
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+    .cat-species-grid   { grid-template-columns: 1fr; }
+    .cat-filter-bar     { flex-direction: column; }
+    .cat-search-wrap    { min-width: 0; width: 100%; }
+    .cat-filter-selects { flex-direction: column; }
+    .cat-select-wrap    { max-width: 100%; }
+}
