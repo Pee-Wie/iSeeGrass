@@ -777,6 +777,15 @@
                     if (!proceed) return;
                 }
 
+                // Guard: ensure admin session loaded
+                if (!adminUserId) {
+                    if (feedbackEl) {
+                        feedbackEl.style.cssText = 'display:block; padding:0.6rem 0.85rem; border-radius:8px; font-size:0.875rem; background:rgba(176,0,0,0.15); border:1px solid #e05252; color:#e05252;';
+                        feedbackEl.textContent   = 'Admin session not loaded — please reload the page and try again.';
+                    }
+                    return;
+                }
+
                 // Loading state
                 const origHTML = btnUpdatePw.innerHTML;
                 btnUpdatePw.disabled   = true;

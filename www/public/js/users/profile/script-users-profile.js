@@ -102,7 +102,11 @@ $('avatarInput')?.addEventListener('change', async () => {
 
 $('btnRemoveAvatar')?.addEventListener('click', async () => {
   try {
-    await fetch(apiUrl('/users/avatar'), { method: 'DELETE', credentials: 'include' });
+    const res = await fetch(apiUrl('/users/avatar'), { method: 'DELETE', credentials: 'include' });
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}));
+      throw new Error(json.error || `Server error (${res.status})`);
+    }
     applyAvatar(null);
     if (currentUser) currentUser.avatar_url = null;
     $('avatarInput').value = '';
