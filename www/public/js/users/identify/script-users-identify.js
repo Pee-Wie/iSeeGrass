@@ -10,10 +10,15 @@
  *   • Camera modal (getUserMedia with front/back switch + shutter)
  *   • Fallback to native <input capture="environment"> when no getUserMedia
  *
+ * Engine track is resolved automatically from admin system settings via
+ * identifyImage() — no selector UI on this page.
+ *
  * Element IDs match identify.html (not the guest Aid IDs).
  */
 
 'use strict';
+
+import { identifyImage } from '../../api/identify.api.js';
 
 // ─── Constants ───────────────────────────────────────────────────
 
@@ -332,17 +337,56 @@ dropzone.addEventListener('keydown', e => {
 
 clearBtn.addEventListener('click', clearAll);
 
-identifyBtn.addEventListener('click', () => {
+identifyBtn.addEventListener('click', async () => {
   const selected = photos.filter(p => p.selected);
   if (selected.length !== 1) return;
   const target = selected[0];
-  // TODO: send target.file to identification API
-  console.log('Identify:', { name: target.label, file: target.file.name });
-  modalAlert(
-    `Identifying "${target.label}"…\n\nAPI integration is pending — results will appear here once the model is connected.`,
-    'Identification Pending',
-    'info'
-  );
+
+  identifyBtn.disabled = true;
+  identifyBtn.textContent = 'Identifying…';
+
+  // Load the selected photo into the direct-upload preview panel first
+  loadDirectPhoto(target.file);
+
+  // Push a pending entry to history right away
+  const histId   = crypto.randomUUID();
+  const thumbUrl = URL.createObjectURL(target.file);
+  if (window.identifyHistory) {
+    window.identifyHistory.push({
+      id:         histId,
+      timestamp:  Date.now(),
+      fileName:   target.file.name,
+      thumbUrl,
+      topSpecies: '',
+      confidence: 0,
+      status:     'pending',
+      errorMsg:   null,
+    });
+  }
+
+  try {
+    const result = await identifyImage(target.file);
+    renderIdentifyResults(result);
+    if (window.identifyHistory) {
+      window.identifyHistory.update(histId, {
+        dbId:       result.identification_id ?? null,
+        topSpecies: result.top_result  || '—',
+        confidence: result.top_confidence ?? (result.scores?.[0]?.confidence ?? 0),
+        status:     'done',
+      });
+    }
+  } catch (err) {
+    modalAlert(err.message || 'Identification failed. Please try again.', 'Error', 'error');
+    if (window.identifyHistory) {
+      window.identifyHistory.update(histId, {
+        status:   'error',
+        errorMsg: err.message || 'Identification failed',
+      });
+    }
+  } finally {
+    identifyBtn.disabled = false;
+    updateUI();
+  }
 });
 
 // ─── Direct-upload – left panel ───────────────────────────────────
@@ -416,15 +460,51 @@ function renderDirectPreview() {
     reuploadBtn.innerHTML = `
       <img src="../../public/icons/favicon.png" alt="" aria-hidden="true">
       <span class="direct-preview__reupload-label">Identify</span>`;
-    reuploadBtn.addEventListener('click', () => {
+    reuploadBtn.addEventListener('click', async () => {
       if (!directPhoto) return;
-      // TODO: send directPhoto.file to identification API
-      console.log('Direct Identify:', directPhoto.file.name);
-      modalAlert(
-        `Identifying "${directPhoto.file.name}"…\n\nAPI integration is pending — results will appear here once the model is connected.`,
-        'Identification Pending',
-        'info'
-      );
+      reuploadBtn.disabled = true;
+      const origLabel = reuploadBtn.querySelector('.direct-preview__reupload-label');
+      if (origLabel) origLabel.textContent = 'Identifying…';
+
+      // Push a pending entry to history right away
+      const histId   = crypto.randomUUID();
+      const thumbUrl = URL.createObjectURL(directPhoto.file);
+      if (window.identifyHistory) {
+        window.identifyHistory.push({
+          id:         histId,
+          timestamp:  Date.now(),
+          fileName:   directPhoto.file.name,
+          thumbUrl,
+          topSpecies: '',
+          confidence: 0,
+          status:     'pending',
+          errorMsg:   null,
+        });
+      }
+
+      try {
+        const result = await identifyImage(directPhoto.file);
+        renderIdentifyResults(result);
+        if (window.identifyHistory) {
+          window.identifyHistory.update(histId, {
+            dbId:       result.identification_id ?? null,
+            topSpecies: result.top_result  || '—',
+            confidence: result.top_confidence ?? (result.scores?.[0]?.confidence ?? 0),
+            status:     'done',
+          });
+        }
+      } catch (err) {
+        modalAlert(err.message || 'Identification failed. Please try again.', 'Error', 'error');
+        if (window.identifyHistory) {
+          window.identifyHistory.update(histId, {
+            status:   'error',
+            errorMsg: err.message || 'Identification failed',
+          });
+        }
+      } finally {
+        reuploadBtn.disabled = false;
+        if (origLabel) origLabel.textContent = 'Identify';
+      }
     });
 
     // Filename
@@ -468,6 +548,10 @@ function clearDirect() {
 
   const preview = document.getElementById('directPreview');
   if (preview) preview.remove();
+
+  // Clear any identification results
+  const resultsPanel = document.getElementById('identifyResultsPanel');
+  if (resultsPanel) resultsPanel.remove();
 
   photoGrid.classList.remove('pc-locked');
   updateUI();
@@ -636,3 +720,124 @@ cameraShutterBtn.addEventListener('click', () => {
 // ─── Init ─────────────────────────────────────────────────────────
 
 updateUI();
+
+// ─── Render identification results ────────────────────────────────────────────
+
+/** Labels that indicate a background / no-seagrass result. */
+const BACKGROUND_RE = /background/i;
+
+/**
+ * True when loaded on the admin identify page — enables confidence bar graphs.
+ * Set by script-admin-identify.js before this module executes.
+ */
+const IS_ADMIN = !!window.ISEE_ADMIN_IDENTIFY;
+
+/**
+ * Cap a confidence value so it never displays as 100%.
+ * @param {number} pct
+ * @returns {number}
+ */
+function capConfidence(pct) {
+  return pct >= 100 ? 98.0 : pct;
+}
+
+/**
+ * Render the CNN identification result below the image panel.
+ *
+ * Rules:
+ *  - If top result is a background class: show "No seagrass found" panel
+ *    (except on admin, where the raw result is always shown).
+ *  - Background entries are filtered from the scores list for users;
+ *    admin sees all entries.
+ *  - Confidence bar graphs are only rendered for admin.
+ *  - Confidence is capped at 98% for display.
+ *
+ * @param {object} result  API response data object
+ */
+function renderIdentifyResults(result) {
+  let container = document.getElementById('identifyResultsPanel');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'identifyResultsPanel';
+    container.style.cssText = 'margin-top:1.5rem;padding:1rem 1.25rem;background:rgba(30,60,20,.55);border:1px solid rgba(124,203,77,.25);border-radius:10px;';
+    mainBody.after(container);
+  }
+
+  const topResult    = result.top_result || 'Unknown';
+  const isBackground = BACKGROUND_RE.test(topResult);
+
+  // ── No seagrass (users only) ───────────────────────────────────────────────
+  if (isBackground && !IS_ADMIN) {
+    container.innerHTML = `
+      <div style="display:flex;align-items:flex-start;gap:.75rem;padding:.25rem 0">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px;color:#e0b060" aria-hidden="true">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        <div>
+          <div style="font-size:.72rem;color:#9fe997;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.2rem">Result(s)</div>
+          <div style="font-size:1.1rem;font-weight:700;color:#e0b060">No seagrass found</div>
+          <div style="font-size:.82rem;color:#aaa;margin-top:.3rem;line-height:1.5">
+            The model did not detect seagrass in this image.<br>
+            Try a clearer underwater photo with visible leaf structures.
+          </div>
+        </div>
+      </div>
+      ${result.identification_id ? `<div style="margin-top:.75rem;padding-top:.6rem;border-top:1px solid rgba(255,255,255,.08);font-size:.75rem;color:#555">Saved to history · ID #${result.identification_id}</div>` : ''}`;
+    return;
+  }
+
+  // ── Seagrass detected (or admin showing background) ────────────────────────
+  const topConf = capConfidence(result.scores?.[0]?.confidence ?? 0);
+
+  // Admin sees all scores with bars; users see species-only scores, no bars
+  const allScores  = result.scores || [];
+  const filteredScores = IS_ADMIN
+    ? allScores
+    : allScores.filter(s => !BACKGROUND_RE.test(s.label));
+
+  const scoresHtml = filteredScores.map(s => {
+    const pct   = capConfidence(Math.min(100, Math.max(0, parseFloat(s.confidence) || 0)));
+    const label = IS_ADMIN && BACKGROUND_RE.test(s.label)
+      ? `${s.label} (non-seagrass)`
+      : s.label;
+
+    if (IS_ADMIN) {
+      // With bar graph
+      return `<div style="margin-bottom:.6rem">
+        <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.2rem">
+          <span style="color:#d6f0b8">${label}</span>
+          <span style="color:#9fe997;font-weight:600">${pct.toFixed(1)}%</span>
+        </div>
+        <div style="height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden">
+          <div style="width:${pct}%;height:100%;background:${pct >= 60 ? '#7ccb4d' : pct >= 30 ? '#f0c040' : '#e05252'};border-radius:3px;transition:width .5s"></div>
+        </div>
+      </div>`;
+    }
+
+    // Without bar graph — percentage only
+    return `<div style="display:flex;justify-content:space-between;align-items:center;font-size:.82rem;padding:.25rem 0;border-bottom:1px solid rgba(255,255,255,.06)">
+      <span style="color:#d6f0b8">${label}</span>
+      <span style="color:#9fe997;font-weight:600;flex-shrink:0;margin-left:.75rem">${pct.toFixed(1)}%</span>
+    </div>`;
+  }).join('');
+
+  const displayTopResult = IS_ADMIN && isBackground
+    ? `⚠ ${topResult} (no seagrass)`
+    : topResult;
+
+  container.innerHTML = `
+    <div style="margin-bottom:.75rem;padding-bottom:.75rem;border-bottom:1px solid rgba(255,255,255,.1)">
+      <div style="font-size:.72rem;color:#9fe997;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem">Result(s)</div>
+      <div style="font-size:1.2rem;font-weight:700;color:#d6f0b8">${displayTopResult}</div>
+      <div style="font-size:.85rem;color:#aaa;margin-top:.2rem">Confidence: ${topConf.toFixed(1)}%</div>
+    </div>
+    ${IS_ADMIN && scoresHtml ? `<div>
+      <div style="font-size:.72rem;color:#9fe997;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">All Scores</div>
+      ${scoresHtml}
+    </div>` : ''}
+    ${result.identification_id ? `<div style="margin-top:.6rem;font-size:.75rem;color:#555">Saved to history · ID #${result.identification_id}</div>` : ''}`;
+}

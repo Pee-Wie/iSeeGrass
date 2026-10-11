@@ -96,7 +96,7 @@ class ISeeIdentifyHistory extends HTMLElement {
           </div>
 
           <!-- Session badge -->
-          <p class="hist-sidebar__session-note">Session only — history resets on page reload.</p>
+          <p class="hist-sidebar__session-note">Last 50 identifications · newest first</p>
 
           <!-- Record list -->
           <div class="hist-sidebar__list" id="histList" aria-live="polite" aria-label="History records">
@@ -142,6 +142,63 @@ class ISeeIdentifyHistory extends HTMLElement {
 
     // Expose on window so script-users-identify.js can call push/clear
     window.identifyHistory = this;
+
+    // Load persistent history from the server (admin users only)
+    this._loadHistory();
+  }
+
+  // ── Persistent history ────────────────────────────────────────────
+
+  /**
+   * Fetch persisted identification history from the API and populate the
+   * sidebar with DB records. Called once on component mount.
+   * Silently no-ops on network/auth errors (guests, non-admin users).
+   */
+  async _loadHistory() {
+    try {
+      // Dynamically import to avoid a hard dependency for guest pages
+      const { listIdentificationHistory } = await import('../public/js/api/identify.api.js');
+      const data    = await listIdentificationHistory({ limit: 50 });
+      const records = data?.records ?? [];
+
+      for (const rec of records) {
+        this._pushPersisted(rec);
+      }
+
+      if (records.length > 0) {
+        this._clearBtn.hidden = false;
+        this._empty.hidden    = true;
+      }
+    } catch (_) {
+      // Not admin, not logged in, or server unavailable — stay silent
+    }
+  }
+
+  /**
+   * Insert a history card sourced from a DB record (no live thumbnail).
+   * Uses the DB row `id` as `_seq` so the number is stable across reloads.
+   *
+   * @param {{ id:number, image_filename:string|null, top_result:string|null,
+   *           top_confidence:number|null, created_at:string }} rec
+   */
+  _pushPersisted(rec) {
+    const entry = {
+      id:         `db-${rec.id}`,          // unique string id for data-id attr
+      dbId:       rec.id,                  // numeric DB id used as _seq
+      _seq:       rec.id,                  // display number (#42, etc.)
+      timestamp:  rec.created_at
+                    ? new Date(rec.created_at).getTime()
+                    : Date.now(),
+      fileName:   rec.image_filename ?? '(unknown)',
+      thumbUrl:   null,                    // no thumbnail for persisted records
+      topSpecies: rec.top_result    ?? '—',
+      confidence: rec.top_confidence ?? 0,
+      status:     'done',
+      errorMsg:   null,
+    };
+
+    this._records.push(entry);             // push to end (already newest-first from API)
+    this._renderRecord(entry);
   }
 
   // ── Open / close ─────────────────────────────────────────────────
@@ -192,7 +249,13 @@ class ISeeIdentifyHistory extends HTMLElement {
    *           topSpecies:string, confidence:number, status:string, errorMsg:string|null }} entry
    */
   push(entry) {
-    this._records.unshift(entry);          // newest first
+    if (entry.dbId != null) {
+      entry._seq = entry.dbId;           // use DB id for stable numbering
+    } else {
+      this._counter = (this._counter || 0) + 1;
+      entry._seq = this._counter;        // sequential run number (session-scoped)
+    }
+    this._records.unshift(entry);        // newest first
     this._renderRecord(entry);
     this._clearBtn.hidden = false;
     this._empty.hidden    = true;
@@ -207,6 +270,9 @@ class ISeeIdentifyHistory extends HTMLElement {
     const rec = this._records.find(r => r.id === id);
     if (!rec) return;
     Object.assign(rec, patch);
+    if (patch.dbId != null) {
+      rec._seq = patch.dbId;             // switch to stable DB id once known
+    }
     this._refreshCard(id);
   }
 
@@ -214,10 +280,28 @@ class ISeeIdentifyHistory extends HTMLElement {
 
   clear() {
     this._records = [];
+    this._counter = 0;
     // Remove all cards but keep the empty state element
     this._list.querySelectorAll('.hist-card').forEach(el => el.remove());
     this._empty.hidden    = false;
     this._clearBtn.hidden = true;
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────
+
+  /**
+   * Truncate a filename to at most 10 visible base chars, then "..", then extension.
+   * e.g. "img-123456789.jpg" → "img-123456..jpg"
+   *      "short.png"         → "short.png"   (no truncation needed)
+   * @param {string} fileName
+   * @returns {string}
+   */
+  _truncateName(fileName) {
+    const dotIdx = fileName.lastIndexOf('.');
+    const base   = dotIdx !== -1 ? fileName.slice(0, dotIdx) : fileName;
+    const ext    = dotIdx !== -1 ? fileName.slice(dotIdx)    : '';   // includes the dot
+    if (base.length <= 10) return fileName;
+    return `${base.slice(0, 10)}..${ext.replace(/^\./, '')}`;
   }
 
   // ── Render helpers ────────────────────────────────────────────────
@@ -272,9 +356,20 @@ class ISeeIdentifyHistory extends HTMLElement {
                 </svg>`,
     }[entry.status] ?? '';
 
+    const shortName = this._truncateName(entry.fileName);
+    const species   = entry.status === 'done'
+      ? (entry.topSpecies || '—')
+      : entry.status === 'error'
+        ? (entry.errorMsg || 'Identification failed')
+        : 'Analysing…';
+
+    const thumbHtml = entry.thumbUrl
+      ? `<img class="hist-card__thumb" src="${entry.thumbUrl}" alt="${entry.fileName}" loading="lazy">`
+      : `<div class="hist-card__thumb hist-card__thumb--placeholder" aria-hidden="true"></div>`;
+
     card.innerHTML = `
       <div class="hist-card__thumb-wrap">
-        <img class="hist-card__thumb" src="${entry.thumbUrl}" alt="${entry.fileName}" loading="lazy">
+        ${thumbHtml}
         <span class="hist-card__status-badge hist-card__status-badge--${entry.status}"
           aria-label="Status: ${statusLabel}">
           ${statusIcon}
@@ -282,14 +377,15 @@ class ISeeIdentifyHistory extends HTMLElement {
       </div>
 
       <div class="hist-card__body">
-        <p class="hist-card__species">
-          ${entry.status === 'done'
-            ? entry.topSpecies || '—'
-            : entry.status === 'error'
-              ? (entry.errorMsg || 'Identification failed')
-              : 'Analysing…'}
+
+        <!-- Meta row: #seq · filename · species -->
+        <p class="hist-card__meta" title="${entry.fileName} — ${species}">
+          <span class="hist-card__seq">#${entry._seq}</span>
+          <span class="hist-card__meta-sep" aria-hidden="true">·</span>
+          <span class="hist-card__filename">${shortName}</span>
+          <span class="hist-card__meta-sep" aria-hidden="true">·</span>
+          <span class="hist-card__species">${species}</span>
         </p>
-        <p class="hist-card__filename" title="${entry.fileName}">${entry.fileName}</p>
 
         ${entry.status === 'done' ? `
         <div class="hist-card__conf-row" aria-label="Confidence ${pct}%">

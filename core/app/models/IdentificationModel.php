@@ -14,26 +14,34 @@ class IdentificationModel
     /**
      * Create an identification run record. Returns the new ID.
      *
-     * @param int         $userId        Who ran the identification.
-     * @param int         $imageCount    Number of images submitted.
-     * @param string|null $topResult     Scientific name of the top prediction.
-     * @param float|null  $topConfidence Confidence percent (e.g. 94.75).
+     * @param int         $userId         Who ran the identification.
+     * @param int         $imageCount     Number of images submitted.
+     * @param string|null $imageFilename  Original filename of the uploaded image.
+     * @param string|null $topResult      Scientific name of the top prediction.
+     * @param float|null  $topConfidence  Confidence percent (e.g. 94.75).
+     * @param string|null $modelType      Engine track key ('original' | 'improved_original' | '6_species_proto').
      */
     public function create(
         int     $userId,
         int     $imageCount    = 1,
+        ?string $imageFilename = null,
         ?string $topResult     = null,
-        ?float  $topConfidence = null
+        ?float  $topConfidence = null,
+        ?string $modelType     = 'improved_original'
     ): int {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO identifications (user_id, image_count, top_result, top_confidence)
-             VALUES (:user_id, :image_count, :top_result, :top_confidence)'
+            'INSERT INTO identifications
+               (user_id, image_count, image_filename, top_result, top_confidence, model_type)
+             VALUES
+               (:user_id, :image_count, :image_filename, :top_result, :top_confidence, :model_type)'
         );
         $stmt->execute([
             ':user_id'        => $userId,
             ':image_count'    => $imageCount,
+            ':image_filename' => $imageFilename,
             ':top_result'     => $topResult,
             ':top_confidence' => $topConfidence,
+            ':model_type'     => $modelType,
         ]);
         return (int) $this->pdo->lastInsertId();
     }
