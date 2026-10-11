@@ -354,9 +354,48 @@ function refreshDocList() {
         <i class="ti ti-trash"></i>
       </button>`;
 
+    // ── Inline rename on .doc-item__name ──────────────────────────
+    const nameEl = item.querySelector('.doc-item__name');
+    nameEl.style.cursor = 'pointer';
+    nameEl.title = 'Click to rename';
+
+    nameEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const currentTitle = doc.title || '';
+      const input = document.createElement('input');
+      input.className = 'doc-item__rename-input';
+      input.type = 'text';
+      input.value = currentTitle;
+      input.maxLength = 120;
+      input.placeholder = 'Untitled';
+      input.setAttribute('aria-label', 'Rename assessment');
+      nameEl.replaceWith(input);
+      input.focus();
+      input.select();
+
+      const commit = () => {
+        const newTitle = input.value.trim() || '';
+        const all = loadAssessments();
+        const idx = all.findIndex(d => d.ts === doc.ts);
+        if (idx !== -1) {
+          all[idx].title = newTitle;
+          saveAssessments(all);
+          doc.title = newTitle;
+        }
+        refreshDocList();
+      };
+
+      input.addEventListener('blur', commit);
+      input.addEventListener('keydown', ev => {
+        if (ev.key === 'Enter')  { ev.preventDefault(); input.blur(); }
+        if (ev.key === 'Escape') { input.value = currentTitle; input.blur(); }
+      });
+    });
+
     /* Load on row click */
     item.addEventListener('click', (e) => {
       if (e.target.closest('.doc-item__delete')) return;
+      if (e.target.closest('.doc-item__rename-input') || e.target.classList.contains('doc-item__name')) return;
       if (titleInput) titleInput.value = doc.title || '';
       if (canvas)     canvas.innerHTML = doc.body  || '';
       markSaved();
