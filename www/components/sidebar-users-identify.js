@@ -157,8 +157,14 @@ class ISeeIdentifyHistory extends HTMLElement {
   async _loadHistory() {
     try {
       // Dynamically import to avoid a hard dependency for guest pages
-      const { listIdentificationHistory } = await import('../public/js/api/identify.api.js');
-      const data    = await listIdentificationHistory({ limit: 50 });
+      let data;
+      if (window.ISEE_ADMIN_IDENTIFY) {
+        const { listIdentificationHistory } = await import('../public/js/api/identify.api.js');
+        data = await listIdentificationHistory({ limit: 50 });
+      } else {
+        const { listUserIdentificationHistory } = await import('../public/js/api/identify.api.js');
+        data = await listUserIdentificationHistory({ limit: 50 });
+      }
       const records = data?.records ?? [];
 
       for (const rec of records) {
@@ -455,8 +461,13 @@ class ISeeIdentifyHistory extends HTMLElement {
       const btn = card.querySelector('.hist-card__delete');
       btn.disabled = true;
       try {
-        const { deleteIdentification } = await import('../public/js/api/identify.api.js');
-        await deleteIdentification(entry.dbId);
+        if (window.ISEE_ADMIN_IDENTIFY) {
+          const { deleteIdentification } = await import('../public/js/api/identify.api.js');
+          await deleteIdentification(entry.dbId);
+        } else {
+          const { deleteUserIdentification } = await import('../public/js/api/identify.api.js');
+          await deleteUserIdentification(entry.dbId);
+        }
         this._records = this._records.filter(r => r.id !== entry.id);
         card.remove();
         if (this._records.length === 0) { this._empty.hidden = false; this._clearBtn.hidden = true; }
@@ -499,8 +510,13 @@ class ISeeIdentifyHistory extends HTMLElement {
       input.replaceWith(newTitleEl);
       if (entry.dbId) {
         try {
-          const { updateIdentificationTitle } = await import('../public/js/api/identify.api.js');
-          await updateIdentificationTitle(entry.dbId, newTitle);
+          if (window.ISEE_ADMIN_IDENTIFY) {
+            const { updateIdentificationTitle } = await import('../public/js/api/identify.api.js');
+            await updateIdentificationTitle(entry.dbId, newTitle);
+          } else {
+            const { updateUserIdentificationTitle } = await import('../public/js/api/identify.api.js');
+            await updateUserIdentificationTitle(entry.dbId, newTitle);
+          }
         } catch { /* silently ignore */ }
       }
     };
