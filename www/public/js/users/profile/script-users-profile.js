@@ -1,15 +1,14 @@
 /**
  * iSeeGrass — Profile page
  * Loads user from API session, saves changes via API.
- * Avatar stays localStorage (file upload endpoint not yet built).
+ * Avatar is stored server-side; uploaded via /users/avatar endpoint.
  */
 'use strict';
 
-import { me }                    from '../../api/auth.api.js';
+import { me }                         from '../../api/auth.api.js';
 import { updateUser, changePassword } from '../../api/users.api.js';
-import { get }                   from '../../api/client.js';
-
-const AVATAR_KEY = 'isee_user_avatar';
+import { get, upload }                from '../../api/client.js';
+import { apiUrl }                     from '../../config/api.config.js';
 
 // ── Current user (set after me()) ─────────────────────────────────────────────
 let currentUser = null;
@@ -63,25 +62,54 @@ function applyAvatar(dataUrl) {
   }
 }
 
-$('avatarInput')?.addEventListener('change', () => {
-  const file = $('avatarInput').files[0];
+$('avatarInput')?.addEventListener('change', async () => {
+  const input = $('avatarInput');
+  const file  = input.files[0];
   if (!file) return;
-  if (!file.type.startsWith('image/')) { showToast('Please select an image file.', true); return; }
-  if (file.size > 4 * 1024 * 1024)    { showToast('Image must be smaller than 4 MB.', true); return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    localStorage.setItem(AVATAR_KEY, e.target.result);
-    applyAvatar(e.target.result);
+
+  // Client-side pre-validation
+  if (!file.type.startsWith('image/')) {
+    showToast('Please select an image file.', true);
+    input.value = '';
+    return;
+  }
+  if (file.size > 2 * 1024 * 1024) {
+    showToast('Image must be smaller than 2 MB.', true);
+    input.value = '';
+    return;
+  }
+
+  // Disable the upload label while uploading
+  const uploadLabel = document.querySelector('label[for="avatarInput"]');
+  if (uploadLabel) uploadLabel.style.pointerEvents = 'none';
+
+  const fd = new FormData();
+  fd.append('avatar', file);
+
+  try {
+    const data = await upload('/users/avatar', fd);
+    const url  = data.avatar_url ?? null;
+    applyAvatar(url);
+    if (currentUser) currentUser.avatar_url = url;
     showToast('Profile picture updated.');
-  };
-  reader.readAsDataURL(file);
+  } catch (err) {
+    showToast(err.message || 'Failed to upload profile picture.', true);
+  } finally {
+    if (uploadLabel) uploadLabel.style.pointerEvents = '';
+    input.value = '';
+  }
 });
 
-$('btnRemoveAvatar')?.addEventListener('click', () => {
-  localStorage.removeItem(AVATAR_KEY);
-  applyAvatar(null);
-  $('avatarInput').value = '';
-  showToast('Profile picture removed.');
+$('btnRemoveAvatar')?.addEventListener('click', async () => {
+  try {
+    await fetch(apiUrl('/users/avatar'), { method: 'DELETE', credentials: 'include' });
+    applyAvatar(null);
+    if (currentUser) currentUser.avatar_url = null;
+    $('avatarInput').value = '';
+    showToast('Profile picture removed.');
+  } catch (err) {
+    showToast(err.message || 'Failed to remove profile picture.', true);
+  }
 });
 
 // ── Sidebar card ──────────────────────────────────────────────────────────────
@@ -280,7 +308,7 @@ function renderJoinedSince(isoDate) {
     currentUser = await me();
     populateForm(currentUser);
     renderJoinedSince(currentUser.created_at);
-    applyAvatar(localStorage.getItem(AVATAR_KEY));
+    applyAvatar(currentUser.avatar_url ?? null);
     loadStats();
   } catch {
     // me() will redirect to login on 401

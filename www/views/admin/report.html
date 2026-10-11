@@ -463,7 +463,7 @@
 
                                 <!-- Requirements hint -->
                                 <p style="color:var(--muted); font-size:0.8rem; margin:0;">
-                                    Min. 8 characters &middot; at least one uppercase &middot; one number &middot; one special character
+                                    Minimum 8 characters required
                                 </p>
 
                                 <!-- Inline feedback -->
@@ -755,15 +755,27 @@
 
                 let valid = true;
 
-                const pwOk = newPw.length >= 8
-                    && /[A-Z]/.test(newPw)
-                    && /\d/.test(newPw)
-                    && /[^A-Za-z0-9]/.test(newPw);
+                const pwOk = newPw.length >= 8;
                 if (!pwOk)   { if (errNew)  errNew.style.display   = 'block'; valid = false; }
 
                 if (!confPw || newPw !== confPw) { if (errConf) errConf.style.display = 'block'; valid = false; }
 
                 if (!valid) return;
+
+                // Warn if weak but allow
+                const strengthScore = (() => {
+                    let s = 0;
+                    if (newPw.length >= 8)          s++;
+                    if (newPw.length >= 12)         s++;
+                    if (/[A-Z]/.test(newPw))        s++;
+                    if (/\d/.test(newPw))           s++;
+                    if (/[^A-Za-z0-9]/.test(newPw)) s++;
+                    return s;
+                })();
+                if (strengthScore <= 1) {
+                    const proceed = confirm('This password is weak — it only meets the minimum 8-character requirement.\n\nAre you sure you want to use it?');
+                    if (!proceed) return;
+                }
 
                 // Loading state
                 const origHTML = btnUpdatePw.innerHTML;
