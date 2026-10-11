@@ -1271,3 +1271,22 @@
     flex-wrap: wrap;
   }
 }
+
+/* ─── Assessment doc-item inline rename ─────────────────────────── */
+
+.doc-item__rename-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(124, 203, 77, 0.5);
+  border-radius: 4px;
+  color: #d6f0b8;
+  font-size: 0.82rem;
+  padding: 0.1rem 0.3rem;
+  outline: none;
+  font-family: inherit;
+}
+
+.doc-item__rename-input:focus {
+  border-color: rgba(124, 203, 77, 0.85);
+  box-shadow: 0 0 0 2px rgba(124, 203, 77, 0.12);
+}
