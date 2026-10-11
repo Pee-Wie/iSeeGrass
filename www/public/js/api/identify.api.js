@@ -132,3 +132,17 @@ export async function updateUserIdentificationTitle(id, title) {
 export async function deleteUserIdentification(id) {
   return del(`/identifications/user-delete?id=${id}`);
 }
+
+/**
+ * Hard-delete ALL identification runs for the current admin user.
+ */
+export function deleteAllIdentifications() {
+  return del('/identifications/delete-all');
+}
+
+/**
+ * Hard-delete ALL identification runs for the current regular user.
+ */
+export function deleteAllUserIdentifications() {
+  return del('/identifications/user-delete-all');
+}

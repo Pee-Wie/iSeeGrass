@@ -6,19 +6,19 @@ class ISeeNavbar extends HTMLElement {
     const path = window.location.pathname;
 
     const links = [
-      { href: '/views/admin/index.html',      label: 'Home',        icon: 'ti-home'             },
-      { href: '/views/admin/dashboard.html',  label: 'Dashboard',   icon: 'ti-layout-dashboard' },
-      { href: '/views/admin/users.html',      label: 'Users',       icon: 'ti-users'            },
-      { href: '/views/admin/assessment.html', label: 'Assessments', icon: 'ti-clipboard-list'   },
-      { href: '/views/admin/identify.html',   label: 'Identify',    icon: 'ti-microscope'       },
-      { href: '/views/admin/report.html',     label: 'Reports',     icon: 'ti-chart-bar'        },
+      { href: '/views/admin/index.html',      label: 'Home',        icon: 'ti-home',             title: 'Go to admin home'                        },
+      { href: '/views/admin/dashboard.html',  label: 'Dashboard',   icon: 'ti-layout-dashboard', title: 'Platform overview & analytics'           },
+      { href: '/views/admin/users.html',      label: 'Users',       icon: 'ti-users',            title: 'Manage user accounts'                    },
+      { href: '/views/admin/assessment.html', label: 'Assessments', icon: 'ti-clipboard-list',   title: 'View field assessments'                  },
+      { href: '/views/admin/identify.html',   label: 'Identify',    icon: 'ti-microscope',       title: 'Run species identification'              },
+      { href: '/views/admin/report.html',     label: 'Operations',  icon: 'ti-chart-bar',        title: 'Reports, catalog & model settings'       },
     ];
 
-    const navItems = links.map(({ href, label, icon }) => {
+    const navItems = links.map(({ href, label, icon, title }) => {
       const isActive = path.endsWith(href) || path === href;
       return `
         <li class="nav-item">
-          <a class="nav-link isee-nav-link${isActive ? ' active' : ''}" href="${href}">
+          <a class="nav-link isee-nav-link${isActive ? ' active' : ''}" href="${href}" title="${title}">
             <span class="isee-nav-link__icon"><i class="ti ${icon}"></i></span>
             <span class="isee-nav-link__label">${label}</span>
           </a>
@@ -117,6 +117,32 @@ class ISeeNavbar extends HTMLElement {
       iconOpen.style.display  = expanded ? 'none' : '';
       iconClose.style.display = expanded ? ''     : 'none';
     });
+
+    // Load current user avatar + name
+    this._loadUserProfile();
+  }
+
+  async _loadUserProfile() {
+    try {
+      const { get } = await import('../public/js/api/client.js');
+      const user = await get('/auth/me');
+      const avatarSlot = this.querySelector('.isee-user-btn__avatar');
+      const labelSlot  = this.querySelector('.isee-user-btn__label');
+      if (!avatarSlot) return;
+
+      if (user.avatar_url) {
+        avatarSlot.innerHTML = `<img src="${user.avatar_url}" alt="${user.first_name || 'User'}" class="isee-user-btn__avatar-img">`;
+      } else {
+        const initials = ((user.first_name?.[0] ?? '') + (user.last_name?.[0] ?? '')).toUpperCase() || '?';
+        avatarSlot.innerHTML = `<span class="isee-user-btn__initials">${initials}</span>`;
+      }
+
+      if (labelSlot && user.first_name) {
+        labelSlot.textContent = user.first_name;
+      }
+    } catch {
+      // Silently ignore — static fallback stays in place
+    }
   }
 }
 

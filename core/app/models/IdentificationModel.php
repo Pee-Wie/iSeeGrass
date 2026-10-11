@@ -84,6 +84,19 @@ class IdentificationModel
     }
 
     /**
+     * Hard-delete ALL identification runs for a user.
+     * Returns the number of rows deleted.
+     */
+    public function deleteAllByUser(int $userId): int
+    {
+        $stmt = $this->pdo->prepare(
+            'DELETE FROM identifications WHERE user_id = :uid'
+        );
+        $stmt->execute([':uid' => $userId]);
+        return (int) $stmt->rowCount();
+    }
+
+    /**
      * Return identification history for one user, newest first.
      */
     public function getByUser(int $userId, int $limit = 20, int $offset = 0): array

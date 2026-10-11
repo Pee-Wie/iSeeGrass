@@ -246,23 +246,55 @@ body {
   min-height: 100vh;
 }
 
+/* ─── Fixed sidebar on desktop — stays in place while content scrolls ── */
+
+@media (min-width: 768px) {
+  .user-navigation.position-absolute,
+  .isee-navbar.position-absolute {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  /* Push page content right so it isn't hidden under the fixed sidebar.
+     Tabler's --tblr-sidebar-width is 16rem; mirror it here explicitly so
+     the offset works regardless of how Tabler auto-margins behave. */
+  .page > .page-wrapper,
+  .page-wrapper {
+    margin-left: var(--tblr-sidebar-width, 16rem) !important;
+  }
+}
+
 .user-navigation-links {
   gap: 0.35rem;
 }
 
 @media (max-width: 767.98px) {
+  /* Lock the entire page to viewport width — no horizontal overflow */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
   /* Stack page vertically: topbar then content */
   .page {
     display: flex !important;
     flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
   }
 
-  .page > isee-navbar-user {
+  .page > isee-navbar-user,
+  .page > isee-navbar-admin {
     display: block;
     position: relative;
     z-index: 100;
     flex: 0 0 auto;
     width: 100%;
+    max-width: 100%;
   }
 
   /* Force navbar out of absolute/fixed positioning into normal flow */
@@ -272,6 +304,7 @@ body {
   .isee-navbar.position-absolute {
     position: relative !important;
     width: 100% !important;
+    max-width: 100% !important;
     min-height: auto !important;
     height: auto !important;
     top: auto !important;
@@ -362,10 +395,12 @@ body {
   .page > .page-wrapper,
   .page-wrapper {
     width: 100% !important;
+    max-width: 100% !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
     padding-left: 0 !important;
     min-width: 0 !important;
+    overflow-x: hidden !important;
   }
 }
 
@@ -706,4 +741,28 @@ footer p {
 .isee-user-menu__item--danger:hover {
   background: rgba(220, 55, 55, 0.12);
   color: #ffa0a0;
+}
+
+/* ─── Navbar avatar image / initials ───────────────────────────── */
+.isee-user-btn__avatar-img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.isee-user-btn__initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(124, 203, 77, 0.2);
+  color: #9fe997;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1;
 }

@@ -71,6 +71,17 @@ class ISeeIdentifyHistory extends HTMLElement {
               ID History
             </h3>
             <div class="hist-sidebar__header-actions">
+              <button class="hist-sidebar__delete-all-btn" id="histDeleteAllBtn" type="button"
+                aria-label="Delete all history from database" title="Delete all (permanent)" hidden>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14H6L5 6"/>
+                  <path d="M10 11v6M14 11v6"/>
+                  <path d="M9 6V4h6v2"/>
+                </svg>
+              </button>
               <button class="hist-sidebar__clear-btn" id="histClearBtn" type="button"
                 aria-label="Clear all history" title="Clear history" hidden>
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
@@ -120,6 +131,7 @@ class ISeeIdentifyHistory extends HTMLElement {
     this._list          = this.querySelector('#histList');
     this._empty         = this.querySelector('#histEmpty');
     this._clearBtn      = this.querySelector('#histClearBtn');
+    this._deleteAllBtn  = this.querySelector('#histDeleteAllBtn');
     this._tabBtn        = this.querySelector('#histTabBtn');
     this._mobileOpenBtn = this.querySelector('#histMobileOpenBtn');
 
@@ -134,6 +146,7 @@ class ISeeIdentifyHistory extends HTMLElement {
 
     // Clear all
     this._clearBtn.addEventListener('click', () => this.clear());
+    this._deleteAllBtn.addEventListener('click', () => this._deleteAll());
 
     // Escape key
     document.addEventListener('keydown', e => {
@@ -172,8 +185,9 @@ class ISeeIdentifyHistory extends HTMLElement {
       }
 
       if (records.length > 0) {
-        this._clearBtn.hidden = false;
-        this._empty.hidden    = true;
+        this._clearBtn.hidden    = false;
+        this._deleteAllBtn.hidden = false;
+        this._empty.hidden       = true;
       }
     } catch (_) {
       // Not admin, not logged in, or server unavailable — stay silent
@@ -265,6 +279,7 @@ class ISeeIdentifyHistory extends HTMLElement {
     this._records.unshift(entry);        // newest first
     this._renderRecord(entry);
     this._clearBtn.hidden = false;
+    this._deleteAllBtn.hidden = false;
     this._empty.hidden    = true;
   }
 
@@ -292,6 +307,42 @@ class ISeeIdentifyHistory extends HTMLElement {
     this._list.querySelectorAll('.hist-card').forEach(el => el.remove());
     this._empty.hidden    = false;
     this._clearBtn.hidden = true;
+    this._deleteAllBtn.hidden = true;
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────
+
+  /**
+   * Hard-delete ALL persisted identification records for the current user,
+   * then clear the in-memory list from view.
+   */
+  async _deleteAll() {
+    const count = this._records.length;
+    if (count === 0) return;
+
+    const persisted = this._records.filter(r => r.dbId).length;
+    const msg = persisted > 0
+      ? `Permanently delete all ${persisted} identification record${persisted !== 1 ? 's' : ''} from the database?\n\nThis cannot be undone. Records cleared from view only (session entries) will not be affected.`
+      : `Clear ${count} session record${count !== 1 ? 's' : ''} from view?`;
+
+    const ok = await window.modalConfirm(msg, 'Delete All History', 'Delete All');
+    if (!ok) return;
+
+    this._deleteAllBtn.disabled = true;
+
+    try {
+      if (persisted > 0) {
+        const fnName = window.ISEE_ADMIN_IDENTIFY
+          ? 'deleteAllIdentifications'
+          : 'deleteAllUserIdentifications';
+        const { [fnName]: deleteFn } = await import('../public/js/api/identify.api.js');
+        await deleteFn();
+      }
+      this.clear();
+    } catch (err) {
+      console.error('[ID History] bulk delete failed:', err);
+      this._deleteAllBtn.disabled = false;
+    }
   }
 
   // ── Helpers ───────────────────────────────────────────────────────
