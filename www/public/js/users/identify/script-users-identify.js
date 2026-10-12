@@ -958,6 +958,9 @@ async function fetchAndRenderCatalogMatch(topResult) {
     body.appendChild(desc);
   }
 
+  // Guard against a concurrent identification appending a card first
+  document.getElementById('speciesCatalogCard')?.remove();
+
   // Insert as a sibling after the results panel
   const resultsPanel = document.getElementById('identifyResultsPanel');
   if (resultsPanel) {

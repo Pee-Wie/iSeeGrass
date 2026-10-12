@@ -794,6 +794,7 @@ function renderIdResults(result) {
           </div>
         </div>
       </div>`;
+    return;
   }
 
   // ── Seagrass detected ──────────────────────────────────────────────────────
@@ -813,9 +814,7 @@ function renderIdResults(result) {
     </div>`;
 
   // Defer the catalog lookup so the result panel paints first
-  if (!isBackground) {
-    setTimeout(() => fetchAndRenderCatalogMatch(top_result), 0);
-  }
+  setTimeout(() => fetchAndRenderCatalogMatch(top_result), 0);
 }
 
 // ─── Species catalog match card ────────────────────────────────────────────────
@@ -917,6 +916,9 @@ async function fetchAndRenderCatalogMatch(topResult) {
     desc.textContent = text.length > 200 ? `${text.slice(0, 200)}…` : text;
     body.appendChild(desc);
   }
+
+  // Guard against a concurrent identification appending a card first
+  document.getElementById('speciesCatalogCard')?.remove();
 
   // Append inside the results container, after the existing content
   getOrCreateResultsContainer().appendChild(card);
