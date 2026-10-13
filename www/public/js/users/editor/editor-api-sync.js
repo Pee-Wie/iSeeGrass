@@ -54,9 +54,9 @@ async function loadAndRenderList() {
   try {
     const data = await listAssessments({ limit: 50, page: 1 });
     assessmentsCache = data.assessments || [];
-    refreshDocList(assessmentsCache);
+    refreshDocList(assessmentsCache, apiAssessmentId);
   } catch {
-    refreshDocList([]);
+    refreshDocList([], null);
   }
 }
 
@@ -234,7 +234,7 @@ document.addEventListener('isee:delete-all-assessments', async () => {
     const canvasEl = document.getElementById('editorCanvas');
     if (titleEl)  titleEl.value      = '';
     if (canvasEl) canvasEl.innerHTML = '';
-    refreshDocList([]);
+    refreshDocList([], null);
     showEditorToast('All assessments deleted', 'success');
   } catch {
     showEditorToast('Delete failed. Please try again.', 'error');

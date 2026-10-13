@@ -176,6 +176,20 @@
   background: rgba(142, 214, 85, 0.10);
 }
 
+.doc-item.is-selected {
+  border-color: rgba(142, 214, 85, 0.70);
+  background: rgba(142, 214, 85, 0.18);
+  box-shadow: 0 0 0 1px rgba(142, 214, 85, 0.30) inset;
+}
+
+.doc-item.is-selected .doc-item__icon {
+  color: rgba(124, 203, 77, 0.90);
+}
+
+.doc-item.is-selected .doc-item__name {
+  color: #b6efb6;
+}
+
 .doc-item__icon {
   color: rgba(124, 203, 77, 0.55);
   font-size: 0.9rem;

@@ -253,7 +253,7 @@ const STATUS_META = {
  * @param {Array} assessments  DB records from editor-api-sync.js
  *   Shape: { id, user_id, title, content, status, created_at, updated_at }
  */
-function refreshDocList(assessments) {
+function refreshDocList(assessments, activeId = null) {
   const list      = document.getElementById('docList');
   const deleteAll = document.getElementById('btnDeleteAllAssessments');
   if (!list) return;
@@ -277,7 +277,7 @@ function refreshDocList(assessments) {
     const sm      = STATUS_META[doc.status] || STATUS_META['draft'];
 
     const item = document.createElement('div');
-    item.className = 'doc-item';
+    item.className = 'doc-item' + (doc.id === activeId ? ' is-selected' : '');
     item.setAttribute('role', 'listitem');
     item.setAttribute('aria-label', `Assessment: ${doc.title || 'Untitled'}`);
     item.innerHTML = `
