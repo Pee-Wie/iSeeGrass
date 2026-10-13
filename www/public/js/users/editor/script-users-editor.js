@@ -184,11 +184,19 @@ const STORAGE_KEY  = 'iseeGrassEditorDraft';          // legacy single-draft key
 const ASSESSMENTS_KEY = 'iseeGrassAssessments';        // new multi-entry array key
 const MAX_SAVED = 50;
 
-/* Return the saved array, newest-first */
+/* Return the saved array, newest-first — deduped by title on every load */
 function loadAssessments() {
   try {
     const raw = localStorage.getItem(ASSESSMENTS_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const deduped = deduplicateAssessments(parsed);
+      // Persist the deduped list back if anything was removed
+      if (deduped.length !== parsed.length) {
+        localStorage.setItem(ASSESSMENTS_KEY, JSON.stringify(deduped));
+      }
+      return deduped;
+    }
     // ── one-time migration from the old single-draft key ──────── //
     const legacy = localStorage.getItem(STORAGE_KEY);
     if (legacy) {
@@ -209,6 +217,30 @@ function loadAssessments() {
 
 function saveAssessments(list) {
   try { localStorage.setItem(ASSESSMENTS_KEY, JSON.stringify(list)); } catch (_) {}
+}
+
+/**
+ * Deduplicate the assessments list by title (case-insensitive).
+ * Keeps the entry with the most-recent `ts` for each title.
+ * Called once on load to clean up any duplicates created by the old buggy save logic.
+ */
+function deduplicateAssessments(list) {
+  const seen = new Map(); // normalised title → index in result
+  const result = [];
+  for (const entry of list) {
+    const key = (entry.title || '').trim().toLowerCase();
+    if (seen.has(key)) {
+      // Keep whichever is newer
+      const existingIdx = seen.get(key);
+      if (new Date(entry.ts) > new Date(result[existingIdx].ts)) {
+        result[existingIdx] = entry;
+      }
+    } else {
+      seen.set(key, result.length);
+      result.push(entry);
+    }
+  }
+  return result;
 }
 
 function saveWithStatus(status) {
