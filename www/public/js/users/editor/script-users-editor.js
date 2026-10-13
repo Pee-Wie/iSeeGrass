@@ -403,7 +403,7 @@ function refreshDocList() {
       const commit = () => {
         const newTitle = input.value.trim() || '';
         const all = loadAssessments();
-        const idx = all.findIndex(d => d.ts === doc.ts);
+        const idx = all.findIndex(d => d.id === doc.id);
         if (idx !== -1) {
           all[idx].title = newTitle;
           saveAssessments(all);

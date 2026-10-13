@@ -27,6 +27,13 @@ let apiAssessmentId = null;
 
 let apiAssessmentsCache = [];   // [{id, title, updated_at, ...}]
 
+// Gate: resolves once apiAssessmentsCache has been populated (or the load fails).
+// This prevents the isee:assessment-loaded listener from reading the cache before
+// loadLatestFromApi() has finished, which would cause apiAssessmentId to stay null
+// and trigger a spurious POST (duplicate) instead of a PUT (update).
+let apiCacheReady;
+const cacheReadyPromise = new Promise(resolve => { apiCacheReady = resolve; });
+
 // Map the editor's local status keys to the API's enum values
 const STATUS_MAP = {
   'draft':       'draft',
@@ -106,7 +113,7 @@ function bindSaveButton(id, localStatus, guard) {
     // This mirrors any early-return checks already present in wireFooter's handler
     // for the same button (e.g. the empty-title check on btnFinalize).
     if (guard && !guard()) return;
-    syncToApi(localStatus);
+    syncToApi(localStatus).catch(() => {});  // error already shown via showEditorToast
   });
 }
 
@@ -116,6 +123,7 @@ async function loadLatestFromApi() {
   try {
     const data = await listAssessments({ limit: 50, page: 1 });
     apiAssessmentsCache = data.assessments || [];
+    apiCacheReady();  // cache is populated — unblock the isee:assessment-loaded listener
     if (!apiAssessmentsCache.length) return;
 
     const titleEl  = document.getElementById('editorTitle');
@@ -157,11 +165,13 @@ async function loadLatestFromApi() {
     }
   } catch {
     // Offline or unauthenticated — localStorage draft is fine
+    apiCacheReady();  // resolve even on failure so the listener never hangs
   }
 }
 
 // ── Listen for sidebar load events so apiAssessmentId stays in sync ──────────
-document.addEventListener('isee:assessment-loaded', e => {
+document.addEventListener('isee:assessment-loaded', async e => {
+  await cacheReadyPromise;  // don't read the cache until loadLatestFromApi() has finished
   const { title } = e.detail || {};
   if (!title) { apiAssessmentId = null; return; }
   const match = apiAssessmentsCache.find(
