@@ -75,8 +75,12 @@ async function syncToApi(localStatus) {
   }
 }
 
-function bindSaveButton(id, localStatus) {
+function bindSaveButton(id, localStatus, guard) {
   document.getElementById(id)?.addEventListener('click', () => {
+    // If a guard function is provided, skip the API sync when it returns false.
+    // This mirrors any early-return checks already present in wireFooter's handler
+    // for the same button (e.g. the empty-title check on btnFinalize).
+    if (guard && !guard()) return;
     syncToApi(localStatus);
   });
 }
@@ -123,8 +127,12 @@ document.addEventListener('isee:editor-save', e => {
   // (DOMContentLoaded has already fired by the time this module runs)
   await loadLatestFromApi();
 
-  // Bind the three footer save buttons
+  // Bind the three footer save buttons.
+  // btnFinalize mirrors the title guard from wireFooter in script-users-editor.js:
+  // skip the API sync when the title is blank (same condition that blocks localStorage).
   bindSaveButton('btnSaveDraft',  'draft');
   bindSaveButton('btnInProgress', 'in-progress');
-  bindSaveButton('btnFinalize',   'final');
+  bindSaveButton('btnFinalize',   'final', () =>
+    !!document.getElementById('editorTitle')?.value?.trim()
+  );
 })();
