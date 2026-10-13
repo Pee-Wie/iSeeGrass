@@ -90,6 +90,8 @@ const TEMPLATES = {
 
 let canvas, titleInput, unsavedBadge, wordCountEl, charCountEl, cursorPosEl;
 
+let currentLocalId = null;  // UUID of the localStorage entry currently open in the editor
+
 /* ═══════════════════════════════════════════════════════════════════
    Utility helpers
    ═══════════════════════════════════════════════════════════════════ */
@@ -210,24 +212,46 @@ function saveAssessments(list) {
 }
 
 function saveWithStatus(status) {
-  const list = loadAssessments();
+  const list  = loadAssessments();
+  const title = titleInput ? titleInput.value.trim() : '';
+  const body  = canvas ? canvas.innerHTML : '';
+  const ts    = new Date().toISOString();
 
-  const newEntry = {
-    id:     crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
-    title:  titleInput ? titleInput.value.trim() : '',
-    body:   canvas ? canvas.innerHTML : '',
-    ts:     new Date().toISOString(),
-    status,                    // 'draft' | 'in-progress' | 'final'
-  };
+  // Find existing entry: prefer matching by currentLocalId first,
+  // then fall back to title match (case-insensitive).
+  let existingIdx = currentLocalId
+    ? list.findIndex(e => e.id === currentLocalId)
+    : -1;
 
-  // Prepend (newest first), cap at MAX_SAVED
-  list.unshift(newEntry);
+  if (existingIdx === -1 && title) {
+    existingIdx = list.findIndex(e => e.title.trim().toLowerCase() === title.toLowerCase());
+  }
+
+  if (existingIdx !== -1) {
+    // Overwrite the existing entry in place, then move it to the top
+    const existing = list[existingIdx];
+    list[existingIdx] = { ...existing, title, body, ts, status };
+    const [updated] = list.splice(existingIdx, 1);
+    list.unshift(updated);
+    currentLocalId = updated.id;
+  } else {
+    // New entry
+    const newEntry = {
+      id:     crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+      title,
+      body,
+      ts,
+      status,
+    };
+    list.unshift(newEntry);
+    currentLocalId = newEntry.id;
+  }
+
   if (list.length > MAX_SAVED) list.length = MAX_SAVED;
   saveAssessments(list);
-
   markSaved();
   refreshDocList();
-  return newEntry;
+  return list[0];
 }
 
 function saveDraft() {
@@ -287,6 +311,7 @@ function loadDraft() {
   const list = loadAssessments();
   if (!list.length) return;
   const latest = list[0];
+  currentLocalId = latest.id || null;   // track which entry is open
   if (titleInput) titleInput.value = latest.title || '';
   if (canvas)     canvas.innerHTML = latest.body  || '';
   markSaved();
@@ -303,6 +328,7 @@ async function clearDraft() {
   if (titleInput) titleInput.value = '';
   if (canvas)     canvas.innerHTML = '';
   markSaved();
+  currentLocalId = null;
   updateCounts();
   showToast('Assessment cleared', 'success');
 }
@@ -400,6 +426,12 @@ function refreshDocList() {
       if (titleInput) titleInput.value = doc.title || '';
       if (canvas)     canvas.innerHTML = doc.body  || '';
       markSaved();
+      currentLocalId = doc.id || null;
+      // Notify editor-api-sync that the active assessment changed
+      document.dispatchEvent(new CustomEvent('isee:assessment-loaded', {
+        detail: { localId: doc.id, title: doc.title },
+        bubbles: false,
+      }));
       updateCounts();
       showToast(`Loaded: ${doc.title || 'Untitled'}`, 'success');
     });
@@ -438,6 +470,7 @@ async function applyTemplate(key) {
   }
   canvas.innerHTML = TEMPLATES[key] || '';
   titleInput.value = '';
+  currentLocalId = null;
   markSaved();
   updateCounts();
   showToast(`Template "${key}" loaded`, 'success');

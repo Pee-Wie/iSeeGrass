@@ -25,6 +25,8 @@ import { me } from '../../api/auth.api.js';
 // null = not yet saved to API; number = already synced.
 let apiAssessmentId = null;
 
+let apiAssessmentsCache = [];   // [{id, title, updated_at, ...}]
+
 // Map the editor's local status keys to the API's enum values
 const STATUS_MAP = {
   'draft':       'draft',
@@ -49,30 +51,53 @@ async function syncToApi(localStatus) {
 
   try {
     if (apiAssessmentId) {
-      // Update existing record
+      // Update the existing record
       await updateAssessment(apiAssessmentId, { title, content, status });
     } else {
-      // Create new record
-      const created    = await createAssessment({ title, content, status });
-      apiAssessmentId  = created.id;
+      // Check if a record with this title already exists for this user
+      const conflict = apiAssessmentsCache.find(
+        r => r.title.trim().toLowerCase() === title.toLowerCase()
+      );
+      if (conflict) {
+        // Treat it as an update — adopt the existing record's id
+        apiAssessmentId = conflict.id;
+        await updateAssessment(apiAssessmentId, { title, content, status });
+      } else {
+        // Genuinely new — create
+        const created   = await createAssessment({ title, content, status });
+        apiAssessmentId = created.id;
+        // Add to cache so future saves in this session use PUT
+        apiAssessmentsCache.push(created);
+      }
     }
+    // Keep cache entry in sync
+    const cacheIdx = apiAssessmentsCache.findIndex(r => r.id === apiAssessmentId);
+    if (cacheIdx !== -1) apiAssessmentsCache[cacheIdx] = { ...apiAssessmentsCache[cacheIdx], title, status };
   } catch (err) {
-    // Non-fatal: localStorage save already happened; just log.
     console.warn('[editor-api-sync] API sync failed:', err.message);
-    // Show a non-blocking error toast so the user knows the cloud save failed.
-    // localStorage already persisted the save, so data is not lost.
-    const toast = document.getElementById('editorToast');
-    if (toast) {
-      const icon = toast.querySelector('i');
-      const text = toast.querySelector('span');
-      toast.className = 'editor-toast editor-toast--error';
-      if (icon) icon.className = 'ti ti-alert-circle';
-      if (text) text.textContent = 'Cloud save failed — your draft is saved locally.';
-      toast.hidden = false;
-      clearTimeout(toast._timer);
-      toast._timer = setTimeout(() => { toast.hidden = true; }, 4000);
-    }
+    // Check if the error is a 409 title conflict from the server
+    const msg = err.message || '';
+    const isConflict = err.status === 409 || msg.toLowerCase().includes('already exists');
+    const toastMsg = isConflict
+      ? 'An assessment with this title already exists.'
+      : 'Cloud save failed — your draft is saved locally.';
+    showEditorToast(toastMsg, 'error');
+    // If it's a title conflict, also block by throwing
+    if (isConflict) throw err;
   }
+}
+
+function showEditorToast(msg, type = 'error') {
+  const toast = document.getElementById('editorToast');
+  if (!toast) return;
+  const icon = toast.querySelector('i');
+  const text = toast.querySelector('span');
+  toast.className = `editor-toast editor-toast--${type}`;
+  if (icon) icon.className = type === 'success' ? 'ti ti-circle-check' : 'ti ti-alert-circle';
+  if (text) text.textContent = msg;
+  toast.hidden = false;
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => { toast.hidden = true; }, 4000);
 }
 
 function bindSaveButton(id, localStatus, guard) {
@@ -89,50 +114,61 @@ function bindSaveButton(id, localStatus, guard) {
 
 async function loadLatestFromApi() {
   try {
-    const data = await listAssessments({ limit: 1, page: 1 });
-    const rows = data.assessments || [];
-    if (!rows.length) return;
+    const data = await listAssessments({ limit: 50, page: 1 });
+    apiAssessmentsCache = data.assessments || [];
+    if (!apiAssessmentsCache.length) return;
 
-    // Always fetch the full record so we can get the content and id.
-    const full = await getAssessment(rows[0].id);
-
-    // Always capture the DB id — this is the fix for the race condition.
-    // Even if localStorage content is newer, we still need this id for PUT.
-    apiAssessmentId = full.id;
-
-    // Compare API record's updated_at with the localStorage draft's ts field.
-    // loadDraft() (in script-users-editor.js) stores timestamps as `ts`.
     const titleEl  = document.getElementById('editorTitle');
     const canvasEl = document.getElementById('editorCanvas');
+    const currentTitle = titleEl?.value?.trim() || '';
 
-    // Read the most-recent localStorage draft to compare timestamps.
-    // ASSESSMENTS_KEY ('iseeGrassAssessments') is defined in script-users-editor.js;
-    // we replicate the key string here rather than importing it (same file-scope).
+    // Try to find an API record matching the currently loaded title
+    const match = currentTitle
+      ? apiAssessmentsCache.find(r => r.title.trim().toLowerCase() === currentTitle.toLowerCase())
+      : null;
+
+    const candidate = match || apiAssessmentsCache[0];
+
+    // Always capture the DB id so saves use PUT
+    apiAssessmentId = candidate.id;
+
+    // Only overwrite the editor if the API version is strictly newer
+    const full = await getAssessment(candidate.id);
+    apiAssessmentId = full.id;   // confirm with full record
+
     let localTs = null;
     try {
       const raw = localStorage.getItem('iseeGrassAssessments');
       if (raw) {
         const list = JSON.parse(raw);
-        if (list.length) localTs = list[0].ts || null;   // ISO string or null
+        const localMatch = currentTitle
+          ? list.find(e => e.title?.trim().toLowerCase() === currentTitle.toLowerCase())
+          : list[0];
+        if (localMatch) localTs = localMatch.ts || null;
       }
-    } catch (_) { /* corrupt localStorage */ }
+    } catch (_) {}
 
-    const apiTs   = full.updated_at || full.created_at || null;
-    const apiDate = apiTs   ? new Date(apiTs).getTime()   : 0;
+    const apiDate = full.updated_at ? new Date(full.updated_at).getTime() : 0;
     const locDate = localTs ? new Date(localTs).getTime() : 0;
 
-    // API record wins when it's newer OR when there is no local draft.
-    if (apiDate >= locDate) {
+    if (apiDate > locDate) {
       if (titleEl)  titleEl.value      = full.title   || '';
       if (canvasEl) canvasEl.innerHTML = full.content || '';
     }
-    // If local draft is strictly newer, loadDraft() already populated the
-    // editor with the right content, so we just leave it in place.
-    // Either way, apiAssessmentId is now set, so saves will use PUT.
   } catch {
-    // Offline or guest — localStorage draft loaded by loadDraft() remains.
+    // Offline or unauthenticated — localStorage draft is fine
   }
 }
+
+// ── Listen for sidebar load events so apiAssessmentId stays in sync ──────────
+document.addEventListener('isee:assessment-loaded', e => {
+  const { title } = e.detail || {};
+  if (!title) { apiAssessmentId = null; return; }
+  const match = apiAssessmentsCache.find(
+    r => r.title.trim().toLowerCase() === title.trim().toLowerCase()
+  );
+  apiAssessmentId = match ? match.id : null;
+});
 
 // ── Listen for the custom event so we can sync when Ctrl+S fires too ─────────
 // NOTE: isee:editor-save is currently only dispatched by external integrations.
