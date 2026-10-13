@@ -90,8 +90,6 @@ const TEMPLATES = {
 
 let canvas, titleInput, unsavedBadge, wordCountEl, charCountEl, cursorPosEl;
 
-let currentLocalId = null;  // UUID of the localStorage entry currently open in the editor
-
 /* ═══════════════════════════════════════════════════════════════════
    Utility helpers
    ═══════════════════════════════════════════════════════════════════ */
@@ -173,122 +171,12 @@ function syncToolbarState() {
   });
 }
 
-/* ─── Push an entry to the history sidebar ───────────────────────── */
-/* (removed — history sidebar is Identify-only; saves go to the sidebar panel) */
-
 /* ═══════════════════════════════════════════════════════════════════
-   LocalStorage persistence  — multi-entry assessment list
+   saveDraft — dispatches via event so editor-api-sync.js handles it
    ═══════════════════════════════════════════════════════════════════ */
 
-const STORAGE_KEY  = 'iseeGrassEditorDraft';          // legacy single-draft key (kept for migration)
-const ASSESSMENTS_KEY = 'iseeGrassAssessments';        // new multi-entry array key
-const MAX_SAVED = 50;
-
-/* Return the saved array, newest-first — deduped by title on every load */
-function loadAssessments() {
-  try {
-    const raw = localStorage.getItem(ASSESSMENTS_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      const deduped = deduplicateAssessments(parsed);
-      // Persist the deduped list back if anything was removed
-      if (deduped.length !== parsed.length) {
-        localStorage.setItem(ASSESSMENTS_KEY, JSON.stringify(deduped));
-      }
-      return deduped;
-    }
-    // ── one-time migration from the old single-draft key ──────── //
-    const legacy = localStorage.getItem(STORAGE_KEY);
-    if (legacy) {
-      const doc = JSON.parse(legacy);
-      const migrated = [{
-        id:    crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
-        title: doc.title || '',
-        body:  doc.body  || '',
-        ts:    doc.ts    || new Date().toISOString(),
-      }];
-      localStorage.setItem(ASSESSMENTS_KEY, JSON.stringify(migrated));
-      localStorage.removeItem(STORAGE_KEY);
-      return migrated;
-    }
-  } catch (_) { /* corrupt */ }
-  return [];
-}
-
-function saveAssessments(list) {
-  try { localStorage.setItem(ASSESSMENTS_KEY, JSON.stringify(list)); } catch (_) {}
-}
-
-/**
- * Deduplicate the assessments list by title (case-insensitive).
- * Keeps the entry with the most-recent `ts` for each title.
- * Called once on load to clean up any duplicates created by the old buggy save logic.
- */
-function deduplicateAssessments(list) {
-  const seen = new Map(); // normalised title → index in result
-  const result = [];
-  for (const entry of list) {
-    const key = (entry.title || '').trim().toLowerCase();
-    if (seen.has(key)) {
-      // Keep whichever is newer
-      const existingIdx = seen.get(key);
-      if (new Date(entry.ts) > new Date(result[existingIdx].ts)) {
-        result[existingIdx] = entry;
-      }
-    } else {
-      seen.set(key, result.length);
-      result.push(entry);
-    }
-  }
-  return result;
-}
-
-function saveWithStatus(status) {
-  const list  = loadAssessments();
-  const title = titleInput ? titleInput.value.trim() : '';
-  const body  = canvas ? canvas.innerHTML : '';
-  const ts    = new Date().toISOString();
-
-  // Find existing entry: prefer matching by currentLocalId first,
-  // then fall back to title match (case-insensitive).
-  let existingIdx = currentLocalId
-    ? list.findIndex(e => e.id === currentLocalId)
-    : -1;
-
-  if (existingIdx === -1 && title) {
-    existingIdx = list.findIndex(e => e.title.trim().toLowerCase() === title.toLowerCase());
-  }
-
-  if (existingIdx !== -1) {
-    // Overwrite the existing entry in place, then move it to the top
-    const existing = list[existingIdx];
-    list[existingIdx] = { ...existing, title, body, ts, status };
-    const [updated] = list.splice(existingIdx, 1);
-    list.unshift(updated);
-    currentLocalId = updated.id;
-  } else {
-    // New entry
-    const newEntry = {
-      id:     crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
-      title,
-      body,
-      ts,
-      status,
-    };
-    list.unshift(newEntry);
-    currentLocalId = newEntry.id;
-  }
-
-  if (list.length > MAX_SAVED) list.length = MAX_SAVED;
-  saveAssessments(list);
-  markSaved();
-  refreshDocList();
-  return list[0];
-}
-
 function saveDraft() {
-  saveWithStatus('draft');
-  showToast('Draft saved', 'success');
+  document.dispatchEvent(new CustomEvent('isee:save-requested', { detail: { status: 'draft' } }));
 }
 
 /* ── Download current document as an HTML file ───────────────────── */
@@ -338,18 +226,6 @@ function downloadDocument(title, body, status) {
   setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
 }
 
-function loadDraft() {
-  // Load the most-recent saved entry into the editor on page open
-  const list = loadAssessments();
-  if (!list.length) return;
-  const latest = list[0];
-  currentLocalId = latest.id || null;   // track which entry is open
-  if (titleInput) titleInput.value = latest.title || '';
-  if (canvas)     canvas.innerHTML = latest.body  || '';
-  markSaved();
-  updateCounts();
-}
-
 async function clearDraft() {
   const ok = await modalConfirm(
     'Clear the current assessment? This cannot be undone.',
@@ -360,25 +236,31 @@ async function clearDraft() {
   if (titleInput) titleInput.value = '';
   if (canvas)     canvas.innerHTML = '';
   markSaved();
-  currentLocalId = null;
   updateCounts();
+  document.dispatchEvent(new CustomEvent('isee:editor-cleared'));
   showToast('Assessment cleared', 'success');
 }
 
 /* ── Build the Saved Assessments list in the left sidebar ─────────── */
 const STATUS_META = {
   'draft':       { label: 'Draft',       cls: 'badge--draft'    },
-  'in-progress': { label: 'In Progress', cls: 'badge--progress' },
-  'final':       { label: 'Final',       cls: 'badge--final'    },
+  'in_progress': { label: 'In Progress', cls: 'badge--progress' },
+  'finalized':   { label: 'Finalized',   cls: 'badge--final'    },
 };
 
-function refreshDocList() {
-  const list       = document.getElementById('docList');
-  const deleteAll  = document.getElementById('btnDeleteAllAssessments');
+/**
+ * Render the saved-assessments sidebar.
+ * @param {Array} assessments  DB records from editor-api-sync.js
+ *   Shape: { id, user_id, title, content, status, created_at, updated_at }
+ */
+function refreshDocList(assessments) {
+  const list      = document.getElementById('docList');
+  const deleteAll = document.getElementById('btnDeleteAllAssessments');
   if (!list) return;
   list.innerHTML = '';
 
-  const assessments = loadAssessments();
+  // Ensure we always work with an array
+  if (!Array.isArray(assessments)) assessments = [];
 
   // Show / hide the delete-all button
   if (deleteAll) deleteAll.hidden = assessments.length === 0;
@@ -388,9 +270,8 @@ function refreshDocList() {
     return;
   }
 
-  // assessments array is already newest-first
-  assessments.forEach((doc, index) => {
-    const d       = new Date(doc.ts);
+  assessments.forEach(doc => {
+    const d       = new Date(doc.updated_at || doc.created_at);
     const dateStr = d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
     const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const sm      = STATUS_META[doc.status] || STATUS_META['draft'];
@@ -434,14 +315,14 @@ function refreshDocList() {
 
       const commit = () => {
         const newTitle = input.value.trim() || '';
-        const all = loadAssessments();
-        const idx = all.findIndex(d => d.id === doc.id);
-        if (idx !== -1) {
-          all[idx].title = newTitle;
-          saveAssessments(all);
-          doc.title = newTitle;
+        if (newTitle && newTitle !== currentTitle) {
+          document.dispatchEvent(new CustomEvent('isee:rename-assessment', {
+            detail: { id: doc.id, newTitle },
+          }));
+        } else {
+          // No change — just re-render to restore the name element
+          refreshDocList(assessments);
         }
-        refreshDocList();
       };
 
       input.addEventListener('blur', commit);
@@ -455,32 +336,19 @@ function refreshDocList() {
     item.addEventListener('click', (e) => {
       if (e.target.closest('.doc-item__delete')) return;
       if (e.target.closest('.doc-item__rename-input') || e.target.classList.contains('doc-item__name')) return;
-      if (titleInput) titleInput.value = doc.title || '';
-      if (canvas)     canvas.innerHTML = doc.body  || '';
-      markSaved();
-      currentLocalId = doc.id || null;
-      // Notify editor-api-sync that the active assessment changed
-      document.dispatchEvent(new CustomEvent('isee:assessment-loaded', {
-        detail: { localId: doc.id, title: doc.title },
-        bubbles: false,
+      document.dispatchEvent(new CustomEvent('isee:load-assessment', {
+        detail: { id: doc.id },
+        bubbles: true,
       }));
-      updateCounts();
-      showToast(`Loaded: ${doc.title || 'Untitled'}`, 'success');
     });
 
     /* Per-item delete */
-    item.querySelector('.doc-item__delete').addEventListener('click', async (e) => {
+    item.querySelector('.doc-item__delete').addEventListener('click', (e) => {
       e.stopPropagation();
-      const ok = await modalConfirm(
-        `Delete "${doc.title || 'Untitled'}"?\nThis cannot be undone.`,
-        'Delete Assessment',
-        'Delete'
-      );
-      if (!ok) return;
-      const updated = loadAssessments().filter((_, i) => i !== index);
-      saveAssessments(updated);
-      refreshDocList();
-      showToast('Assessment deleted', 'success');
+      document.dispatchEvent(new CustomEvent('isee:delete-assessment', {
+        detail: { id: doc.id, title: doc.title },
+        bubbles: true,
+      }));
     });
 
     list.appendChild(item);
@@ -502,7 +370,7 @@ async function applyTemplate(key) {
   }
   canvas.innerHTML = TEMPLATES[key] || '';
   titleInput.value = '';
-  currentLocalId = null;
+  document.dispatchEvent(new CustomEvent('isee:editor-cleared'));
   markSaved();
   updateCounts();
   showToast(`Template "${key}" loaded`, 'success');
@@ -1038,23 +906,22 @@ function wireFooter() {
     showToast('Transect table inserted', 'success');
   });
 
-  document.getElementById('btnSaveDraft')?.addEventListener('click', saveDraft);
+  // Save buttons dispatch events — editor-api-sync.js handles them
+  document.getElementById('btnSaveDraft')?.addEventListener('click', () =>
+    document.dispatchEvent(new CustomEvent('isee:save-requested', { detail: { status: 'draft' } }))
+  );
 
-  document.getElementById('btnInProgress')?.addEventListener('click', () => {
-    saveWithStatus('in-progress');
-    showToast('Saved as In Progress', 'success');
-  });
+  document.getElementById('btnInProgress')?.addEventListener('click', () =>
+    document.dispatchEvent(new CustomEvent('isee:save-requested', { detail: { status: 'in-progress' } }))
+  );
 
   document.getElementById('btnFinalize')?.addEventListener('click', () => {
-    if (!titleInput.value.trim()) {
+    if (!titleInput?.value.trim()) {
       showToast('Please enter a title before finalizing', 'error');
-      titleInput.focus();
+      titleInput?.focus();
       return;
     }
-    const entry = saveWithStatus('final');
-    showToast('Assessment finalized!', 'success');
-    // Auto-download on finalize
-    downloadDocument(entry.title, entry.body, 'final');
+    document.dispatchEvent(new CustomEvent('isee:save-requested', { detail: { status: 'final' } }));
   });
 
   document.getElementById('btnPrint')?.addEventListener('click', printDocument);
@@ -1126,7 +993,7 @@ function wireTitle() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   Auto-save (every 60 s)
+   Auto-save (every 60 s) — calls saveDraft() which dispatches the event
    ═══════════════════════════════════════════════════════════════════ */
 
 function startAutoSave() {
@@ -1164,23 +1031,10 @@ function init() {
   wireTemplates();
   wireTitle();
 
-  // Load persisted draft
-  loadDraft();
-  refreshDocList();
-
-  // Wire delete-all assessments button
-  document.getElementById('btnDeleteAllAssessments')?.addEventListener('click', async () => {
-    const count = loadAssessments().length;
-    if (!count) return;
-    const ok = await modalConfirm(
-      `This will permanently delete all ${count} saved assessment${count > 1 ? 's' : ''}.\nThis cannot be undone.`,
-      `Delete All Assessments`,
-      'Delete All'
-    );
-    if (!ok) return;
-    saveAssessments([]);
-    refreshDocList();
-    showToast('All assessments deleted', 'success');
+  // editor-api-sync.js handles loading from DB and rendering the sidebar.
+  // Wire delete-all button — event handled by editor-api-sync.js
+  document.getElementById('btnDeleteAllAssessments')?.addEventListener('click', () => {
+    document.dispatchEvent(new CustomEvent('isee:delete-all-assessments'));
   });
 
   startAutoSave();
