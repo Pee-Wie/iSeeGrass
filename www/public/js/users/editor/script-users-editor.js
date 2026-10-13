@@ -237,6 +237,7 @@ function saveDraft() {
 
 /* ── Download current document as an HTML file ───────────────────── */
 function downloadDocument(title, body, status) {
+  const cleanBody = body.replace(/^\s*<h1[^>]*>[\s\S]*?<\/h1>\s*/i, '');
   const safeName = (title || 'assessment').replace(/[^a-z0-9_\-]/gi, '_').replace(/_+/g, '_');
   const filename = `${safeName}_${status}.html`;
 
@@ -263,7 +264,7 @@ function downloadDocument(title, body, status) {
 </head>
 <body>
   <h1>${title || 'Assessment'}</h1>
-  ${body}
+  ${cleanBody}
   <div class="meta">
     iSeeGrass Assessment &mdash; Status: <strong>${status.replace('-', ' ')}</strong>
     &mdash; Exported: ${new Date().toLocaleString()}
@@ -620,8 +621,9 @@ function applyFontColor(color) {
    ═══════════════════════════════════════════════════════════════════ */
 
 function printDocument() {
-  const title = titleInput ? titleInput.value || 'Assessment' : 'Assessment';
-  const body  = canvas ? canvas.innerHTML : '';
+  const title     = titleInput ? titleInput.value || 'Assessment' : 'Assessment';
+  const body      = canvas ? canvas.innerHTML : '';
+  const cleanBody = body.replace(/^\s*<h1[^>]*>[\s\S]*?<\/h1>\s*/i, '');
   const win   = window.open('', '_blank', 'width=800,height=600');
   win.document.write(`<!DOCTYPE html>
 <html lang="en">
@@ -641,7 +643,7 @@ function printDocument() {
 </head>
 <body>
   <h1>${title}</h1>
-  ${body}
+  ${cleanBody}
 </body>
 </html>`);
   win.document.close();
@@ -935,8 +937,9 @@ function wireFooter() {
   document.getElementById('btnClear')?.addEventListener('click', clearDraft);
 
   document.getElementById('btnPreview')?.addEventListener('click', () => {
-    const title = titleInput.value || 'Assessment Preview';
-    const body  = canvas.innerHTML;
+    const title     = titleInput.value || 'Assessment Preview';
+    const body      = canvas.innerHTML;
+    const cleanBody = body.replace(/^\s*<h1[^>]*>[\s\S]*?<\/h1>\s*/i, '');
     const win   = window.open('', '_blank', 'width=900,height=700');
     win.document.write(`<!DOCTYPE html>
 <html lang="en">
@@ -956,7 +959,7 @@ function wireFooter() {
 </head>
 <body>
   <h1>${title}</h1>
-  ${body}
+  ${cleanBody}
   <hr style="margin-top:2rem">
   <p style="font-size:.78rem;color:#888;">iSeeGrass Assessment — Preview</p>
 </body>

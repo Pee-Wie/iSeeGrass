@@ -18,7 +18,7 @@
 
 'use strict';
 
-import { createAssessment, updateAssessment, listAssessments } from '../../api/assessments.api.js';
+import { createAssessment, updateAssessment, listAssessments, getAssessment } from '../../api/assessments.api.js';
 import { me } from '../../api/auth.api.js';
 
 // The DB id of the assessment currently open in the editor.
@@ -93,20 +93,44 @@ async function loadLatestFromApi() {
     const rows = data.assessments || [];
     if (!rows.length) return;
 
-    const latest = rows[0];
-    // Only populate the editor if it's currently empty (title + canvas blank)
-    const title   = document.getElementById('editorTitle');
-    const canvas  = document.getElementById('editorCanvas');
-    if (title && !title.value.trim() && canvas && !canvas.innerText.trim()) {
-      // Fetch the full record (with content)
-      const { getAssessment } = await import('../../api/assessments.api.js');
-      const full = await getAssessment(latest.id);
-      title.value        = full.title   || '';
-      canvas.innerHTML   = full.content || '';
-      apiAssessmentId    = full.id;
+    // Always fetch the full record so we can get the content and id.
+    const full = await getAssessment(rows[0].id);
+
+    // Always capture the DB id — this is the fix for the race condition.
+    // Even if localStorage content is newer, we still need this id for PUT.
+    apiAssessmentId = full.id;
+
+    // Compare API record's updated_at with the localStorage draft's ts field.
+    // loadDraft() (in script-users-editor.js) stores timestamps as `ts`.
+    const titleEl  = document.getElementById('editorTitle');
+    const canvasEl = document.getElementById('editorCanvas');
+
+    // Read the most-recent localStorage draft to compare timestamps.
+    // ASSESSMENTS_KEY ('iseeGrassAssessments') is defined in script-users-editor.js;
+    // we replicate the key string here rather than importing it (same file-scope).
+    let localTs = null;
+    try {
+      const raw = localStorage.getItem('iseeGrassAssessments');
+      if (raw) {
+        const list = JSON.parse(raw);
+        if (list.length) localTs = list[0].ts || null;   // ISO string or null
+      }
+    } catch (_) { /* corrupt localStorage */ }
+
+    const apiTs   = full.updated_at || full.created_at || null;
+    const apiDate = apiTs   ? new Date(apiTs).getTime()   : 0;
+    const locDate = localTs ? new Date(localTs).getTime() : 0;
+
+    // API record wins when it's newer OR when there is no local draft.
+    if (apiDate >= locDate) {
+      if (titleEl)  titleEl.value      = full.title   || '';
+      if (canvasEl) canvasEl.innerHTML = full.content || '';
     }
+    // If local draft is strictly newer, loadDraft() already populated the
+    // editor with the right content, so we just leave it in place.
+    // Either way, apiAssessmentId is now set, so saves will use PUT.
   } catch {
-    // Offline / guest — localStorage draft remains
+    // Offline or guest — localStorage draft loaded by loadDraft() remains.
   }
 }
 
