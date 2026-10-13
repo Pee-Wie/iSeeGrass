@@ -2,7 +2,7 @@
  * Identify page – Users
  *
  * Replicates the guest Aid page behaviour:
- *   • Photo Collector (PC) — drag-and-drop / browse, up to 12 images, 5 MB each
+ *   • Photo Collector (PC) — drag-and-drop / browse, up to 20 images, 5 MB each
  *   • Single-select thumbnail → Identify Species button activates
  *   • Inline rename (format: newName(originalName).ext)
  *   • Direct-upload panel (left 75%) — bypasses the PC
@@ -10,15 +10,25 @@
  *   • Camera modal (getUserMedia with front/back switch + shutter)
  *   • Fallback to native <input capture="environment"> when no getUserMedia
  *
- * Engine track is resolved automatically from admin system settings via
- * identifyImage() — no selector UI on this page.
- *
- * Element IDs match identify.html (not the guest Aid IDs).
+ * Offline queueing:
+ *   When there is no network connection, identification requests are stored in
+ *   IndexedDB (via identify-queue.js) and retried automatically when the
+ *   device comes back online. History entries show a "Queued" badge while
+ *   pending and are updated to "Done" or "Error" after the retry.
  */
 
 'use strict';
 
 import { identifyImage, findCatalogMatch } from '../../api/identify.api.js';
+import { drain, OfflineQueuedError } from '../../utils/identify-queue.js';
+import { saveCollectorPhoto, updateCollectorPhotoLabel, removeCollectorPhoto, clearCollectorPhotos, restoreCollectorPhotos } from '../../utils/photo-collector-store.js';
+
+function getCollectorUserId() {
+  try {
+    const u = JSON.parse(localStorage.getItem('isee_user'));
+    return u?.id ?? null;
+  } catch { return null; }
+}
 
 // ─── Constants ───────────────────────────────────────────────────
 
@@ -104,7 +114,18 @@ function addPhotos(files) {
     const origName = dotIdx !== -1 ? file.name.slice(0, dotIdx) : file.name;
     const ext      = dotIdx !== -1 ? file.name.slice(dotIdx)     : '';
 
-    photos.push({ file, url, label: origName, originalName: origName, ext, selected: false });
+    const entry = { uuid: crypto.randomUUID(), file, url, label: origName, originalName: origName, ext, selected: false };
+    photos.push(entry);
+    saveCollectorPhoto({
+      uuid:         entry.uuid,
+      userId:       getCollectorUserId(),
+      imageBlob:    entry.file,
+      mimeType:     entry.file.type,
+      originalName: entry.originalName,
+      label:        entry.label,
+      ext:          entry.ext,
+      addedAt:      Date.now(),
+    }).catch(() => {}); // non-blocking, fire and forget
     renderThumb(url);
   }
 
@@ -279,6 +300,10 @@ function startRename(url, wrap) {
 
     entry.label = newLabel;
 
+    if (entry.uuid) {
+      updateCollectorPhotoLabel(entry.uuid, newLabel).catch(() => {});
+    }
+
     const newLabelEl = document.createElement('span');
     newLabelEl.className   = 'photo-thumb__label';
     newLabelEl.textContent = newLabel;
@@ -302,7 +327,12 @@ function startRename(url, wrap) {
 
 function removePhoto(url) {
   const entry = getEntry(url);
-  if (entry) URL.revokeObjectURL(entry.url);
+  if (entry) {
+    URL.revokeObjectURL(entry.url);
+    if (entry.uuid) {
+      removeCollectorPhoto(entry.uuid).catch(() => {});
+    }
+  }
   photos = photos.filter(p => p.url !== url);
   const thumb = photoGrid.querySelector(`[data-url="${CSS.escape(url)}"]`);
   if (thumb) thumb.remove();
@@ -310,6 +340,7 @@ function removePhoto(url) {
 }
 
 function clearAll() {
+  clearCollectorPhotos(getCollectorUserId()).catch(() => {});
   photos.forEach(p => URL.revokeObjectURL(p.url));
   photos = [];
   photoGrid.innerHTML = '';
@@ -370,7 +401,7 @@ identifyBtn.addEventListener('click', async () => {
   }
 
   try {
-    const result = await identifyImage(target.file, idTitle);
+    const result = await identifyImage(target.file, idTitle, null, false, histId);
     renderIdentifyResults(result);
     if (window.identifyHistory) {
       window.identifyHistory.update(histId, {
@@ -381,13 +412,25 @@ identifyBtn.addEventListener('click', async () => {
         status:     'done',
       });
     }
+    clearCollectorPhotos(getCollectorUserId()).catch(() => {});
   } catch (err) {
-    modalAlert(err.message || 'Identification failed. Please try again.', 'Error', 'error');
-    if (window.identifyHistory) {
-      window.identifyHistory.update(histId, {
-        status:   'error',
-        errorMsg: err.message || 'Identification failed',
-      });
+    if (err instanceof OfflineQueuedError) {
+      // Offline — job is queued, update history entry to show queued state
+      showQueuedToast(target.file.name);
+      if (window.identifyHistory) {
+        window.identifyHistory.update(histId, {
+          status:   'queued',
+          errorMsg: null,
+        });
+      }
+    } else {
+      modalAlert(err.message || 'Identification failed. Please try again.', 'Error', 'error');
+      if (window.identifyHistory) {
+        window.identifyHistory.update(histId, {
+          status:   'error',
+          errorMsg: err.message || 'Identification failed',
+        });
+      }
     }
   } finally {
     identifyBtn.disabled = false;
@@ -491,7 +534,7 @@ function renderDirectPreview() {
       }
 
       try {
-        const result = await identifyImage(directPhoto.file, idTitle);
+        const result = await identifyImage(directPhoto.file, idTitle, null, false, histId);
         renderIdentifyResults(result);
         if (window.identifyHistory) {
           window.identifyHistory.update(histId, {
@@ -503,12 +546,22 @@ function renderDirectPreview() {
           });
         }
       } catch (err) {
-        modalAlert(err.message || 'Identification failed. Please try again.', 'Error', 'error');
-        if (window.identifyHistory) {
-          window.identifyHistory.update(histId, {
-            status:   'error',
-            errorMsg: err.message || 'Identification failed',
-          });
+        if (err instanceof OfflineQueuedError) {
+          showQueuedToast(directPhoto.file.name);
+          if (window.identifyHistory) {
+            window.identifyHistory.update(histId, {
+              status:   'queued',
+              errorMsg: null,
+            });
+          }
+        } else {
+          modalAlert(err.message || 'Identification failed. Please try again.', 'Error', 'error');
+          if (window.identifyHistory) {
+            window.identifyHistory.update(histId, {
+              status:   'error',
+              errorMsg: err.message || 'Identification failed',
+            });
+          }
         }
       } finally {
         reuploadBtn.disabled = false;
@@ -542,6 +595,33 @@ function renderDirectPreview() {
     preview.appendChild(img);
     preview.appendChild(aside);
     mainBody.appendChild(preview);
+
+    // ── Seagrass upload reminder ──────────────────────────────────────────
+    // Shown once when an image is first loaded; cleared with the preview.
+    // Injected into the card footer, above the caution message.
+    const footer = document.querySelector('.identify-main__footer');
+    const caution = footer?.querySelector('.id-caution');
+    const reminder = document.createElement('div');
+    reminder.id        = 'uploadReminder';
+    reminder.className = 'upload-reminder';
+    reminder.setAttribute('role', 'note');
+    reminder.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span>For best results, upload a clear underwater photo of <strong>seagrass only</strong>.
+      Avoid non-plant objects, murky water, or poor lighting.</span>`;
+    if (footer && caution) {
+      footer.insertBefore(reminder, caution);
+    } else if (footer) {
+      footer.prepend(reminder);
+    } else {
+      mainBody.appendChild(reminder);
+    }
   }
 
   const img    = preview.querySelector('.direct-preview__img');
@@ -564,6 +644,9 @@ function clearDirect() {
 
   // Clear any catalog match card
   document.getElementById('speciesCatalogCard')?.remove();
+
+  // Clear upload reminder
+  document.getElementById('uploadReminder')?.remove();
 
   photoGrid.classList.remove('pc-locked');
   updateUI();
@@ -730,14 +813,148 @@ cameraShutterBtn.addEventListener('click', () => {
   }, 'image/jpeg', 0.92);
 });
 
+// ─── Offline / online toast helpers ───────────────────────────────────────────
+
+/**
+ * Show a small non-blocking toast at the bottom of the screen.
+ * Auto-dismisses after `duration` ms.
+ */
+function showToastMessage(message, duration = 3500, colour = 'rgba(18,18,18,0.92)') {
+  const el = document.createElement('div');
+  el.setAttribute('role', 'status');
+  el.setAttribute('aria-live', 'polite');
+  el.style.cssText = [
+    'position:fixed',
+    'bottom:1.75rem',
+    'left:50%',
+    'transform:translateX(-50%)',
+    `background:${colour}`,
+    'color:#ffffff',
+    'padding:0.65rem 1.4rem',
+    'border-radius:999px',
+    'font-size:0.9rem',
+    'font-weight:600',
+    'z-index:2147483647',
+    'box-shadow:0 4px 20px rgba(0,0,0,0.4)',
+    'pointer-events:none',
+    'white-space:nowrap',
+    'opacity:0',
+    'transition:opacity 200ms ease',
+  ].join(';');
+  el.textContent = message;
+  document.body.appendChild(el);
+
+  // Trigger fade-in
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => { el.style.opacity = '1'; });
+  });
+
+  setTimeout(() => {
+    el.style.opacity = '0';
+    el.addEventListener('transitionend', () => el.remove(), { once: true });
+  }, duration);
+}
+
+function showQueuedToast(fileName) {
+  showToastMessage(
+    `📶 No connection — "${fileName}" queued for identification`,
+    4500,
+    'rgba(40,60,30,0.95)',
+  );
+}
+
+function showOnlineToast() {
+  showToastMessage('✓ Back online — retrying queued identifications…', 3000, 'rgba(30,80,30,0.92)');
+}
+
 // ─── Init ─────────────────────────────────────────────────────────
 
-updateUI();
+(async () => {
+  const userId = getCollectorUserId();
+  if (userId !== null) {
+    try {
+      const stored = await restoreCollectorPhotos(userId);
+      for (const record of stored) {
+        const file = new File([record.imageBlob], record.originalName, { type: record.mimeType });
+        const url  = URL.createObjectURL(file);
+        photos.push({
+          uuid:         record.uuid,
+          file,
+          url,
+          label:        record.label,
+          originalName: record.originalName,
+          ext:          record.ext,
+          selected:     false,
+        });
+        renderThumb(url);
+      }
+    } catch {
+      // IDB unavailable — start empty, non-fatal
+    }
+  }
+  updateUI();
+})();
+
+// ─── Offline queue drain ───────────────────────────────────────────────────────
+
+/**
+ * Called by drain() after each queued job completes (success or permanent fail).
+ * Updates the matching history entry in the UI.
+ */
+function onDrainResult(histId, result, err) {
+  if (!window.identifyHistory) return;
+
+  if (result) {
+    window.identifyHistory.update(histId, {
+      dbId:       result.identification_id ?? null,
+      topSpecies: result.top_result  || '—',
+      confidence: result.top_confidence ?? (result.scores?.[0]?.confidence ?? 0),
+      title:      result.title ?? null,
+      status:     'done',
+    });
+  } else {
+    window.identifyHistory.update(histId, {
+      status:   'error',
+      errorMsg: err?.message || 'Identification failed after retry.',
+    });
+  }
+}
+
+/**
+ * Try to drain any queued identification jobs.
+ * No-ops silently when offline or when the queue is empty.
+ */
+function tryDrainQueue() {
+  if (!navigator.onLine) return;
+  drain(
+    (file, title, modelType) => identifyImage(file, title, modelType),
+    onDrainResult,
+  ).catch(() => {
+    // Drain failures are non-fatal — will retry on next online event
+  });
+}
+
+// Drain on connectivity restored
+window.addEventListener('online', () => {
+  showOnlineToast();
+  tryDrainQueue();
+});
+
+// Drain any leftover jobs from previous sessions on page load
+tryDrainQueue();
 
 // ─── Render identification results ────────────────────────────────────────────
 
 /** Labels that indicate a background / no-seagrass result. */
 const BACKGROUND_RE = /background/i;
+
+/**
+ * Confidence threshold below which a result is flagged as uncertain.
+ * Any top_confidence below this value shows a low-confidence warning
+ * instead of (or alongside) the normal result panel.
+ * 60% is a reasonable floor for CREYNet v0.02 field conditions.
+ */
+const LOW_CONFIDENCE_THRESHOLD = 60;
 
 /**
  * True when loaded on the admin identify page — enables confidence bar graphs.
@@ -760,6 +977,10 @@ function capConfidence(pct) {
  * Rules:
  *  - If top result is a background class: show "No seagrass found" panel
  *    (except on admin, where the raw result is always shown).
+ *  - If top confidence < LOW_CONFIDENCE_THRESHOLD: show a low-confidence
+ *    warning banner. Admin always sees the full result alongside the warning.
+ *    Users see the warning but the result is still displayed so they can
+ *    cross-check with the catalog.
  *  - Background entries are filtered from the scores list for users;
  *    admin sees all entries.
  *  - Confidence bar graphs are only rendered for admin.
@@ -778,6 +999,8 @@ function renderIdentifyResults(result) {
 
   const topResult    = result.top_result || 'Unknown';
   const isBackground = BACKGROUND_RE.test(topResult);
+  const rawTopConf   = result.scores?.[0]?.confidence ?? result.top_confidence ?? 0;
+  const isLowConf    = rawTopConf < LOW_CONFIDENCE_THRESHOLD;
 
   // ── No seagrass (users only) ───────────────────────────────────────────────
   if (isBackground && !IS_ADMIN) {
@@ -791,11 +1014,11 @@ function renderIdentifyResults(result) {
           <line x1="12" y1="17" x2="12.01" y2="17"/>
         </svg>
         <div>
-          <div style="font-size:.72rem;color:#9fe997;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.2rem">Result(s)</div>
-          <div style="font-size:1.1rem;font-weight:700;color:#e0b060">No seagrass found</div>
+          <div style="font-size:.72rem;color:#9fe997;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.2rem">Result</div>
+          <div style="font-size:1.1rem;font-weight:700;color:#e0b060">Unable to identify</div>
           <div style="font-size:.82rem;color:#aaa;margin-top:.3rem;line-height:1.5">
-            The model did not detect seagrass in this image.<br>
-            Try a clearer underwater photo with visible leaf structures.
+            CREYNet could not identify a seagrass species from this image.<br>
+            The photo may be unclear, contain multiple subjects, or fall outside the model's training range. Try a clearer, focused photo.
           </div>
         </div>
       </div>
@@ -803,8 +1026,28 @@ function renderIdentifyResults(result) {
     return;
   }
 
+  // ── Low-confidence warning banner (shown for both users and admin) ──────────
+  // Built as a string fragment inserted at the top of the result panel when
+  // top confidence is below LOW_CONFIDENCE_THRESHOLD.
+  const lowConfBanner = isLowConf ? `
+    <div style="display:flex;align-items:flex-start;gap:.65rem;padding:.55rem .75rem;margin-bottom:.85rem;background:rgba(224,176,96,.12);border:1px solid rgba(224,176,96,.35);border-radius:7px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+        fill="none" stroke="#e0b060" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px" aria-hidden="true">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <div style="font-size:.80rem;color:#e0b060;line-height:1.5">
+        <strong>Low confidence result (${rawTopConf.toFixed(1)}%).</strong>
+        The model is uncertain — cross-check with the
+        <a href="../catalog/index.html" style="color:#9fe997;text-decoration:underline">species catalog</a>
+        or a field guide before recording this identification.
+      </div>
+    </div>` : '';
+
   // ── Seagrass detected (or admin showing background) ────────────────────────
-  const topConf = capConfidence(result.scores?.[0]?.confidence ?? 0);
+  const topConf = capConfidence(rawTopConf);
 
   // Admin sees all scores with bars; users see species-only scores, no bars
   const allScores  = result.scores || [];
@@ -819,14 +1062,14 @@ function renderIdentifyResults(result) {
       : s.label;
 
     if (IS_ADMIN) {
-      // With bar graph
+      // With bar graph — colour reflects confidence tier
       return `<div style="margin-bottom:.6rem">
         <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.2rem">
           <span style="color:#d6f0b8">${label}</span>
           <span style="color:#9fe997;font-weight:600">${pct.toFixed(1)}%</span>
         </div>
         <div style="height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden">
-          <div style="width:${pct}%;height:100%;background:${pct >= 60 ? '#7ccb4d' : pct >= 30 ? '#f0c040' : '#e05252'};border-radius:3px;transition:width .5s"></div>
+          <div style="width:${pct}%;height:100%;background:${pct >= LOW_CONFIDENCE_THRESHOLD ? '#7ccb4d' : pct >= 30 ? '#f0c040' : '#e05252'};border-radius:3px;transition:width .5s"></div>
         </div>
       </div>`;
     }
@@ -842,11 +1085,15 @@ function renderIdentifyResults(result) {
     ? `⚠ ${topResult} (no seagrass)`
     : topResult;
 
+  // Confidence label colour: green ≥ threshold, amber < threshold
+  const confColour = isLowConf ? '#e0b060' : '#aaa';
+
   container.innerHTML = `
+    ${lowConfBanner}
     <div style="margin-bottom:.75rem;padding-bottom:.75rem;border-bottom:1px solid rgba(255,255,255,.1)">
-      <div style="font-size:.72rem;color:#9fe997;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem">Result(s)</div>
+      <div style="font-size:.72rem;color:#9fe997;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem">Result</div>
       <div style="font-size:1.2rem;font-weight:700;color:#d6f0b8">${displayTopResult}</div>
-      <div style="font-size:.85rem;color:#aaa;margin-top:.2rem">Confidence: ${topConf.toFixed(1)}%</div>
+      <div style="font-size:.85rem;color:${confColour};margin-top:.2rem">Confidence: ${topConf.toFixed(1)}%</div>
     </div>
     ${IS_ADMIN && scoresHtml ? `<div>
       <div style="font-size:.72rem;color:#9fe997;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">All Scores</div>
