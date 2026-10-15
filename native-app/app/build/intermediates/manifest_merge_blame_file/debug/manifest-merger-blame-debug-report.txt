@@ -1,0 +1,199 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.iseegrass.app"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="24"
+9        android:targetSdkVersion="34" />
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:4:5-67
+11-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:4:22-64
+12    <uses-permission android:name="android.permission.CAMERA" />
+12-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:5:5-65
+12-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:5:22-62
+13    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+13-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:6:5-76
+13-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:6:22-73
+14    <uses-permission
+14-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:7:5-8:38
+15        android:name="android.permission.READ_EXTERNAL_STORAGE"
+15-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:7:22-77
+16        android:maxSdkVersion="32" />
+16-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:8:9-35
+17    <uses-permission
+17-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:9:5-10:38
+18        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+18-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:9:22-78
+19        android:maxSdkVersion="28" />
+19-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:10:9-35
+20
+21    <uses-feature
+21-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:11:5-85
+22        android:name="android.hardware.camera"
+22-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:11:19-57
+23        android:required="false" />
+23-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:11:58-82
+24
+25    <permission
+25-->[androidx.core:core:1.13.0] /home/codex/.gradle/caches/8.14.3/transforms/fa1423b39c4876b5fb9ce0e0c0bc1b85/transformed/core-1.13.0/AndroidManifest.xml:22:5-24:47
+26        android:name="com.iseegrass.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+26-->[androidx.core:core:1.13.0] /home/codex/.gradle/caches/8.14.3/transforms/fa1423b39c4876b5fb9ce0e0c0bc1b85/transformed/core-1.13.0/AndroidManifest.xml:23:9-81
+27        android:protectionLevel="signature" />
+27-->[androidx.core:core:1.13.0] /home/codex/.gradle/caches/8.14.3/transforms/fa1423b39c4876b5fb9ce0e0c0bc1b85/transformed/core-1.13.0/AndroidManifest.xml:24:9-44
+28
+29    <uses-permission android:name="com.iseegrass.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+29-->[androidx.core:core:1.13.0] /home/codex/.gradle/caches/8.14.3/transforms/fa1423b39c4876b5fb9ce0e0c0bc1b85/transformed/core-1.13.0/AndroidManifest.xml:26:5-97
+29-->[androidx.core:core:1.13.0] /home/codex/.gradle/caches/8.14.3/transforms/fa1423b39c4876b5fb9ce0e0c0bc1b85/transformed/core-1.13.0/AndroidManifest.xml:26:22-94
+30
+31    <application
+31-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:13:5-57:19
+32        android:allowBackup="true"
+32-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:14:9-35
+33        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+33-->[androidx.core:core:1.13.0] /home/codex/.gradle/caches/8.14.3/transforms/fa1423b39c4876b5fb9ce0e0c0bc1b85/transformed/core-1.13.0/AndroidManifest.xml:28:18-86
+34        android:debuggable="true"
+35        android:extractNativeLibs="false"
+36        android:icon="@mipmap/ic_launcher"
+36-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:15:9-43
+37        android:label="@string/app_name"
+37-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:17:9-41
+38        android:roundIcon="@mipmap/ic_launcher_round"
+38-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:16:9-54
+39        android:supportsRtl="true"
+39-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:18:9-35
+40        android:theme="@style/Theme.ISeeGrass"
+40-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:19:9-47
+41        android:usesCleartextTraffic="false" >
+41-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:20:9-45
+42        <provider
+43            android:name="androidx.core.content.FileProvider"
+43-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:23:13-62
+44            android:authorities="com.iseegrass.app.fileprovider"
+44-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:24:13-64
+45            android:exported="false"
+45-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:25:13-37
+46            android:grantUriPermissions="true" >
+46-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:26:13-47
+47            <meta-data
+47-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:27:13-29:54
+48                android:name="android.support.FILE_PROVIDER_PATHS"
+48-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:28:17-67
+49                android:resource="@xml/file_paths" />
+49-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:29:17-51
+50        </provider>
+51
+52        <activity
+52-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:32:9-40:20
+53            android:name="com.iseegrass.app.SplashActivity"
+53-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:33:13-43
+54            android:exported="true"
+54-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:34:13-36
+55            android:theme="@style/Theme.ISeeGrass.Splash" >
+55-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:35:13-58
+56            <intent-filter>
+56-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:36:13-39:29
+57                <action android:name="android.intent.action.MAIN" />
+57-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:37:17-69
+57-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:37:25-66
+58
+59                <category android:name="android.intent.category.LAUNCHER" />
+59-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:38:17-77
+59-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:38:27-74
+60            </intent-filter>
+61        </activity>
+62        <activity
+62-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:42:9-45:58
+63            android:name="com.iseegrass.app.LoginActivity"
+63-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:43:13-42
+64            android:exported="false"
+64-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:44:13-37
+65            android:windowSoftInputMode="adjustResize" />
+65-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:45:13-55
+66        <activity
+66-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:47:9-50:58
+67            android:name="com.iseegrass.app.MainActivity"
+67-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:48:13-41
+68            android:exported="false"
+68-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:49:13-37
+69            android:windowSoftInputMode="adjustResize" />
+69-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:50:13-55
+70        <activity
+70-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:52:9-55:58
+71            android:name="com.iseegrass.app.ui.assessment.AssessmentEditorActivity"
+71-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:53:13-67
+72            android:exported="false"
+72-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:54:13-37
+73            android:windowSoftInputMode="adjustResize" />
+73-->/media/codex/Shared/iSeeGrass/native-app/app/src/main/AndroidManifest.xml:55:13-55
+74
+75        <provider
+75-->[androidx.emoji2:emoji2:1.3.0] /home/codex/.gradle/caches/8.14.3/transforms/137fc17d7e54a53cd3878da1dbdb36ba/transformed/jetified-emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
+76            android:name="androidx.startup.InitializationProvider"
+76-->[androidx.emoji2:emoji2:1.3.0] /home/codex/.gradle/caches/8.14.3/transforms/137fc17d7e54a53cd3878da1dbdb36ba/transformed/jetified-emoji2-1.3.0/AndroidManifest.xml:25:13-67
+77            android:authorities="com.iseegrass.app.androidx-startup"
+77-->[androidx.emoji2:emoji2:1.3.0] /home/codex/.gradle/caches/8.14.3/transforms/137fc17d7e54a53cd3878da1dbdb36ba/transformed/jetified-emoji2-1.3.0/AndroidManifest.xml:26:13-68
+78            android:exported="false" >
+78-->[androidx.emoji2:emoji2:1.3.0] /home/codex/.gradle/caches/8.14.3/transforms/137fc17d7e54a53cd3878da1dbdb36ba/transformed/jetified-emoji2-1.3.0/AndroidManifest.xml:27:13-37
+79            <meta-data
+79-->[androidx.emoji2:emoji2:1.3.0] /home/codex/.gradle/caches/8.14.3/transforms/137fc17d7e54a53cd3878da1dbdb36ba/transformed/jetified-emoji2-1.3.0/AndroidManifest.xml:29:13-31:52
+80                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+80-->[androidx.emoji2:emoji2:1.3.0] /home/codex/.gradle/caches/8.14.3/transforms/137fc17d7e54a53cd3878da1dbdb36ba/transformed/jetified-emoji2-1.3.0/AndroidManifest.xml:30:17-75
+81                android:value="androidx.startup" />
+81-->[androidx.emoji2:emoji2:1.3.0] /home/codex/.gradle/caches/8.14.3/transforms/137fc17d7e54a53cd3878da1dbdb36ba/transformed/jetified-emoji2-1.3.0/AndroidManifest.xml:31:17-49
+82            <meta-data
+82-->[androidx.lifecycle:lifecycle-process:2.6.2] /home/codex/.gradle/caches/8.14.3/transforms/57baadd0b9a1c5deff2fb918dc85bbf1/transformed/jetified-lifecycle-process-2.6.2/AndroidManifest.xml:29:13-31:52
+83                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+83-->[androidx.lifecycle:lifecycle-process:2.6.2] /home/codex/.gradle/caches/8.14.3/transforms/57baadd0b9a1c5deff2fb918dc85bbf1/transformed/jetified-lifecycle-process-2.6.2/AndroidManifest.xml:30:17-78
+84                android:value="androidx.startup" />
+84-->[androidx.lifecycle:lifecycle-process:2.6.2] /home/codex/.gradle/caches/8.14.3/transforms/57baadd0b9a1c5deff2fb918dc85bbf1/transformed/jetified-lifecycle-process-2.6.2/AndroidManifest.xml:31:17-49
+85            <meta-data
+85-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/codex/.gradle/caches/8.14.3/transforms/b8961b9005a8f0416c40a26a000adeb0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:29:13-31:52
+86                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+86-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/codex/.gradle/caches/8.14.3/transforms/b8961b9005a8f0416c40a26a000adeb0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:30:17-85
+87                android:value="androidx.startup" />
+87-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/codex/.gradle/caches/8.14.3/transforms/b8961b9005a8f0416c40a26a000adeb0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:31:17-49
+88        </provider>
+89
+90        <receiver
+90-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/codex/.gradle/caches/8.14.3/transforms/b8961b9005a8f0416c40a26a000adeb0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:34:9-52:20
+91            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+91-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/codex/.gradle/caches/8.14.3/transforms/b8961b9005a8f0416c40a26a000adeb0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:35:13-76
+92            android:directBootAware="false"
+92-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/codex/.gradle/caches/8.14.3/transforms/b8961b9005a8f0416c40a26a000adeb0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:36:13-44
+93            android:enabled="true"
+93-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/codex/.gradle/caches/8.14.3/transforms/b8961b9005a8f0416c40a26a000adeb0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:37:13-35
+94            android:exported="true"
+94-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/codex/.gradle/caches/8.14.3/transforms/b8961b9005a8f0416c40a26a000adeb0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:38:13-36
+95            android:permission="android.permission.DUMP" >
+95-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/codex/.gradle/caches/8.14.3/transforms/b8961b9005a8f0416c40a26a000adeb0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:39:13-57
+96            <intent-filter>
+96-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/codex/.gradle/caches/8.14.3/transforms/b8961b9005a8f0416c40a26a000adeb0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:40:13-42:29
+97                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+97-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/codex/.gradle/caches/8.14.3/transforms/b8961b9005a8f0416c40a26a000adeb0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:41:17-91
+97-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/codex/.gradle/caches/8.14.3/transforms/b8961b9005a8f0416c40a26a000adeb0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:41:25-88
+98            </intent-filter>
+99            <intent-filter>
+99-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/codex/.gradle/caches/8.14.3/transforms/b8961b9005a8f0416c40a26a000adeb0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:43:13-45:29
+100                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+100-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/codex/.gradle/caches/8.14.3/transforms/b8961b9005a8f0416c40a26a000adeb0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:44:17-85
+100-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/codex/.gradle/caches/8.14.3/transforms/b8961b9005a8f0416c40a26a000adeb0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:44:25-82
+101            </intent-filter>
+102            <intent-filter>
+102-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/codex/.gradle/caches/8.14.3/transforms/b8961b9005a8f0416c40a26a000adeb0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:46:13-48:29
+103                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+103-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/codex/.gradle/caches/8.14.3/transforms/b8961b9005a8f0416c40a26a000adeb0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:47:17-88
+103-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/codex/.gradle/caches/8.14.3/transforms/b8961b9005a8f0416c40a26a000adeb0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:47:25-85
+104            </intent-filter>
+105            <intent-filter>
+105-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/codex/.gradle/caches/8.14.3/transforms/b8961b9005a8f0416c40a26a000adeb0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:49:13-51:29
+106                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+106-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/codex/.gradle/caches/8.14.3/transforms/b8961b9005a8f0416c40a26a000adeb0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:50:17-95
+106-->[androidx.profileinstaller:profileinstaller:1.3.1] /home/codex/.gradle/caches/8.14.3/transforms/b8961b9005a8f0416c40a26a000adeb0/transformed/jetified-profileinstaller-1.3.1/AndroidManifest.xml:50:25-92
+107            </intent-filter>
+108        </receiver>
+109    </application>
+110
+111</manifest>

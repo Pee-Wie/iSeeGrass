@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="accent">#8ED655</color>
+    <color name="accent_dark">#5AAA33</color>
+    <color name="bg">#122614</color>
+    <color name="black">#000000</color>
+    <color name="border">#1DFFFFFF</color>
+    <color name="error">#CF6679</color>
+    <color name="status_draft">#9E9E9E</color>
+    <color name="status_finalized">#8ED655</color>
+    <color name="status_in_progress">#FFC107</color>
+    <color name="surface">#1E4822</color>
+    <color name="text_muted">#C4DDC0</color>
+    <color name="text_primary">#F0F9ED</color>
+    <color name="transparent">#00000000</color>
+    <color name="white">#FFFFFF</color>
+    <dimen name="avatar_size">80dp</dimen>
+    <dimen name="bottom_nav_height">56dp</dimen>
+    <dimen name="card_radius">12dp</dimen>
+    <dimen name="photo_grid_item_size">100dp</dimen>
+    <dimen name="spacing_lg">24dp</dimen>
+    <dimen name="spacing_md">16dp</dimen>
+    <dimen name="spacing_sm">8dp</dimen>
+    <dimen name="spacing_xl">32dp</dimen>
+    <dimen name="spacing_xs">4dp</dimen>
+    <string name="add_image">Add Image</string>
+    <string name="app_name">iSeeGrass</string>
+    <string name="assessments">Assessments</string>
+    <string name="assessments_count">%1$d Assessments</string>
+    <string name="bulk_delete">Bulk Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="capture_camera">Capture with Camera</string>
+    <string name="change_password">Change Password</string>
+    <string name="confidence_result">Confidence: %1$.1f%%</string>
+    <string name="confirm_bulk_delete">Delete all selected items?</string>
+    <string name="confirm_delete">Are you sure you want to delete this?</string>
+    <string name="content">Content</string>
+    <string name="create">Create</string>
+    <string name="current_password">Current Password</string>
+    <string name="delete">Delete</string>
+    <string name="discard">Discard</string>
+    <string name="draft">Draft</string>
+    <string name="enter_content">Write your assessment here…</string>
+    <string name="enter_password">Enter password</string>
+    <string name="enter_title">Enter title…</string>
+    <string name="enter_username">Enter username</string>
+    <string name="finalized">Finalized</string>
+    <string name="get_started">Get Started</string>
+    <string name="greeting">Hello, %1$s!</string>
+    <string name="home">Home</string>
+    <string name="id_history">ID History</string>
+    <string name="identifications_count">%1$d Identifications</string>
+    <string name="identify">Identify</string>
+    <string name="identify_75">Identify (75%)</string>
+    <string name="identify_seagrass">Identify Seagrass</string>
+    <string name="in_progress">In Progress</string>
+    <string name="loading">Loading…</string>
+    <string name="login">Login</string>
+    <string name="logout">Logout</string>
+    <string name="my_assessments">My Assessments</string>
+    <string name="network_error">Network error. Please try again.</string>
+    <string name="new_assessment">New Assessment</string>
+    <string name="new_password">New Password</string>
+    <string name="no_assessments">No assessments yet.</string>
+    <string name="no_identifications">No identifications yet.</string>
+    <string name="password">Password</string>
+    <string name="photo_collector">Photo Collector</string>
+    <string name="photo_collector_hint">Add up to 10 images to identify</string>
+    <string name="profile">Profile</string>
+    <string name="rename">Rename</string>
+    <string name="retry">Retry</string>
+    <string name="save">Save</string>
+    <string name="send_to_identify">Send to Identify</string>
+    <string name="species_result">Species: %1$s</string>
+    <string name="splash_tagline">Seagrass Identification &amp; Assessment</string>
+    <string name="status">Status</string>
+    <string name="title">Title</string>
+    <string name="unsaved_changes">You have unsaved changes. Discard them?</string>
+    <string name="update_password">Update Password</string>
+    <string name="upload_avatar">Upload Avatar</string>
+    <string name="upload_gallery">Upload from Gallery</string>
+    <string name="username">Username</string>
+    <style name="ISeeGrass.Button" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/accent</item>
+        <item name="android:textColor">@color/bg</item>
+    </style>
+    <style name="ISeeGrass.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="strokeColor">@color/accent</item>
+        <item name="android:textColor">@color/accent</item>
+    </style>
+    <style name="ISeeGrass.Card" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardBackgroundColor">@color/surface</item>
+        <item name="cardElevation">4dp</item>
+        <item name="cardCornerRadius">12dp</item>
+    </style>
+    <style name="ISeeGrass.Chip" parent="Widget.MaterialComponents.Chip.Action">
+        <item name="chipBackgroundColor">@color/surface</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="chipStrokeColor">@color/accent</item>
+        <item name="chipStrokeWidth">1dp</item>
+    </style>
+    <style name="ISeeGrass.EditText" parent="Widget.AppCompat.EditText">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColorHint">@color/text_muted</item>
+    </style>
+    <style name="ISeeGrass.TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/accent</item>
+        <item name="hintTextColor">@color/text_muted</item>
+        <item name="android:textColorHint">@color/text_muted</item>
+    </style>
+    <style name="ShapeAppearance.Circle" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+    <style name="ShapeAppearance.Rounded8" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+    <style name="StatusBadge" parent="Widget.MaterialComponents.Chip.Action">
+        <item name="chipMinHeight">24dp</item>
+        <item name="android:textSize">11sp</item>
+    </style>
+    <style name="Theme.ISeeGrass" parent="Theme.Material3.Dark">
+        <item name="colorPrimary">@color/accent</item>
+        <item name="colorPrimaryDark">@color/accent_dark</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:colorBackground">@color/bg</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorOnBackground">@color/text_primary</item>
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:statusBarColor">@color/bg</item>
+        <item name="android:navigationBarColor">@color/bg</item>
+        <item name="colorControlNormal">@color/text_muted</item>
+        <item name="colorControlActivated">@color/accent</item>
+        <item name="editTextStyle">@style/ISeeGrass.EditText</item>
+    </style>
+    <style name="Theme.ISeeGrass.Splash" parent="Theme.ISeeGrass">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+</resources>

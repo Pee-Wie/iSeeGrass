@@ -22,7 +22,7 @@
         <item name="android:windowNoTitle">true</item>
     </style>
 
-    <style name="ISeeGrass.EditText" parent="Widget.Material3.TextInputEditText">
+    <style name="ISeeGrass.EditText" parent="Widget.AppCompat.EditText">
         <item name="android:textColor">@color/text_primary</item>
         <item name="android:textColorHint">@color/text_muted</item>
     </style>
@@ -49,16 +49,26 @@
         <item name="cardCornerRadius">12dp</item>
     </style>
 
-    <style name="ISeeGrass.Chip" parent="Widget.Material3.Chip.Action">
+    <style name="ISeeGrass.Chip" parent="Widget.MaterialComponents.Chip.Action">
         <item name="chipBackgroundColor">@color/surface</item>
         <item name="android:textColor">@color/text_primary</item>
         <item name="chipStrokeColor">@color/accent</item>
         <item name="chipStrokeWidth">1dp</item>
     </style>
 
-    <style name="StatusBadge" parent="Widget.Material3.Chip.Assist">
+    <style name="StatusBadge" parent="Widget.MaterialComponents.Chip.Action">
         <item name="chipMinHeight">24dp</item>
         <item name="android:textSize">11sp</item>
+    </style>
+
+    <style name="ShapeAppearance.Circle" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="ShapeAppearance.Rounded8" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
     </style>
 
 </resources>

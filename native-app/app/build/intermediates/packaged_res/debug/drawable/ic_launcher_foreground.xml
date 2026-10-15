@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Seagrass leaf shape on accent background -->
+    <path
+        android:fillColor="#8ED655"
+        android:pathData="M54,54m-54,0a54,54 0,1 1,108 0a54,54 0,1 1,-108 0" />
+    <path
+        android:fillColor="#122614"
+        android:pathData="M72,30C52,34 45.9,50.17 43.82,55.34L45.71,56l1,-2.3A4.49,4.49 0,0 0,48 54C59,54 62,37 62,37 61,39 54,39.25 49,40.25c-5,1 -6,3.5 -6,3.5C50,36 57,42 57,42z"
+        android:translateX="0"
+        android:translateY="0" />
+</vector>

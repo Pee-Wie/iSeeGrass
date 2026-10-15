@@ -1,0 +1,122 @@
+[
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.iseegrass.app-main-36:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/layout_item_identification.xml.flat",
+        "source": "com.iseegrass.app-main-36:/layout/item_identification.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/mipmap-mdpi_ic_launcher.png.flat",
+        "source": "com.iseegrass.app-main-36:/mipmap-mdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/layout_item_photo.xml.flat",
+        "source": "com.iseegrass.app-main-36:/layout/item_photo.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/drawable_ic_assessment.xml.flat",
+        "source": "com.iseegrass.app-main-36:/drawable/ic_assessment.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/layout_activity_main.xml.flat",
+        "source": "com.iseegrass.app-main-36:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/drawable_bottom_nav_selector.xml.flat",
+        "source": "com.iseegrass.app-main-36:/drawable/bottom_nav_selector.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.iseegrass.app-main-36:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/menu_bottom_nav_menu.xml.flat",
+        "source": "com.iseegrass.app-main-36:/menu/bottom_nav_menu.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/mipmap-mdpi_ic_launcher_round.png.flat",
+        "source": "com.iseegrass.app-main-36:/mipmap-mdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/layout_item_score.xml.flat",
+        "source": "com.iseegrass.app-main-36:/layout/item_score.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.iseegrass.app-main-36:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/layout_activity_splash.xml.flat",
+        "source": "com.iseegrass.app-main-36:/layout/activity_splash.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/layout_activity_login.xml.flat",
+        "source": "com.iseegrass.app-main-36:/layout/activity_login.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.iseegrass.app-main-36:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/drawable_ic_retry.xml.flat",
+        "source": "com.iseegrass.app-main-36:/drawable/ic_retry.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/xml_file_paths.xml.flat",
+        "source": "com.iseegrass.app-main-36:/xml/file_paths.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/layout_fragment_identify.xml.flat",
+        "source": "com.iseegrass.app-main-36:/layout/fragment_identify.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/drawable_ic_home.xml.flat",
+        "source": "com.iseegrass.app-main-36:/drawable/ic_home.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/layout_activity_assessment_editor.xml.flat",
+        "source": "com.iseegrass.app-main-36:/layout/activity_assessment_editor.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/layout_fragment_profile.xml.flat",
+        "source": "com.iseegrass.app-main-36:/layout/fragment_profile.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/layout_item_assessment.xml.flat",
+        "source": "com.iseegrass.app-main-36:/layout/item_assessment.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/drawable_ic_add.xml.flat",
+        "source": "com.iseegrass.app-main-36:/drawable/ic_add.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/drawable_ic_chevron_down.xml.flat",
+        "source": "com.iseegrass.app-main-36:/drawable/ic_chevron_down.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/drawable_ic_delete.xml.flat",
+        "source": "com.iseegrass.app-main-36:/drawable/ic_delete.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/drawable_ic_avatar_placeholder.xml.flat",
+        "source": "com.iseegrass.app-main-36:/drawable/ic_avatar_placeholder.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/drawable_ic_identify.xml.flat",
+        "source": "com.iseegrass.app-main-36:/drawable/ic_identify.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/layout_fragment_home.xml.flat",
+        "source": "com.iseegrass.app-main-36:/layout/fragment_home.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/layout_fragment_assessment.xml.flat",
+        "source": "com.iseegrass.app-main-36:/layout/fragment_assessment.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-merged_res-34:/drawable_ic_chevron_up.xml.flat",
+        "source": "com.iseegrass.app-main-36:/drawable/ic_chevron_up.xml"
+    }
+]

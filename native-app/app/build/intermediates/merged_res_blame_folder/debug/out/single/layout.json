@@ -1,0 +1,50 @@
+[
+    {
+        "merged": "com.iseegrass.app-mergeDebugResources-33:/layout/activity_main.xml",
+        "source": "com.iseegrass.app-main-36:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-mergeDebugResources-33:/layout/item_photo.xml",
+        "source": "com.iseegrass.app-main-36:/layout/item_photo.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-mergeDebugResources-33:/layout/fragment_assessment.xml",
+        "source": "com.iseegrass.app-main-36:/layout/fragment_assessment.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-mergeDebugResources-33:/layout/fragment_profile.xml",
+        "source": "com.iseegrass.app-main-36:/layout/fragment_profile.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-mergeDebugResources-33:/layout/item_identification.xml",
+        "source": "com.iseegrass.app-main-36:/layout/item_identification.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-mergeDebugResources-33:/layout/item_score.xml",
+        "source": "com.iseegrass.app-main-36:/layout/item_score.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-mergeDebugResources-33:/layout/activity_login.xml",
+        "source": "com.iseegrass.app-main-36:/layout/activity_login.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-mergeDebugResources-33:/layout/activity_assessment_editor.xml",
+        "source": "com.iseegrass.app-main-36:/layout/activity_assessment_editor.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-mergeDebugResources-33:/layout/activity_splash.xml",
+        "source": "com.iseegrass.app-main-36:/layout/activity_splash.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-mergeDebugResources-33:/layout/fragment_identify.xml",
+        "source": "com.iseegrass.app-main-36:/layout/fragment_identify.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-mergeDebugResources-33:/layout/item_assessment.xml",
+        "source": "com.iseegrass.app-main-36:/layout/item_assessment.xml"
+    },
+    {
+        "merged": "com.iseegrass.app-mergeDebugResources-33:/layout/fragment_home.xml",
+        "source": "com.iseegrass.app-main-36:/layout/fragment_home.xml"
+    }
+]
