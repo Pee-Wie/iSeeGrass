@@ -6,54 +6,73 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.iseegrass.app.R;
 import com.iseegrass.app.databinding.ActivityAssessmentEditorBinding;
-import com.iseegrass.app.model.Assessment;
-import com.iseegrass.app.model.AssessmentCreateRequest;
-import com.iseegrass.app.model.AssessmentDetailResponse;
-import com.iseegrass.app.model.AssessmentUpdateRequest;
-import com.iseegrass.app.model.GenericResponse;
-import com.iseegrass.app.model.HistoryResponse;
 import com.iseegrass.app.model.Identification;
-import com.iseegrass.app.network.ApiClient;
-import com.iseegrass.app.ui.identify.HistoryAdapter;
+import com.iseegrass.app.ui.identify.IdentificationAdapter;
+import com.iseegrass.app.ui.identify.IdentifyViewModel;
+import com.iseegrass.app.viewmodel.AssessmentViewModel;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  * Create / edit an Assessment.
  *
- * Pass {@link #EXTRA_ASSESSMENT_ID} to open an existing record for editing.
- * Omit it (or pass -1) to start with a blank create form.
+ * <p>Pass {@link #EXTRA_ASSESSMENT_ID}, {@link #EXTRA_TITLE}, {@link #EXTRA_CONTENT},
+ * and {@link #EXTRA_STATUS} to pre-fill an existing record.
+ * Omit (or pass -1 for id) to open a blank create form.</p>
+ *
+ * <p>Includes an ID History section at the bottom that mirrors the history
+ * panel in IdentifyFragment, driven by its own {@link IdentifyViewModel}
+ * instance.</p>
  */
 public class AssessmentEditorActivity extends AppCompatActivity {
 
+    // ------------------------------------------------------------------ //
+    //  Intent extras                                                      //
+    // ------------------------------------------------------------------ //
+
     public static final String EXTRA_ASSESSMENT_ID = "assessment_id";
+    public static final String EXTRA_TITLE         = "assessment_title";
+    public static final String EXTRA_CONTENT       = "assessment_content";
+    public static final String EXTRA_STATUS        = "assessment_status";
 
-    private ActivityAssessmentEditorBinding binding;
+    // ------------------------------------------------------------------ //
+    //  Status options                                                     //
+    // ------------------------------------------------------------------ //
 
-    private int assessmentId = -1;
-    private Assessment currentAssessment;
-
-    // Status options (values match API)
     private static final String[] STATUS_LABELS = {"Draft", "In Progress", "Finalized"};
     private static final String[] STATUS_VALUES = {"draft", "in_progress", "finalized"};
+
+    // ------------------------------------------------------------------ //
+    //  State                                                              //
+    // ------------------------------------------------------------------ //
+
+    private ActivityAssessmentEditorBinding binding;
+    private AssessmentViewModel assessmentViewModel;
+    private IdentifyViewModel identifyViewModel;
+    private IdentificationAdapter historyAdapter;
+
+    private int assessmentId = -1;
     private int selectedStatusIndex = 0;
 
-    // History
-    private HistoryAdapter historyAdapter;
-    private final List<Identification> historyList = new ArrayList<>();
+    /** Original values captured on load — used for unsaved-changes detection. */
+    private String originalTitle   = "";
+    private String originalContent = "";
+    private String originalStatus  = STATUS_VALUES[0];
+
     private boolean historyVisible = true;
-    private int historyOffset = 0;
-    private static final int HISTORY_LIMIT = 20;
+
+    // ------------------------------------------------------------------ //
+    //  Lifecycle                                                          //
+    // ------------------------------------------------------------------ //
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,15 +82,23 @@ public class AssessmentEditorActivity extends AppCompatActivity {
 
         assessmentId = getIntent().getIntExtra(EXTRA_ASSESSMENT_ID, -1);
 
+        assessmentViewModel = new ViewModelProvider(this)
+                .get(AssessmentViewModel.class);
+        identifyViewModel = new ViewModelProvider(this)
+                .get(IdentifyViewModel.class);
+
         setupToolbar();
         setupStatusDropdown();
         setupHistoryList();
         setupClickListeners();
+        observeViewModels();
+        prefillFromIntent();
+    }
 
-        if (assessmentId > 0) {
-            loadAssessment();
-        }
-        loadHistory();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        identifyViewModel.loadHistory(this);
     }
 
     // ------------------------------------------------------------------ //
@@ -82,8 +109,10 @@ public class AssessmentEditorActivity extends AppCompatActivity {
         setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            String title = assessmentId > 0 ? "Edit Assessment" : "New Assessment";
-            getSupportActionBar().setTitle(title);
+            getSupportActionBar().setTitle(
+                    assessmentId > 0
+                            ? getString(R.string.assessments)
+                            : getString(R.string.new_assessment));
         }
         binding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
     }
@@ -95,20 +124,42 @@ public class AssessmentEditorActivity extends AppCompatActivity {
                 STATUS_LABELS);
         binding.acvStatus.setAdapter(adapter);
         binding.acvStatus.setText(STATUS_LABELS[selectedStatusIndex], false);
-
-        binding.acvStatus.setOnItemClickListener((parent, view, position, id) -> {
-            selectedStatusIndex = position;
-        });
+        binding.acvStatus.setOnItemClickListener((parent, view, position, id) ->
+                selectedStatusIndex = position);
     }
 
     private void setupHistoryList() {
-        historyAdapter = new HistoryAdapter(
-                historyList,
-                /* onDelete */ item -> confirmDeleteHistory(item),
-                /* onTitleEdit */ (item, title) -> updateTitle(item, title)
-        );
+        historyAdapter = new IdentificationAdapter();
+        historyAdapter.setOnDeleteListener(item -> confirmDeleteHistoryItem(item));
+
         binding.rvHistory.setLayoutManager(new LinearLayoutManager(this));
         binding.rvHistory.setAdapter(historyAdapter);
+        binding.rvHistory.setNestedScrollingEnabled(false);
+
+        // Swipe-to-delete on history items
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(
+                0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView rv,
+                                  @NonNull RecyclerView.ViewHolder vh,
+                                  @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder,
+                                  int direction) {
+                int pos = viewHolder.getAdapterPosition();
+                if (pos == RecyclerView.NO_ID) return;
+                // Grab item from latest list state
+                List<Identification> currentItems = getLatestHistoryItems();
+                if (currentItems != null && pos < currentItems.size()) {
+                    confirmDeleteHistoryItem(currentItems.get(pos));
+                } else {
+                    historyAdapter.notifyItemChanged(pos);
+                }
+            }
+        }).attachToRecyclerView(binding.rvHistory);
     }
 
     private void setupClickListeners() {
@@ -118,55 +169,90 @@ public class AssessmentEditorActivity extends AppCompatActivity {
             historyVisible = !historyVisible;
             binding.rvHistory.setVisibility(historyVisible ? View.VISIBLE : View.GONE);
             binding.btnToggleHistory.setImageResource(
-                    historyVisible ? R.drawable.ic_chevron_up : R.drawable.ic_chevron_down);
+                    historyVisible
+                            ? R.drawable.ic_chevron_up
+                            : R.drawable.ic_chevron_down);
         });
 
-        binding.btnRetryHistory.setOnClickListener(v -> loadHistory());
+        binding.btnRetryHistory.setOnClickListener(v -> {
+            binding.layoutHistoryError.setVisibility(View.GONE);
+            identifyViewModel.loadHistory(this);
+        });
     }
 
     // ------------------------------------------------------------------ //
-    //  Load existing assessment                                           //
+    //  Prefill from Intent                                                //
     // ------------------------------------------------------------------ //
 
-    private void loadAssessment() {
-        showProgress(true);
-        ApiClient.getInstance(this)
-                .getApiService()
-                .getAssessment(assessmentId)
-                .enqueue(new Callback<AssessmentDetailResponse>() {
-                    @Override
-                    public void onResponse(Call<AssessmentDetailResponse> call,
-                                           Response<AssessmentDetailResponse> response) {
-                        showProgress(false);
-                        if (response.isSuccessful() && response.body() != null
-                                && response.body().isSuccess()) {
-                            currentAssessment = response.body().getAssessment();
-                            populateForm(currentAssessment);
-                        }
-                    }
+    private void prefillFromIntent() {
+        String title   = getIntent().getStringExtra(EXTRA_TITLE);
+        String content = getIntent().getStringExtra(EXTRA_CONTENT);
+        String status  = getIntent().getStringExtra(EXTRA_STATUS);
 
-                    @Override
-                    public void onFailure(Call<AssessmentDetailResponse> call,
-                                          Throwable t) {
-                        showProgress(false);
-                        Toast.makeText(AssessmentEditorActivity.this,
-                                getString(R.string.network_error),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
+        if (title != null)   binding.etTitle.setText(title);
+        if (content != null) binding.etContent.setText(content);
 
-    private void populateForm(Assessment a) {
-        binding.etTitle.setText(a.getTitle());
-        binding.etContent.setText(a.getContent());
-
-        for (int i = 0; i < STATUS_VALUES.length; i++) {
-            if (STATUS_VALUES[i].equals(a.getStatus())) {
-                selectedStatusIndex = i;
-                binding.acvStatus.setText(STATUS_LABELS[i], false);
-                break;
+        if (status != null) {
+            for (int i = 0; i < STATUS_VALUES.length; i++) {
+                if (STATUS_VALUES[i].equals(status)) {
+                    selectedStatusIndex = i;
+                    binding.acvStatus.setText(STATUS_LABELS[i], false);
+                    break;
+                }
             }
         }
+
+        // Capture originals for unsaved-changes detection
+        originalTitle   = title   != null ? title   : "";
+        originalContent = content != null ? content : "";
+        originalStatus  = status  != null ? status  : STATUS_VALUES[0];
+    }
+
+    // ------------------------------------------------------------------ //
+    //  Observe ViewModels                                                 //
+    // ------------------------------------------------------------------ //
+
+    private void observeViewModels() {
+        // Assessment save / create actions
+        assessmentViewModel.actionState.observe(this, state -> {
+            if (state instanceof AssessmentViewModel.AssessmentActionState.Loading) {
+                showProgress(true);
+                binding.btnSave.setEnabled(false);
+
+            } else if (state instanceof AssessmentViewModel.AssessmentActionState.Success) {
+                showProgress(false);
+                binding.btnSave.setEnabled(true);
+                String msg = ((AssessmentViewModel.AssessmentActionState.Success) state).message;
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+                assessmentViewModel.clearActionState();
+                setResult(RESULT_OK);
+                finish();
+
+            } else if (state instanceof AssessmentViewModel.AssessmentActionState.Error) {
+                showProgress(false);
+                binding.btnSave.setEnabled(true);
+                String msg = ((AssessmentViewModel.AssessmentActionState.Error) state).message;
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+                assessmentViewModel.clearActionState();
+            }
+        });
+
+        // ID History
+        identifyViewModel.historyState.observe(this, state -> {
+            if (state instanceof IdentifyViewModel.HistoryState.Loading) {
+                binding.layoutHistoryError.setVisibility(View.GONE);
+
+            } else if (state instanceof IdentifyViewModel.HistoryState.Success) {
+                binding.layoutHistoryError.setVisibility(View.GONE);
+                List<Identification> items =
+                        ((IdentifyViewModel.HistoryState.Success) state).items;
+                latestHistoryItems = items;
+                historyAdapter.setData(items);
+
+            } else if (state instanceof IdentifyViewModel.HistoryState.Error) {
+                binding.layoutHistoryError.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     // ------------------------------------------------------------------ //
@@ -174,197 +260,79 @@ public class AssessmentEditorActivity extends AppCompatActivity {
     // ------------------------------------------------------------------ //
 
     private void saveAssessment() {
-        String title   = getEditText(binding.etTitle);
-        String content = getEditText(binding.etContent);
+        String title   = getEditTextValue(binding.etTitle);
+        String content = getEditTextValue(binding.etContent);
         String status  = STATUS_VALUES[selectedStatusIndex];
 
         if (title.isEmpty()) {
-            binding.tilTitle.setError("Title is required");
+            binding.tilTitle.setError(getString(R.string.title) + " is required");
             return;
         }
         binding.tilTitle.setError(null);
 
-        showProgress(true);
-        binding.btnSave.setEnabled(false);
-
         if (assessmentId > 0) {
-            // Update existing
-            AssessmentUpdateRequest req =
-                    new AssessmentUpdateRequest(title, content, status);
-            ApiClient.getInstance(this)
-                    .getApiService()
-                    .updateAssessment(assessmentId, req)
-                    .enqueue(new Callback<AssessmentDetailResponse>() {
-                        @Override
-                        public void onResponse(Call<AssessmentDetailResponse> call,
-                                               Response<AssessmentDetailResponse> resp) {
-                            handleSaveResponse(resp);
-                        }
-
-                        @Override
-                        public void onFailure(Call<AssessmentDetailResponse> call,
-                                              Throwable t) {
-                            handleSaveFailure();
-                        }
-                    });
+            assessmentViewModel.updateAssessment(this, assessmentId, title, content, status);
         } else {
-            // Create new
-            AssessmentCreateRequest req =
-                    new AssessmentCreateRequest(title, content, status);
-            ApiClient.getInstance(this)
-                    .getApiService()
-                    .createAssessment(req)
-                    .enqueue(new Callback<AssessmentDetailResponse>() {
-                        @Override
-                        public void onResponse(Call<AssessmentDetailResponse> call,
-                                               Response<AssessmentDetailResponse> resp) {
-                            handleSaveResponse(resp);
-                        }
-
-                        @Override
-                        public void onFailure(Call<AssessmentDetailResponse> call,
-                                              Throwable t) {
-                            handleSaveFailure();
-                        }
-                    });
+            assessmentViewModel.createAssessment(this, title, content, status);
         }
     }
 
-    private void handleSaveResponse(Response<AssessmentDetailResponse> response) {
-        showProgress(false);
-        binding.btnSave.setEnabled(true);
+    // ------------------------------------------------------------------ //
+    //  Back / unsaved changes                                             //
+    // ------------------------------------------------------------------ //
 
-        if (response.isSuccessful()
-                && response.body() != null
-                && response.body().isSuccess()) {
-            Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
-            if (assessmentId < 0 && response.body().getAssessment() != null) {
-                assessmentId = response.body().getAssessment().getId();
-                currentAssessment = response.body().getAssessment();
-            } else if (assessmentId < 0) {
-                // top-level id field fallback
-                assessmentId = response.body().getId();
-            }
-            setResult(RESULT_OK);
+    @Override
+    public void onBackPressed() {
+        if (hasUnsavedChanges()) {
+            new AlertDialog.Builder(this)
+                    .setMessage(R.string.unsaved_changes)
+                    .setPositiveButton(R.string.discard, (d, w) -> finish())
+                    .setNegativeButton(R.string.cancel, null)
+                    .show();
         } else {
-            Toast.makeText(this, getString(R.string.network_error),
-                    Toast.LENGTH_SHORT).show();
+            super.onBackPressed();
         }
     }
 
-    private void handleSaveFailure() {
-        showProgress(false);
-        binding.btnSave.setEnabled(true);
-        Toast.makeText(this, getString(R.string.network_error),
-                Toast.LENGTH_SHORT).show();
+    private boolean hasUnsavedChanges() {
+        String currentTitle   = getEditTextValue(binding.etTitle);
+        String currentContent = getEditTextValue(binding.etContent);
+        String currentStatus  = STATUS_VALUES[selectedStatusIndex];
+
+        return !currentTitle.equals(originalTitle)
+                || !currentContent.equals(originalContent)
+                || !currentStatus.equals(originalStatus);
     }
 
     // ------------------------------------------------------------------ //
-    //  History                                                            //
+    //  History helpers                                                    //
     // ------------------------------------------------------------------ //
 
-    private void loadHistory() {
-        binding.layoutHistoryError.setVisibility(View.GONE);
+    /** Latest snapshot received from IdentifyViewModel — used for swipe-to-delete. */
+    private List<Identification> latestHistoryItems;
 
-        ApiClient.getInstance(this)
-                .getApiService()
-                .getHistory(HISTORY_LIMIT, historyOffset)
-                .enqueue(new Callback<HistoryResponse>() {
-                    @Override
-                    public void onResponse(Call<HistoryResponse> call,
-                                           Response<HistoryResponse> response) {
-                        if (response.isSuccessful()
-                                && response.body() != null
-                                && response.body().isSuccess()
-                                && response.body().getData() != null) {
-                            List<Identification> records =
-                                    response.body().getData().getRecords();
-                            if (historyOffset == 0) historyList.clear();
-                            if (records != null) {
-                                historyList.addAll(records);
-                                historyOffset += records.size();
-                            }
-                            historyAdapter.notifyDataSetChanged();
-                        } else {
-                            binding.layoutHistoryError.setVisibility(View.VISIBLE);
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<HistoryResponse> call, Throwable t) {
-                        binding.layoutHistoryError.setVisibility(View.VISIBLE);
-                    }
-                });
+    private List<Identification> getLatestHistoryItems() {
+        return latestHistoryItems;
     }
 
-    private void confirmDeleteHistory(Identification item) {
+    private void confirmDeleteHistoryItem(Identification item) {
         new AlertDialog.Builder(this)
                 .setMessage(R.string.confirm_delete)
-                .setPositiveButton(R.string.delete, (d, w) -> {
-                    ApiClient.getInstance(this)
-                            .getApiService()
-                            .deleteIdentification(item.getId())
-                            .enqueue(new Callback<GenericResponse>() {
-                                @Override
-                                public void onResponse(Call<GenericResponse> call,
-                                                       Response<GenericResponse> r) {
-                                    int idx = historyList.indexOf(item);
-                                    if (idx >= 0) {
-                                        historyList.remove(idx);
-                                        historyAdapter.notifyItemRemoved(idx);
-                                    }
-                                }
-
-                                @Override
-                                public void onFailure(Call<GenericResponse> call,
-                                                      Throwable t) {
-                                    Toast.makeText(AssessmentEditorActivity.this,
-                                            getString(R.string.network_error),
-                                            Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                })
+                .setPositiveButton(R.string.delete,
+                        (d, w) -> identifyViewModel.deleteHistoryItem(this, item.getId()))
                 .setNegativeButton(R.string.cancel, null)
                 .show();
     }
 
-    private void updateTitle(Identification item, String newTitle) {
-        com.iseegrass.app.model.UpdateTitleRequest req =
-                new com.iseegrass.app.model.UpdateTitleRequest(item.getId(), newTitle);
-        ApiClient.getInstance(this)
-                .getApiService()
-                .updateTitle(req)
-                .enqueue(new Callback<GenericResponse>() {
-                    @Override
-                    public void onResponse(Call<GenericResponse> call,
-                                           Response<GenericResponse> r) {
-                        // Reflected on next load
-                    }
-
-                    @Override
-                    public void onFailure(Call<GenericResponse> call, Throwable t) {
-                        Toast.makeText(AssessmentEditorActivity.this,
-                                getString(R.string.network_error),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
-
     // ------------------------------------------------------------------ //
-    //  Helpers                                                            //
+    //  Utility                                                            //
     // ------------------------------------------------------------------ //
 
     private void showProgress(boolean show) {
         binding.progressOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
-    private String getEditText(android.widget.EditText et) {
+    private String getEditTextValue(android.widget.EditText et) {
         return et.getText() != null ? et.getText().toString().trim() : "";
-    }
-
-    @Override
-    public void onBackPressed() {
-        // Could show unsaved-changes dialog here if desired
-        super.onBackPressed();
     }
 }
