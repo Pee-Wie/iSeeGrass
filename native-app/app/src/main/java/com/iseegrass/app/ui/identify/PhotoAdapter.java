@@ -12,40 +12,67 @@ import com.bumptech.glide.Glide;
 import com.iseegrass.app.databinding.ItemPhotoBinding;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
- * Adapter for the 3-column photo collector grid in IdentifyFragment.
+ * RecyclerView adapter for the 3-column photo-collector grid.
+ *
+ * <p>Normal mode  — item click opens a detail/options dialog (delegated to the
+ * fragment via {@link OnPhotoClickListener}).</p>
+ * <p>Selection mode — item click toggles the selected state; long-press on any
+ * item enters selection mode via {@link OnPhotoLongClickListener}.</p>
  */
 public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.VH> {
 
-    public interface OnPhotoClick {
-        void onClick(int position, Uri uri);
+    // ------------------------------------------------------------------ //
+    //  Callback interfaces                                                //
+    // ------------------------------------------------------------------ //
+
+    public interface OnPhotoClickListener {
+        void onPhotoClick(int position, PhotoItem item);
     }
 
-    public interface OnPhotoLongClick {
-        void onLongClick(int position, Uri uri);
+    public interface OnPhotoLongClickListener {
+        void onPhotoLongClick(int position, PhotoItem item);
     }
 
-    private final List<Uri> uris;
-    private final List<String> titles;
-    private final OnPhotoClick clickListener;
-    private final OnPhotoLongClick longClickListener;
+    // ------------------------------------------------------------------ //
+    //  State                                                              //
+    // ------------------------------------------------------------------ //
 
+    private final List<PhotoItem> items;
     private boolean selectionMode = false;
-    private final Set<Integer> selectedPositions = new HashSet<>();
 
-    public PhotoAdapter(List<Uri> uris,
-                        List<String> titles,
-                        OnPhotoClick clickListener,
-                        OnPhotoLongClick longClickListener) {
-        this.uris = uris;
-        this.titles = titles;
-        this.clickListener = clickListener;
-        this.longClickListener = longClickListener;
+    private OnPhotoClickListener clickListener;
+    private OnPhotoLongClickListener longClickListener;
+
+    // ------------------------------------------------------------------ //
+    //  Constructors                                                       //
+    // ------------------------------------------------------------------ //
+
+    public PhotoAdapter() {
+        this.items = new ArrayList<>();
     }
+
+    public PhotoAdapter(List<PhotoItem> items) {
+        this.items = items != null ? items : new ArrayList<>();
+    }
+
+    // ------------------------------------------------------------------ //
+    //  Listener setters                                                   //
+    // ------------------------------------------------------------------ //
+
+    public void setOnPhotoClickListener(OnPhotoClickListener listener) {
+        this.clickListener = listener;
+    }
+
+    public void setOnPhotoLongClickListener(OnPhotoLongClickListener listener) {
+        this.longClickListener = listener;
+    }
+
+    // ------------------------------------------------------------------ //
+    //  RecyclerView.Adapter                                               //
+    // ------------------------------------------------------------------ //
 
     @NonNull
     @Override
@@ -57,61 +84,97 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.VH> {
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
-        Uri uri = uris.get(position);
+        PhotoItem item = items.get(position);
 
         Glide.with(holder.binding.ivPhoto.getContext())
-                .load(uri)
+                .load(item.getImageUri())
                 .centerCrop()
                 .into(holder.binding.ivPhoto);
 
-        // Selection mode UI
-        holder.binding.cbSelect.setVisibility(selectionMode ? View.VISIBLE : View.GONE);
-        boolean selected = selectedPositions.contains(position);
-        holder.binding.cbSelect.setChecked(selected);
-        holder.binding.viewSelectedOverlay.setVisibility(selected ? View.VISIBLE : View.GONE);
+        // Show/hide checkbox and overlay based on selection mode
+        int checkboxVisibility = selectionMode ? View.VISIBLE : View.GONE;
+        holder.binding.cbSelect.setVisibility(checkboxVisibility);
+        holder.binding.cbSelect.setChecked(item.isSelected());
+        holder.binding.viewSelectedOverlay.setVisibility(
+                item.isSelected() ? View.VISIBLE : View.GONE);
 
         holder.itemView.setOnClickListener(v -> {
             int pos = holder.getAdapterPosition();
-            if (pos != RecyclerView.NO_ID) clickListener.onClick(pos, uris.get(pos));
+            if (pos == RecyclerView.NO_ID) return;
+            PhotoItem current = items.get(pos);
+            if (selectionMode) {
+                // Toggle selection
+                current.setSelected(!current.isSelected());
+                notifyItemChanged(pos);
+            } else {
+                if (clickListener != null) clickListener.onPhotoClick(pos, current);
+            }
         });
 
         holder.itemView.setOnLongClickListener(v -> {
             int pos = holder.getAdapterPosition();
-            if (pos != RecyclerView.NO_ID) longClickListener.onLongClick(pos, uris.get(pos));
+            if (pos == RecyclerView.NO_ID) return false;
+            if (longClickListener != null) {
+                longClickListener.onPhotoLongClick(pos, items.get(pos));
+            }
             return true;
         });
     }
 
     @Override
     public int getItemCount() {
-        return uris.size();
+        return items.size();
     }
 
     // ------------------------------------------------------------------ //
-    //  Selection helpers                                                  //
+    //  Public API                                                         //
     // ------------------------------------------------------------------ //
 
-    public void toggleSelection(int position) {
-        if (selectedPositions.contains(position)) {
-            selectedPositions.remove(position);
-        } else {
-            selectedPositions.add(position);
+    /** Add a single photo to the grid. */
+    public void addPhoto(PhotoItem item) {
+        items.add(item);
+        notifyItemInserted(items.size() - 1);
+    }
+
+    /** Remove the photo at the given adapter position. */
+    public void removeItem(int position) {
+        if (position < 0 || position >= items.size()) return;
+        items.remove(position);
+        notifyItemRemoved(position);
+    }
+
+    /** Returns all items currently in the adapter. */
+    public List<PhotoItem> getItems() {
+        return items;
+    }
+
+    /** Returns only the items whose selected flag is true. */
+    public List<PhotoItem> getSelectedItems() {
+        List<PhotoItem> selected = new ArrayList<>();
+        for (PhotoItem item : items) {
+            if (item.isSelected()) selected.add(item);
         }
-        notifyItemChanged(position);
+        return selected;
     }
 
-    public void clearSelections() {
-        selectedPositions.clear();
+    /**
+     * Enter or exit selection mode.
+     * Exiting also clears all selection flags.
+     */
+    public void exitSelectionMode() {
+        selectionMode = false;
+        for (PhotoItem item : items) item.setSelected(false);
         notifyDataSetChanged();
     }
 
-    public Set<Integer> getSelectedPositions() {
-        return selectedPositions;
+    /** Enter selection mode. */
+    public void enterSelectionMode() {
+        selectionMode = true;
+        notifyDataSetChanged();
     }
 
-    public void setSelectionMode(boolean mode) {
-        this.selectionMode = mode;
-        notifyDataSetChanged();
+    public boolean isInSelectionMode() {
+        return selectionMode;
     }
 
     // ------------------------------------------------------------------ //
