@@ -1,0 +1,19 @@
+.agents/
+.context/
+.git/
+.gradle/
+.idea/
+.kaggle/
+.kiro/
+.vscode/
+App-Build History/
+android/
+assets/guides/
+backup/
+build/
+iSeeGrass--CNN-v0.02/
+native-app/
+node_modules/
+
+gitguide.md
+nohup.out
