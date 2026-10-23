@@ -1,2 +1,0 @@
-# iSeeGrass
-iSeeGrass development

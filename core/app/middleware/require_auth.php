@@ -18,6 +18,7 @@ if (defined('AUTH_MIDDLEWARE_LOADED')) {
 }
 define('AUTH_MIDDLEWARE_LOADED', true);
 
+require_once __DIR__ . '/../../config/cors.php';
 require_once __DIR__ . '/../../config/db.php';
 require_once __DIR__ . '/../../helpers/response.php';
 require_once __DIR__ . '/../../helpers/auth.php';

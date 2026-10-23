@@ -818,6 +818,10 @@ cameraShutterBtn.addEventListener('click', () => {
 /**
  * Show a small non-blocking toast at the bottom of the screen.
  * Auto-dismisses after `duration` ms.
+ *
+ * Robust for Android WebView: the element is appended and the fade-in
+ * transition is triggered inside a double-rAF so the browser always
+ * has a chance to paint before it tries to animate.
  */
 function showToastMessage(message, duration = 3500, colour = 'rgba(18,18,18,0.92)') {
   const el = document.createElement('div');
@@ -839,19 +843,31 @@ function showToastMessage(message, duration = 3500, colour = 'rgba(18,18,18,0.92
     'pointer-events:none',
     'white-space:nowrap',
     'opacity:0',
-    'transition:opacity 200ms ease',
+    'transition:opacity 220ms ease',
+    'max-width:90vw',
+    'text-align:center',
   ].join(';');
   el.textContent = message;
-  document.body.appendChild(el);
 
-  // Trigger fade-in
+  // Append after body is guaranteed to exist
+  const target = document.body || document.documentElement;
+  target.appendChild(el);
+
+  // Double-rAF: first frame registers the element, second frame starts transition
   requestAnimationFrame(() => {
-    requestAnimationFrame(() => { el.style.opacity = '1'; });
+    requestAnimationFrame(() => {
+      el.style.opacity = '1';
+    });
   });
 
   setTimeout(() => {
     el.style.opacity = '0';
-    el.addEventListener('transitionend', () => el.remove(), { once: true });
+    // Fallback remove in case transitionend never fires (some WebView versions)
+    const fallback = setTimeout(() => el.remove(), 400);
+    el.addEventListener('transitionend', () => {
+      clearTimeout(fallback);
+      el.remove();
+    }, { once: true });
   }, duration);
 }
 
@@ -899,24 +915,48 @@ function showOnlineToast() {
 
 /**
  * Called by drain() after each queued job completes (success or permanent fail).
- * Updates the matching history entry in the UI.
+ * Updates the matching history entry in the UI if it exists in memory,
+ * then always reloads the server-backed history so the result is visible
+ * even when the entry came from a previous session (no in-memory match).
+ *
+ * @param {string}      histId  The UUID used in the history UI
+ * @param {object|null} result  API response on success, null on failure
+ * @param {Error|null}  err     Error on failure, null on success
+ * @param {File|null}   file    The reconstructed image File from IDB
  */
-function onDrainResult(histId, result, err) {
-  if (!window.identifyHistory) return;
+function onDrainResult(histId, result, err, file) {
+  // Update the in-memory entry if it's still on screen (same-session queue)
+  if (window.identifyHistory) {
+    if (result) {
+      window.identifyHistory.update(histId, {
+        dbId:       result.identification_id ?? null,
+        topSpecies: result.top_result  || '—',
+        confidence: result.top_confidence ?? (result.scores?.[0]?.confidence ?? 0),
+        title:      result.title ?? null,
+        status:     'done',
+      });
+    } else {
+      window.identifyHistory.update(histId, {
+        status:   'error',
+        errorMsg: err?.message || 'Identification failed after retry.',
+      });
+    }
 
-  if (result) {
-    window.identifyHistory.update(histId, {
-      dbId:       result.identification_id ?? null,
-      topSpecies: result.top_result  || '—',
-      confidence: result.top_confidence ?? (result.scores?.[0]?.confidence ?? 0),
-      title:      result.title ?? null,
-      status:     'done',
-    });
-  } else {
-    window.identifyHistory.update(histId, {
-      status:   'error',
-      errorMsg: err?.message || 'Identification failed after retry.',
-    });
+    // Always reload from the server so cross-session queued results appear
+    // without a manual page refresh. _loadHistory() is a no-op when the
+    // component is not connected, so this is safe to call unconditionally.
+    window.identifyHistory._loadHistory().catch(() => {});
+  }
+
+  // Load the image into the 75% panel and render the result below it.
+  // Only when the identification succeeded and a file is available.
+  if (result && file) {
+    // loadDirectPhoto shows the image in the preview panel
+    loadDirectPhoto(file);
+    // renderIdentifyResults inserts the result panel after mainBody
+    renderIdentifyResults(result);
+    // Catalog lookup deferred so the result panel paints first
+    setTimeout(() => fetchAndRenderCatalogMatch(result.top_result || ''), 0);
   }
 }
 
@@ -927,21 +967,184 @@ function onDrainResult(histId, result, err) {
 function tryDrainQueue() {
   if (!navigator.onLine) return;
   drain(
-    (file, title, modelType) => identifyImage(file, title, modelType),
+    // Pass histId through so that if identifyImage re-queues on a mid-drain
+    // disconnect, it reuses the same UUID instead of creating an orphan entry.
+    (file, title, modelType, histId) => identifyImage(file, title, modelType, false, histId),
     onDrainResult,
   ).catch(() => {
     // Drain failures are non-fatal — will retry on next online event
   });
 }
 
-// Drain on connectivity restored
-window.addEventListener('online', () => {
+// ─── Online event wiring — robust for Android WebView + Capacitor ────────────
+//
+// Android WebView does not reliably fire 'online' on window. We cover all paths:
+//   1. window 'online'   — standard browsers and some WebView versions
+//   2. document 'online' — some Android WebView versions fire here instead
+//   3. Capacitor Network plugin — the most reliable source on Android native;
+//      fires 'networkStatusChange' even when the DOM events don't
+//
+// A guard flag prevents the toast + drain from running multiple times if
+// several of these fire in quick succession on the same reconnect.
+
+let _drainScheduled = false;
+
+function handleOnline() {
+  if (_drainScheduled) return;
+  _drainScheduled = true;
+
+  // Small delay: Android may fire 'online' a moment before TCP is usable.
+  // 800 ms is enough for the network stack to stabilise.
+  setTimeout(() => {
+    _drainScheduled = false;
+    if (!navigator.onLine) return;  // changed its mind — still offline
+    showOnlineToast();
+    tryDrainQueue();
+  }, 800);
+}
+
+// Path 1 — window (standard)
+window.addEventListener('online', handleOnline);
+
+// Path 2 — document (some Android WebView versions)
+document.addEventListener('online', handleOnline);
+
+// Path 3 — Capacitor Network plugin (most reliable on Android)
+// The plugin is available when running inside a Capacitor app.
+// We register this listener once the DOM is ready; it's a no-op on web.
+(function wireCapacitorNetwork() {
+  function tryRegister() {
+    try {
+      const Network = window.Capacitor?.Plugins?.Network;
+      if (!Network) return;
+      Network.addListener('networkStatusChange', (status) => {
+        if (status.connected) handleOnline();
+      });
+    } catch (_) {
+      // Capacitor not present or plugin unavailable — fall back to DOM events
+    }
+  }
+
+  // Try immediately (plugin may already be ready), then again after DOMContentLoaded
+  tryRegister();
+  if (document.readyState !== 'complete' && document.readyState !== 'interactive') {
+    document.addEventListener('DOMContentLoaded', tryRegister, { once: true });
+  }
+})();
+
+// Drain any leftover jobs from previous sessions on page load
+tryDrainQueue();
+
+// ── Retry queued jobs on demand (from sidebar retry button) ───────────────────
+document.addEventListener('isee:retry-queue', () => {
+  if (!navigator.onLine) {
+    showToastMessage('Still offline — will retry when connection returns.', 3000, 'rgba(60,60,60,0.92)');
+    return;
+  }
+  // Show toast and drain immediately (bypass the 800 ms delay used for
+  // auto-reconnect — user explicitly requested a retry, so act now).
   showOnlineToast();
   tryDrainQueue();
 });
 
-// Drain any leftover jobs from previous sessions on page load
-tryDrainQueue();
+// ── Reload a history result into the left panel ───────────────────────────────
+/**
+ * Called when the user clicks a "done" history card.
+ * Loads the thumbnail (if available) into the direct-preview panel and
+ * re-renders the result panel from the stored entry data.
+ * Shows only the Clear button — no "Identify" or "Change photo" buttons
+ * since this is a historical record, not a new identification.
+ *
+ * @param {{ entry: object }} detail
+ */
+document.addEventListener('isee:load-hist-result', (e) => {
+  const entry = e.detail?.entry;
+  if (!entry || entry.status !== 'done') return;
+
+  // ── Clear any existing direct preview state ───────────────────────────────
+  if (directPhoto) { URL.revokeObjectURL(directPhoto.url); directPhoto = null; }
+  document.getElementById('directPreview')?.remove();
+  document.getElementById('identifyResultsPanel')?.remove();
+  document.getElementById('speciesCatalogCard')?.remove();
+  document.getElementById('uploadReminder')?.remove();
+  photoGrid.classList.remove('pc-locked');
+  if (idTitleInput) idTitleInput.value = entry.title || '';
+
+  // ── Build a read-only preview panel ──────────────────────────────────────
+  const prompt = document.getElementById('uploadPrompt');
+  if (prompt) prompt.hidden = true;
+
+  const preview = document.createElement('div');
+  preview.id        = 'directPreview';
+  preview.className = 'direct-preview direct-preview--history';
+  preview.setAttribute('aria-label', 'Historical identification result');
+
+  const img = document.createElement('img');
+  img.className = 'direct-preview__img';
+  if (entry.thumbUrl) {
+    img.src = entry.thumbUrl;
+    img.alt = entry.fileName;
+  } else {
+    // No thumbnail for DB-only records — show a placeholder
+    img.src = '../../public/icons/favicon.png';
+    img.alt = 'No preview available';
+    img.style.opacity = '0.3';
+    img.style.objectFit = 'contain';
+    img.style.padding = '1rem';
+  }
+
+  const aside = document.createElement('div');
+  aside.className = 'direct-preview__aside';
+
+  const nameEl = document.createElement('span');
+  nameEl.className   = 'direct-preview__name';
+  nameEl.textContent = entry.fileName;
+  nameEl.title       = entry.fileName;
+
+  const histLabel = document.createElement('span');
+  histLabel.className   = 'direct-preview__hist-label';
+  histLabel.textContent = `#${entry._seq} · ${entry.title || 'Untitled'}`;
+  histLabel.style.cssText = 'font-size:.75rem;color:rgba(255,255,255,.45);display:block;margin-top:.2rem';
+
+  // Clear only — no Identify or Change buttons for history records
+  const clearBtn = document.createElement('button');
+  clearBtn.className   = 'btn direct-preview__clear';
+  clearBtn.type        = 'button';
+  clearBtn.textContent = 'Clear';
+  clearBtn.addEventListener('click', () => {
+    preview.remove();
+    document.getElementById('identifyResultsPanel')?.remove();
+    document.getElementById('speciesCatalogCard')?.remove();
+    document.getElementById('uploadReminder')?.remove();
+    if (prompt) prompt.hidden = false;
+    if (idTitleInput) idTitleInput.value = '';
+    updateUI();
+  });
+
+  aside.appendChild(nameEl);
+  aside.appendChild(histLabel);
+  aside.appendChild(clearBtn);
+  preview.appendChild(img);
+  preview.appendChild(aside);
+  mainBody.appendChild(preview);
+
+  // ── Re-render the result panel from stored entry data ─────────────────────
+  // Reconstruct a minimal result object from what's stored in the history entry.
+  const syntheticResult = {
+    identification_id : entry.dbId ?? null,
+    model_type        : null,
+    top_result        : entry.topSpecies || 'Unknown',
+    top_confidence    : entry.confidence ?? 0,
+    scores            : entry.topSpecies
+      ? [{ label: entry.topSpecies, confidence: entry.confidence ?? 0 }]
+      : [],
+    title             : entry.title,
+  };
+  renderIdentifyResults(syntheticResult);
+  setTimeout(() => fetchAndRenderCatalogMatch(syntheticResult.top_result), 0);
+
+  updateUI();
+});
 
 // ─── Render identification results ────────────────────────────────────────────
 

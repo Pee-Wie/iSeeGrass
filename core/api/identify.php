@@ -87,8 +87,11 @@ $title = isset($_POST['image_title']) ? substr(trim($_POST['image_title']), 0, 1
 if ($title === '') $title = null;
 
 // ── Optional auth ─────────────────────────────────────────────────────────────
+// If the caller explicitly identifies itself as a guest (Aid page), skip auth
+// entirely so the run is never attributed to a lingering logged-in session.
 $currentUser = null;
-$token       = getSessionTokenFromCookie();
+$isGuestCall = !empty($_POST['guest']) && $_POST['guest'] === '1';
+$token       = $isGuestCall ? null : getSessionTokenFromCookie();
 
 if ($token !== null) {
     $pdo          = getDB();

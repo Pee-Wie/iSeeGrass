@@ -1,0 +1,123 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# iSeeGrass — www/.htaccess  (also used as htdocs/.htaccess on shared hosting)
+#
+# Server layout (shared hosting / InfinityFree):
+#   htdocs/          ← DocumentRoot (web root)
+#   htdocs/core/     ← PHP backend — blocked from browser, accessible to PHP
+#   htdocs/.env      ← blocked from browser
+#
+# Server layout (local XAMPP — DocumentRoot → www/):
+#   core/ lives one level up and is never in the web root.
+#
+# PHP files are accessed directly by path; no URL rewriting needed.
+# This file handles:
+#   1. Security — block core/, .env, database/ from browser
+#   2. Security headers
+#   3. MIME types for ES modules
+#   4. Prevent directory listing
+# ─────────────────────────────────────────────────────────────────────────────
+
+Options -Indexes
+
+# ── Force HTTPS (required for camera/getUserMedia on non-localhost) ───────────
+# Skips redirect on localhost so local dev is unaffected.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP_HOST} !^localhost [NC]
+    RewriteCond %{HTTP_HOST} !^127\.0\.0\.1 [NC]
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+</IfModule>
+
+# ── MIME type for ES module scripts (.js served as module) ────────────────────
+AddType application/javascript .js .mjs
+
+# ── Block sensitive paths from browser access ────────────────────────────────
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Block core/ — PHP can include it server-side but browser cannot reach it
+    RewriteRule ^core(/.*)?$ - [F,L]
+
+    # Block .env
+    RewriteRule ^\.env$ - [F,L]
+
+    # Block database/ (SQL migrations and seeds)
+    RewriteRule ^database(/.*)?$ - [F,L]
+
+    # Block .git/
+    RewriteRule ^\.git(/.*)?$ - [F,L]
+
+    # Block backup/
+    RewriteRule ^backup(/.*)?$ - [F,L]
+
+    # Block tmp_uploads/ — server-side temp dir for CNN image forwarding
+    RewriteRule ^tmp_uploads(/.*)?$ - [F,L]
+</IfModule>
+
+# ── Security headers ─────────────────────────────────────────────────────────
+<IfModule mod_headers.c>
+    # Prevent MIME-type sniffing
+    Header always set X-Content-Type-Options "nosniff"
+
+    # Clickjacking protection
+    Header always set X-Frame-Options "SAMEORIGIN"
+
+    # XSS filter (legacy browsers)
+    Header always set X-XSS-Protection "1; mode=block"
+
+    # Only send Referrer on same-origin requests
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Permissions policy — allow camera/mic for the page itself (needed for capture feature)
+    # geolocation remains blocked entirely since the app never uses it.
+    Header always set Permissions-Policy "camera=(self), microphone=(self), geolocation=()"
+</IfModule>
+
+# ── Block access to sensitive files that may be inside www/ ──────────────────
+<FilesMatch "(^\.env|\.env\..*|\.gitignore|\.git|package\.json|package-lock\.json|composer\.json|composer\.lock)$">
+    Require all denied
+</FilesMatch>
+
+# ── Block access to backup and source map files ───────────────────────────────
+<FilesMatch "\.(bak|orig|swp|map)$">
+    Require all denied
+</FilesMatch>
+
+# ── Block access to the backup/ directory ────────────────────────────────────
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Block requests targeting the backup folder
+    RewriteRule ^backup(/.*)?$ - [F,L]
+
+    # Block tmp_uploads/ — server-side temp dir, no browser access
+    RewriteRule ^tmp_uploads(/.*)?$ - [F,L]
+
+    # Block requests targeting the .git folder
+    RewriteRule ^\.git(/.*)?$ - [F,L]
+</IfModule>
+
+# ── Enable CORS preflight caching (reduces OPTIONS round-trips) ───────────────
+<IfModule mod_headers.c>
+    <FilesMatch "\.php$">
+        Header always set Access-Control-Max-Age "600"
+    </FilesMatch>
+</IfModule>
+
+# ── Compression (optional, improves performance) ─────────────────────────────
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json
+</IfModule>
+
+# ── Browser caching for static assets ────────────────────────────────────────
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css                  "access plus 7 days"
+    ExpiresByType application/javascript    "access plus 7 days"
+    ExpiresByType image/png                 "access plus 30 days"
+    ExpiresByType image/jpeg                "access plus 30 days"
+    ExpiresByType image/svg+xml             "access plus 30 days"
+    ExpiresByType image/x-icon              "access plus 30 days"
+    ExpiresByType font/woff2                "access plus 30 days"
+</IfModule>

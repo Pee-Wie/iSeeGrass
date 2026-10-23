@@ -46,10 +46,9 @@
 .identify-layout {
   display: grid;
   grid-template-columns: 75fr 25fr;
-  grid-auto-rows: 1fr;
   gap: 1.5rem;
   margin-top: 1.5rem;
-  align-items: stretch;
+  align-items: start;
 }
 
 /* ─── Left panel (main card) ───────────────────────────────────── */
@@ -239,10 +238,14 @@
 /* ─── Right sidebar (Photo Collector) ──────────────────────────── */
 
 .collector-sidebar {
-  position: relative;
+  position: sticky;
+  top: 1rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  align-self: flex-start;
+  max-height: 560px;
+  overflow: hidden;
 }
 
 .collector-header {
@@ -365,6 +368,12 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0.5rem;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(124, 203, 77, 0.30) transparent;
 }
 
 /* Locked state – direct-upload photo is active in the main panel */
@@ -392,7 +401,8 @@
 
 .photo-thumb {
   position: relative;
-  aspect-ratio: 1;
+  width: 100%;
+  height: 80px;
   border-radius: 10px;
   overflow: hidden;
   border: 1px solid rgba(124, 203, 77, 0.2);
@@ -1243,6 +1253,24 @@
   margin: auto 0; /* vertically centre inside the flex list */
 }
 
+/* Each inner state (default / offline) matches the parent layout */
+.hist-empty__state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Offline state uses a blue tint to distinguish from the default */
+.hist-empty__state--offline svg {
+  opacity: 0.5;
+  color: rgba(100, 170, 240, 0.7);
+}
+
+.hist-empty__state--offline p {
+  color: rgba(100, 170, 240, 0.65);
+}
+
 .hist-empty svg {
   opacity: 0.4;
   flex-shrink: 0;
@@ -1348,6 +1376,21 @@
 .hist-card__status-badge--error {
   background: rgba(220, 55, 55, 0.85);
   color: #fff;
+}
+
+/* Queued — offline, will retry */
+.hist-card--queued {
+  border-left: 3px solid rgba(80, 160, 230, 0.55);
+}
+
+.hist-card__status-badge--queued {
+  background: rgba(60, 130, 210, 0.85);
+  color: #fff;
+}
+
+.hist-card--queued .hist-card__species {
+  color: #90c8f0;
+  font-style: italic;
 }
 
 /* ─── Card body ─────────────────────────────────────────────────── */
@@ -1764,4 +1807,94 @@
   line-height: 1.55;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   padding-top: 0.4rem;
+}
+
+/* ─── Seagrass upload reminder ───────────────────────────────────── */
+
+.upload-reminder {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+  padding: 0.55rem 0.85rem;
+  background: rgba(124, 203, 77, 0.08);
+  border: 1px solid rgba(124, 203, 77, 0.22);
+  border-radius: 8px;
+  font-size: 0.80rem;
+  color: rgba(214, 240, 184, 0.85);
+  line-height: 1.5;
+}
+
+.upload-reminder svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: rgba(159, 233, 151, 0.75);
+}
+
+.upload-reminder strong {
+  color: #9fe997;
+}
+
+/* ─── Queued card retry button ──────────────────────────────────── */
+
+.hist-card__retry {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  border: 1px solid rgba(60, 130, 210, 0.45);
+  background: rgba(60, 130, 210, 0.12);
+  color: #90c8f0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 140ms ease, background 140ms ease, color 140ms ease;
+  padding: 0;
+}
+
+.hist-card:hover .hist-card__retry,
+.hist-card:focus-within .hist-card__retry {
+  opacity: 1;
+}
+
+.hist-card__retry:hover {
+  background: rgba(60, 130, 210, 0.28);
+  border-color: rgba(60, 130, 210, 0.7);
+  color: #c0e0ff;
+}
+
+.hist-card__retry:focus-visible {
+  outline: 2px solid rgba(60, 130, 210, 0.8);
+  outline-offset: 2px;
+  opacity: 1;
+}
+
+/* ─── Clickable done-card body ──────────────────────────────────── */
+
+.hist-card__body--clickable {
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 120ms ease;
+}
+
+.hist-card__body--clickable:hover {
+  background: rgba(124, 203, 77, 0.07);
+}
+
+.hist-card__body--clickable:focus-visible {
+  outline: 2px solid rgba(124, 203, 77, 0.6);
+  outline-offset: 2px;
+}
+
+/* ─── History-mode direct preview (no identify / change buttons) ── */
+
+/* The panel itself reuses .direct-preview styles.
+   We only need to mark it as read-only for any future specificity. */
+.direct-preview--history .direct-preview__aside {
+  gap: 0.6rem;
 }

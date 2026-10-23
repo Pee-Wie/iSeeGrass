@@ -33,7 +33,7 @@
                 <div class="container-xl">
                     <div class="row g-2 align-items-center">
                         <div class="col">
-                            <h2 class="page-title text-primary">&gt; Admin / Operations</h2>
+                            <!-- <h2 class="page-title text-primary">&gt; Admin / Operations</h2> -->
                         </div>
                     </div>
                 </div>
@@ -44,15 +44,21 @@
 
                     <!-- Tab bar -->
                     <div class="admin-tabs">
-                        <button class="admin-tab active" data-tab="stats">Platform Statistics</button>
-                        <button class="admin-tab" data-tab="catalog">Seagrass Catalog</button>
+                        <button class="admin-tab active" data-tab="stats">
+                            <i class="ti ti-chart-bar" aria-hidden="true"></i>
+                            <span class="admin-tab__label">Platform Statistics</span>
+                        </button>
+                        <button class="admin-tab" data-tab="catalog">
+                            <i class="ti ti-plant" aria-hidden="true"></i>
+                            <span class="admin-tab__label">Seagrass Catalog</span>
+                        </button>
                         <button class="admin-tab" data-tab="engine">
                             <i class="ti ti-cpu" aria-hidden="true"></i>
-                            Model Engine
+                            <span class="admin-tab__label">Model Engine</span>
                         </button>
                         <button class="admin-tab" data-tab="admin-info">
                             <i class="ti ti-user-shield" aria-hidden="true"></i>
-                            Admin Info
+                            <span class="admin-tab__label">Admin Info</span>
                         </button>
                     </div>
 

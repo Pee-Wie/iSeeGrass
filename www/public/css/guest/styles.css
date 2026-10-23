@@ -506,16 +506,26 @@
         padding: 0.35rem 0.75rem;
       }
 
-      /* Dropdowns — full width stacked */
+      /* Dropdowns — 2×2 grid to cut vertical empty space */
       .filter-selects {
-        flex-direction: column;
-        gap: 0.6rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        align-items: end;
       }
 
       .select-wrap {
-        flex: 1 1 100% !important;
+        flex: unset !important;
         min-width: 0 !important;
         max-width: 100% !important;
+        width: 100%;
+      }
+
+      /* Clear filters button spans both columns */
+      .filter-selects .btn-clear {
+        grid-column: 1 / -1;
+        width: 100%;
+        text-align: center;
       }
 
       select {

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Browse the full seagrass species catalog — taxonomy, habitat, distribution, and ecological facts.">
+  <title>Seagrass Catalog | iSeeGrass</title>
+
+  <link rel="icon" type="image/png" href="../../public/icons/favicon.png">
+
+  <!-- Tabler (load first so iSeeGrass styles can override) -->
+  <link rel="stylesheet" href="../../resources/tabler/css/tabler.css">
+  <link rel="stylesheet" href="../../resources/tabler/css/tabler.min.css">
+
+  <!-- Tabler Icons webfont -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.48.0/dist/tabler-icons.min.css">
+
+  <!-- iSeeGrass shared user theme -->
+  <link rel="stylesheet" href="../../public/css/users/styles-users.css">
+
+  <!-- Seagrass Catalog page styles (dedicated — does NOT affect Aid.html or explore.html) -->
+  <link rel="stylesheet" href="../../public/css/users/seagrass/styles-users-seagrass.css">
+</head>
+
+<body>
+  <div class="page" id="main-content">
+    <isee-navbar-user></isee-navbar-user>
+
+    <div class="page-wrapper">
+
+      <!-- ── Page header ───────────────────────────────────────── -->
+      <div class="page-header d-print-none">
+        <div class="container-xl">
+          <div class="row g-2 align-items-center">
+            <div class="col">
+              <!-- <h2 class="page-title text-primary">&gt; Seagrass Catalog</h2> -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Page body ─────────────────────────────────────────── -->
+      <div class="page-body">
+        <div class="container-xl">
+          <div class="catalog-wrap">
+
+            <!-- ── Hero ──────────────────────────────────────── -->
+            <div class="catalog-hero">
+              <span class="eyebrow">Species Library</span>
+              <h2>Explore Seagrass Species</h2>
+              <p class="lead">
+                Browse all known seagrass species recognised by iSeeGrass. Each entry includes
+                taxonomy, habitat, distribution, and key ecological facts.
+              </p>
+            </div>
+
+            <!-- ── Stats row ─────────────────────────────────── -->
+            <div class="catalog-stats-row" id="catalog-stats-row">
+              <!-- stat chips injected by script -->
+              <a href="/views/users/identify.html" class="catalog-identify-btn"
+                aria-label="Go to the Identify page">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="M21 21l-4.35-4.35"/>
+                  <path d="M11 8v6M8 11h6"/>
+                </svg>
+                Identify
+              </a>
+            </div>
+
+            <!-- ── Filter + catalog panel ────────────────────── -->
+            <div class="catalog-panel">
+
+              <!-- Row 1 — search + scope toggle + region pills -->
+              <div class="cat-filter-bar">
+
+                <div class="cat-search-wrap">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  </svg>
+                  <input type="search" id="cat-species-search"
+                    placeholder="Search name, genus, family, region…"
+                    aria-label="Search seagrass species" autocomplete="off">
+                </div>
+
+                <div class="cat-region-scope">
+
+                  <!-- Global / Local radio toggle -->
+                  <div class="cat-scope-toggle" role="radiogroup" aria-label="Region scope">
+                    <label class="cat-scope-radio">
+                      <input type="radio" name="cat-scope" value="global" checked>
+                      <span>Global</span>
+                    </label>
+                    <label class="cat-scope-radio">
+                      <input type="radio" name="cat-scope" value="local">
+                      <span>Local (Philippines)</span>
+                    </label>
+                  </div>
+
+                  <!-- Global region pills -->
+                  <div class="cat-filter-pills" id="cat-pills-global"
+                    role="group" aria-label="Filter by global region">
+                    <button class="cat-pill active" data-filter="all">All regions</button>
+                    <button class="cat-pill" data-filter="caribbean">Caribbean</button>
+                    <button class="cat-pill" data-filter="mediterranean">Mediterranean</button>
+                    <button class="cat-pill" data-filter="indo-pacific">Indo-Pacific</button>
+                    <button class="cat-pill" data-filter="temperate">Temperate</button>
+                  </div>
+
+                  <!-- Local (Philippines) pills — hidden until "Local" is selected -->
+                  <div class="cat-filter-pills cat-hidden" id="cat-pills-local"
+                    role="group" aria-label="Filter by Philippine region">
+                    <button class="cat-pill active" data-local-filter="all">All Philippines</button>
+                    <button class="cat-pill" data-local-filter="luzon">Luzon</button>
+                    <button class="cat-pill" data-local-filter="visayas">Visayas</button>
+                    <button class="cat-pill" data-local-filter="mindanao">Mindanao</button>
+                  </div>
+
+                </div>
+              </div><!-- /cat-filter-bar -->
+
+              <!-- Row 2 — dropdowns + sort + clear -->
+              <div class="cat-filter-selects" role="group" aria-label="Detailed filters">
+
+                <div class="cat-select-wrap">
+                  <label for="cat-filter-family" class="cat-select-label">Family</label>
+                  <select id="cat-filter-family" aria-label="Filter by family">
+                    <option value="">All families</option>
+                  </select>
+                </div>
+
+                <div class="cat-select-wrap">
+                  <label for="cat-filter-genus" class="cat-select-label">Genus</label>
+                  <select id="cat-filter-genus" aria-label="Filter by genus">
+                    <option value="">All genera</option>
+                  </select>
+                </div>
+
+                <div class="cat-select-wrap">
+                  <label for="cat-filter-status" class="cat-select-label">IUCN Status</label>
+                  <select id="cat-filter-status" aria-label="Filter by IUCN status">
+                    <option value="">All statuses</option>
+                  </select>
+                </div>
+
+                <div class="cat-select-wrap">
+                  <label for="cat-sort-select" class="cat-select-label">Sort by</label>
+                  <select id="cat-sort-select" aria-label="Sort species">
+                    <option value="name-az">Name A → Z</option>
+                    <option value="name-za">Name Z → A</option>
+                    <option value="scientific">Scientific name</option>
+                    <option value="family">Family</option>
+                    <option value="genus">Genus</option>
+                    <option value="status">IUCN status</option>
+                  </select>
+                </div>
+
+                <button id="cat-clear-filters" class="cat-btn-clear" aria-label="Clear all filters">
+                  Clear filters
+                </button>
+
+              </div><!-- /cat-filter-selects -->
+
+              <p id="cat-results-count" aria-live="polite"></p>
+
+              <!-- Species grid -->
+              <div class="cat-species-grid" id="cat-species-grid" role="list"></div>
+
+            </div><!-- /catalog-panel -->
+
+          </div><!-- /catalog-wrap -->
+        </div><!-- /container-xl -->
+      </div><!-- /page-body -->
+    </div><!-- /page-wrapper -->
+  </div><!-- /page -->
+
+  <!-- ── Species detail modal ──────────────────────────────────── -->
+  <div class="cat-modal-overlay" id="cat-species-modal"
+    role="dialog" aria-modal="true"
+    aria-labelledby="cat-modal-title-text"
+    aria-describedby="cat-modal-desc-text">
+    <div class="cat-modal-box">
+      <button class="cat-modal-close" id="cat-modal-close-btn" aria-label="Close species detail">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+          stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <div id="cat-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Navbar component -->
+  <script type="module" src="../../components/navbar-user.js"></script>
+
+  <!-- Catalog script (dedicated — never touches Aid.html or explore.html) -->
+  <script type="module" src="../../public/js/users/seagrass/script-users-seagrass.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
+  <!-- Android back-button handler (no-op on web) -->
+  <script src="/js/back-handler.js"></script>
+</body>
+</html>

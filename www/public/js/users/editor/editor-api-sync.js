@@ -3,11 +3,14 @@
  *
  * Database-only persistence controller for the assessment editor.
  * This module is the SOLE source of truth for assessment data.
- * localStorage is not used.
+ * localStorage is not used for assessment content.
  *
  * Responsibilities:
  *  - Load the assessment list from the API and render the sidebar.
  *  - Save (create / update) via API on Save Draft / In Progress / Finalize.
+ *    → Falls back to the offline IndexedDB queue when there is no network.
+ *  - Drain the offline queue on page load and when connectivity returns.
+ *  - Show a pending-sync badge when queued assessments exist.
  *  - Load a full record into the editor when the user clicks a sidebar item.
  *  - Delete single assessments and all assessments.
  *  - Handle inline renames from the sidebar.
@@ -18,6 +21,12 @@
 
 import { createAssessment, updateAssessment, listAssessments, getAssessment, deleteAssessment } from '../../api/assessments.api.js';
 import { me } from '../../api/auth.api.js';
+import {
+  enqueueAssessment,
+  drainAssessments,
+  getQueuedAssessmentCount,
+  isOfflineError,
+} from '../../utils/assessment-queue.js';
 
 /* ── State ───────────────────────────────────────────────────────── */
 
@@ -32,7 +41,9 @@ function showEditorToast(msg, type = 'error') {
   const icon = toast.querySelector('i');
   const text = toast.querySelector('span');
   toast.className = `editor-toast editor-toast--${type}`;
-  if (icon) icon.className = type === 'success' ? 'ti ti-circle-check' : 'ti ti-alert-circle';
+  if (icon) icon.className = type === 'success' ? 'ti ti-circle-check'
+                           : type === 'warning'  ? 'ti ti-wifi-off'
+                           :                       'ti ti-alert-circle';
   if (text) text.textContent = msg;
   toast.hidden = false;
   clearTimeout(toast._timer);
@@ -48,6 +59,24 @@ function getEditorState() {
   return { title, content };
 }
 
+/* ── Pending-sync badge ──────────────────────────────────────────── */
+
+async function refreshPendingBadge() {
+  const badge = document.getElementById('pendingSyncBadge');
+  if (!badge) return;
+  try {
+    const count = await getQueuedAssessmentCount();
+    if (count > 0) {
+      badge.textContent = `⏳ ${count} assessment${count !== 1 ? 's' : ''} pending sync`;
+      badge.hidden = false;
+    } else {
+      badge.hidden = true;
+    }
+  } catch {
+    badge.hidden = true;
+  }
+}
+
 /* ── Fetch list from API and re-render sidebar ───────────────────── */
 
 async function loadAndRenderList() {
@@ -58,6 +87,7 @@ async function loadAndRenderList() {
   } catch {
     refreshDocList([], null);
   }
+  await refreshPendingBadge();
 }
 
 /* ── Fetch a full record and populate the editor ─────────────────── */
@@ -78,7 +108,7 @@ async function loadAssessmentIntoEditor(id) {
   }
 }
 
-/* ── Save to API ─────────────────────────────────────────────────── */
+/* ── Save to API (with offline fallback) ─────────────────────────── */
 
 const STATUS_MAP = {
   'draft':       'draft',
@@ -96,50 +126,122 @@ async function syncToApi(localStatus) {
     return;
   }
 
-  try {
-    if (apiAssessmentId) {
-      // Update the existing record (overwrite — same title is fine)
-      await updateAssessment(apiAssessmentId, { title, content, status });
-    } else {
-      // Check cache for a title conflict before creating a new record
-      const conflict = assessmentsCache.find(
-        r => r.title.trim().toLowerCase() === title.toLowerCase()
-      );
-      if (conflict) {
-        showEditorToast('An assessment with this title already exists.', 'error');
+  // ── Online path ───────────────────────────────────────────────────
+  if (navigator.onLine) {
+    try {
+      if (apiAssessmentId) {
+        await updateAssessment(apiAssessmentId, { title, content, status });
+      } else {
+        const conflict = assessmentsCache.find(
+          r => r.title.trim().toLowerCase() === title.toLowerCase()
+        );
+        if (conflict) {
+          showEditorToast('An assessment with this title already exists.', 'error');
+          return;
+        }
+        const created   = await createAssessment({ title, content, status });
+        apiAssessmentId = created.id;
+      }
+
+      await loadAndRenderList();
+      markSaved();
+
+      const statusLabel = {
+        draft:       'Draft saved',
+        in_progress: 'Saved as In Progress',
+        finalized:   'Assessment finalized!',
+      };
+      showEditorToast(statusLabel[status] || 'Saved', 'success');
+
+      if (status === 'finalized') {
+        const { title: t, content: c } = getEditorState();
+        downloadDocument(t, c, 'final');
+      }
+      return;
+
+    } catch (err) {
+      // If the error is a connectivity failure despite navigator.onLine being true,
+      // fall through to the offline queue below.
+      if (!isOfflineError(err)) {
+        const msg        = err.message || '';
+        const isConflict = err.status === 409 || msg.toLowerCase().includes('already exists');
+        showEditorToast(
+          isConflict
+            ? 'An assessment with this title already exists.'
+            : 'Save failed. Please try again.',
+          'error'
+        );
         return;
       }
-      const created   = await createAssessment({ title, content, status });
-      apiAssessmentId = created.id;
     }
+  }
 
-    // Refresh sidebar and mark saved
-    await loadAndRenderList();
-    markSaved();
+  // ── Offline path — queue the save for later ───────────────────────
+  try {
+    await enqueueAssessment({
+      localId  : crypto.randomUUID(),
+      serverId : apiAssessmentId ?? null,
+      title,
+      content,
+      status,
+    });
 
-    const statusLabel = {
-      draft:       'Draft saved',
-      in_progress: 'Saved as In Progress',
-      finalized:   'Assessment finalized!',
-    };
-    showEditorToast(statusLabel[status] || 'Saved', 'success');
+    markSaved(); // treat as saved so the user can keep working
+    await refreshPendingBadge();
+    showEditorToast('No connection — assessment queued for sync', 'warning');
 
-    // Auto-download on finalize
-    if (status === 'finalized') {
-      const { title: t, content: c } = getEditorState();
-      downloadDocument(t, c, 'final');
-    }
-  } catch (err) {
-    const msg = err.message || '';
-    const isConflict = err.status === 409 || msg.toLowerCase().includes('already exists');
-    showEditorToast(
-      isConflict
-        ? 'An assessment with this title already exists.'
-        : 'Save failed. Please try again.',
-      'error'
-    );
+  } catch {
+    showEditorToast('Save failed and could not be queued. Check storage permissions.', 'error');
   }
 }
+
+/* ── Drain the offline queue ─────────────────────────────────────── */
+
+let _draining = false;
+
+async function drain() {
+  if (_draining || !navigator.onLine) return;
+  _draining = true;
+
+  try {
+    await drainAssessments(
+      // createFn
+      (data) => createAssessment(data),
+      // updateFn
+      (id, data) => updateAssessment(id, data),
+      // onResult
+      async (localId, result, err) => {
+        if (result) {
+          // Successful sync — if this was the currently open record, update its id
+          if (!apiAssessmentId && result.id) {
+            apiAssessmentId = result.id;
+          }
+        } else if (err) {
+          const msg = (err.message || '').toLowerCase();
+          const isConflict = err.status === 409 || msg.includes('already exists');
+          showEditorToast(
+            isConflict
+              ? 'A queued assessment could not sync (title conflict). It was renamed automatically.'
+              : 'A queued assessment failed to sync and will be retried.',
+            'error'
+          );
+        }
+      }
+    );
+
+    // Refresh the sidebar after draining
+    await loadAndRenderList();
+
+  } finally {
+    _draining = false;
+  }
+}
+
+/* ── Listen for reconnection ─────────────────────────────────────── */
+
+window.addEventListener('online', () => {
+  drain().catch(() => {});
+});
 
 /* ══════════════════════════════════════════════════════════════════
    Event listeners — all editor actions flow through custom events
@@ -188,19 +290,17 @@ document.addEventListener('isee:rename-assessment', async e => {
   const { id, newTitle } = e.detail || {};
   if (!id || !newTitle) return;
 
-  // Conflict check (exclude the record being renamed)
   const conflict = assessmentsCache.find(
     r => r.id !== id && r.title.trim().toLowerCase() === newTitle.trim().toLowerCase()
   );
   if (conflict) {
     showEditorToast('An assessment with this title already exists.', 'error');
-    await loadAndRenderList(); // restore the old title in the sidebar
+    await loadAndRenderList();
     return;
   }
 
   try {
     await updateAssessment(id, { title: newTitle });
-    // Keep the editor title field in sync if this is the open record
     if (apiAssessmentId === id) {
       const titleEl = document.getElementById('editorTitle');
       if (titleEl) titleEl.value = newTitle;
@@ -235,6 +335,7 @@ document.addEventListener('isee:delete-all-assessments', async () => {
     if (titleEl)  titleEl.value      = '';
     if (canvasEl) canvasEl.innerHTML = '';
     refreshDocList([], null);
+    await refreshPendingBadge();
     showEditorToast('All assessments deleted', 'success');
   } catch {
     showEditorToast('Delete failed. Please try again.', 'error');
@@ -264,4 +365,7 @@ document.addEventListener('isee:editor-save', e => {
   if (assessmentsCache.length) {
     await loadAssessmentIntoEditor(assessmentsCache[0].id);
   }
+
+  // Drain any assessments that were queued while offline
+  drain().catch(() => {});
 })();

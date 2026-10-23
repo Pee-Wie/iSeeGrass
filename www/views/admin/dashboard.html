@@ -33,7 +33,7 @@
                 <div class="container-xl">
                     <div class="row g-2 align-items-center">
                         <div class="col">
-                            <h2 class="page-title text-primary">&gt; Admin / Dashboard</h2>
+                            <!-- <h2 class="page-title text-primary">&gt; Admin / Dashboard</h2> -->
                         </div>
                     </div>
                 </div>
@@ -43,35 +43,9 @@
                 <div class="container-xl">
                     <div class="row row-deck row-cards g-3">
 
-                        <!-- ── Hero Card: Stat Cards + Quick Actions ── -->
+                        <!-- ── Hero Card: Quick Actions + Recent Activity ── -->
                         <div class="col-12">
                             <div class="dash-hero">
-                                <!-- Stat cards -->
-                                <div class="dash-hero__stats">
-                                    <a href="/views/admin/users.html" class="dash-stat-card dash-stat-card--link">
-                                        <span class="stat-label">Total Users</span>
-                                        <span class="stat-value" id="stat-users">—</span>
-                                        <span class="stat-sub">Registered accounts</span>
-                                    </a>
-                                    <a href="/views/admin/assessment.html" class="dash-stat-card dash-stat-card--link">
-                                        <span class="stat-label">Total Assessments</span>
-                                        <span class="stat-value" id="stat-assessments">—</span>
-                                        <span class="stat-sub">Platform-wide records</span>
-                                    </a>
-                                    <a href="/views/admin/identify.html" class="dash-stat-card dash-stat-card--link">
-                                        <span class="stat-label">Identifications Run</span>
-                                        <span class="stat-value" id="stat-identifications">—</span>
-                                        <span class="stat-sub">CNN sessions</span>
-                                    </a>
-                                    <a href="/views/admin/report.html" class="dash-stat-card dash-stat-card--link">
-                                        <span class="stat-label">Species in Catalog</span>
-                                        <span class="stat-value" id="stat-species">—</span>
-                                        <span class="stat-sub">Seagrass catalog entries</span>
-                                    </a>
-                                </div>
-
-                                <!-- Divider -->
-                                <div class="dash-hero__divider"></div>
 
                                 <!-- Quick actions -->
                                 <div class="dash-hero__actions">
@@ -81,36 +55,35 @@
                                             <span class="ql-icon"><i class="ti ti-users"></i></span> Manage Users
                                         </a>
                                         <a href="/views/admin/assessment.html" class="quick-link-btn">
-                                            <span class="ql-icon"><i class="ti ti-clipboard-list"></i></span> All Assessments
+                                            <span class="ql-icon"><i class="ti ti-clipboard-list"></i></span> All
+                                            Assessments
                                         </a>
                                         <a href="/views/admin/report.html" class="quick-link-btn">
-                                            <span class="ql-icon"><i class="ti ti-chart-bar"></i></span> Reports &amp; Catalog
+                                            <span class="ql-icon"><i class="ti ti-chart-bar"></i></span> Reports &amp;
+                                            Catalog
                                         </a>
                                         <a href="/views/admin/identify.html" class="quick-link-btn">
-                                            <span class="ql-icon"><i class="ti ti-microscope"></i></span> Run Identification
+                                            <span class="ql-icon"><i class="ti ti-microscope"></i></span> Run
+                                            Identification
                                         </a>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <!-- ── Recent Activity + Species Breakdown 50/50 ── -->
-                        <div class="col-12">
-                            <div class="dash-panels-row">
-                                <div class="dash-panel dash-panel--tall">
-                                    <h3><span class="panel-icon"><i class="ti ti-clock"></i></span> Recent Activity</h3>
+                                <!-- Divider -->
+                                <div class="dash-hero__divider"></div>
+
+                                <!-- Recent Activity -->
+                                <div class="dash-hero__activity">
+                                    <p class="section-label">Recent Activity</p>
                                     <ul class="activity-list" id="activity-list">
                                         <!-- populated by JS -->
                                     </ul>
                                 </div>
-                                <div class="dash-panel dash-panel--tall">
-                                    <h3><span class="panel-icon"><i class="ti ti-chart-bar"></i></span> Species Breakdown</h3>
-                                    <div class="species-bar-list" id="species-breakdown">
-                                        <!-- populated by JS -->
-                                    </div>
-                                </div>
+
                             </div>
                         </div>
+
+
 
                         <!-- ── System Scope Notice ────────────────────── -->
                         <div class="col-12">
@@ -118,7 +91,8 @@
                                 <span class="sn-tag">SCOPE</span>
                                 <span>
                                     Platform-wide view. Stats shown are aggregated across all users. The identification
-                                    model is scoped to the <strong style="color:#d6f0b8;">Negros region</strong> species dataset.
+                                    model is scoped to the <strong style="color:#d6f0b8;">Negros region</strong> species
+                                    dataset.
                                 </span>
                             </div>
                         </div>
@@ -140,13 +114,20 @@
 
                         <div class="col-lg-6">
                             <div class="dash-panel">
-                                <h3><span class="panel-icon"><i class="ti ti-robot"></i></span> About the Identification Model</h3>
+                                <h3><span class="panel-icon"><i class="ti ti-robot"></i></span> About the Identification
+                                    Model</h3>
                                 <ul class="tip-list">
-                                    <li>Classification is performed by a <strong style="color:#d6f0b8;">Convolutional Neural Network (CNN)</strong> trained on labeled seagrass images.</li>
-                                    <li>The model outputs a species prediction alongside a <strong style="color:#d6f0b8;">confidence score</strong> — lower scores suggest ambiguous images.</li>
-                                    <li>Only species present in the <strong style="color:#d6f0b8;">Negros region dataset</strong> are within the model's trained scope.</li>
-                                    <li>Results should be reviewed by the researcher; the system does not replace expert field assessment.</li>
-                                    <li>Assessment outputs include species composition, abundance, and percentage cover estimates.</li>
+                                    <li>Classification is performed by a <strong style="color:#d6f0b8;">Convolutional
+                                            Neural Network (CNN)</strong> trained on labeled seagrass images.</li>
+                                    <li>The model outputs a species prediction alongside a <strong
+                                            style="color:#d6f0b8;">confidence score</strong> — lower scores suggest
+                                        ambiguous images.</li>
+                                    <li>Only species present in the <strong style="color:#d6f0b8;">Negros region
+                                            dataset</strong> are within the model's trained scope.</li>
+                                    <li>Results should be reviewed by the researcher; the system does not replace expert
+                                        field assessment.</li>
+                                    <li>Assessment outputs include species composition, abundance, and percentage cover
+                                        estimates.</li>
                                 </ul>
                             </div>
                         </div>
@@ -154,46 +135,71 @@
                         <!-- ── Negros Species Reference ───────────────── -->
                         <div class="col-12">
                             <div class="dash-panel">
-                                <h3><span class="panel-icon"><i class="ti ti-plant"></i></span> Identifiable Species — Negros Region</h3>
+                                <h3><span class="panel-icon"><i class="ti ti-plant"></i></span> Identifiable Species —
+                                    Negros Region</h3>
                                 <p style="font-size:0.84rem; color:var(--muted); margin:0 0 1rem;">
                                     These are the seagrass species the CNN model is trained to classify from
                                     field images. Part of the broader ~60–72 species worldwide catalogue.
                                 </p>
                                 <div class="row g-2" id="negros-species-grid">
                                     <div class="col-sm-6 col-lg-4">
-                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
-                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Enhalus acoroides</p>
-                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Tape Seagrass · Largest species in the world. Forms extensive intertidal meadows.</p>
+                                        <div
+                                            style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p
+                                                style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">
+                                                Enhalus acoroides</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Tape Seagrass ·
+                                                Largest species in the world. Forms extensive intertidal meadows.</p>
                                         </div>
                                     </div>
                                     <div class="col-sm-6 col-lg-4">
-                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
-                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Thalassia hemprichii</p>
-                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Hemprich's Seagrass · Dominant species in Indo-Pacific mixed meadows.</p>
+                                        <div
+                                            style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p
+                                                style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">
+                                                Thalassia hemprichii</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Hemprich's
+                                                Seagrass · Dominant species in Indo-Pacific mixed meadows.</p>
                                         </div>
                                     </div>
                                     <div class="col-sm-6 col-lg-4">
-                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
-                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Halophila ovalis</p>
-                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Dugong Grass · Pioneer coloniser with small oval leaf pairs.</p>
+                                        <div
+                                            style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p
+                                                style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">
+                                                Halophila ovalis</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Dugong Grass ·
+                                                Pioneer coloniser with small oval leaf pairs.</p>
                                         </div>
                                     </div>
                                     <div class="col-sm-6 col-lg-4">
-                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
-                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Cymodocea rotundata</p>
-                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Rotund Cymodocea · Common on reef flats and shallow lagoons.</p>
+                                        <div
+                                            style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p
+                                                style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">
+                                                Cymodocea rotundata</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Rotund Cymodocea
+                                                · Common on reef flats and shallow lagoons.</p>
                                         </div>
                                     </div>
                                     <div class="col-sm-6 col-lg-4">
-                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
-                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Halodule uninervis</p>
-                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Spade Grass · Abundant pioneer with distinctive trident-shaped leaf tip.</p>
+                                        <div
+                                            style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p
+                                                style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">
+                                                Halodule uninervis</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Spade Grass ·
+                                                Abundant pioneer with distinctive trident-shaped leaf tip.</p>
                                         </div>
                                     </div>
                                     <div class="col-sm-6 col-lg-4">
-                                        <div style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
-                                            <p style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">Syringodium isoetifolium</p>
-                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Needle Seagrass · Unique cylindrical hollow leaves; monospecific beds.</p>
+                                        <div
+                                            style="background:rgba(124,203,77,0.07); border:1px solid rgba(124,203,77,0.18); border-radius:12px; padding:1rem;">
+                                            <p
+                                                style="margin:0 0 0.25rem; font-weight:700; color:#d6f0b8; font-size:0.9rem;">
+                                                Syringodium isoetifolium</p>
+                                            <p style="margin:0; font-size:0.8rem; color:var(--muted);">Needle Seagrass ·
+                                                Unique cylindrical hollow leaves; monospecific beds.</p>
                                         </div>
                                     </div>
                                 </div>

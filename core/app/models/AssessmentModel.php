@@ -69,7 +69,7 @@ class AssessmentModel
      */
     public function getAll(array $filters = [], int $limit = 50, int $offset = 0): array
     {
-        [$where, $params] = $this->buildFilters($filters);
+        [$where, $params] = $this->buildFilters($filters, 'a.');
         $whereClause = $where ? "WHERE {$where}" : '';
 
         $sql = "SELECT a.id, a.user_id, a.title, a.status, a.created_at, a.updated_at,
@@ -95,7 +95,7 @@ class AssessmentModel
      */
     public function count(array $filters = []): int
     {
-        [$where, $params] = $this->buildFilters($filters);
+        [$where, $params] = $this->buildFilters($filters, 'a.');
         $whereClause = $where ? "WHERE {$where}" : '';
 
         $stmt = $this->pdo->prepare(
@@ -106,6 +106,33 @@ class AssessmentModel
         }
         $stmt->execute();
         return (int) $stmt->fetchColumn();
+    }
+
+    // ── Uniqueness check ─────────────────────────────────────────────────────
+
+    /**
+     * Check whether a title already exists for the given user.
+     *
+     * @param int      $userId
+     * @param string   $title
+     * @param int|null $excludeId  Assessment ID to exclude (used on update so the
+     *                             current record's own title doesn't trigger a conflict).
+     */
+    public function titleExistsForUser(int $userId, string $title, ?int $excludeId = null): bool
+    {
+        $sql    = 'SELECT 1 FROM assessments WHERE user_id = :user_id AND title = :title';
+        $params = [':user_id' => $userId, ':title' => $title];
+
+        if ($excludeId !== null) {
+            $sql              .= ' AND id != :exclude_id';
+            $params[':exclude_id'] = $excludeId;
+        }
+
+        $sql .= ' LIMIT 1';
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        return (bool) $stmt->fetchColumn();
     }
 
     // ── Create ───────────────────────────────────────────────────────────────
@@ -195,30 +222,33 @@ class AssessmentModel
      * Build a WHERE clause string + params array from a filters array.
      * Returns ['clause', [':param' => value, ...]]
      */
-    private function buildFilters(array $filters): array
+    /**
+     * @param string $prefix  Table alias prefix — 'a.' for aliased queries, '' for plain ones.
+     */
+    private function buildFilters(array $filters, string $prefix = ''): array
     {
         $clauses = [];
         $params  = [];
 
         if (!empty($filters['user_id'])) {
-            $clauses[]          = 'a.user_id = :user_id';
+            $clauses[]          = "{$prefix}user_id = :user_id";
             $params[':user_id'] = (int) $filters['user_id'];
         }
         if (!empty($filters['status'])) {
-            $clauses[]          = 'a.status = :status';
+            $clauses[]          = "{$prefix}status = :status";
             $params[':status']  = $filters['status'];
         }
         if (!empty($filters['date_from'])) {
-            $clauses[]              = 'DATE(a.created_at) >= :date_from';
-            $params[':date_from']   = $filters['date_from'];
+            $clauses[]            = "DATE({$prefix}created_at) >= :date_from";
+            $params[':date_from'] = $filters['date_from'];
         }
         if (!empty($filters['date_to'])) {
-            $clauses[]            = 'DATE(a.created_at) <= :date_to';
-            $params[':date_to']   = $filters['date_to'];
+            $clauses[]          = "DATE({$prefix}created_at) <= :date_to";
+            $params[':date_to'] = $filters['date_to'];
         }
         if (!empty($filters['search'])) {
-            $clauses[]            = 'a.title LIKE :search';
-            $params[':search']    = '%' . $filters['search'] . '%';
+            $clauses[]          = "{$prefix}title LIKE :search";
+            $params[':search']  = '%' . $filters['search'] . '%';
         }
 
         return [implode(' AND ', $clauses), $params];

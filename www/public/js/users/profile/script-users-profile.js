@@ -187,9 +187,9 @@ formPersonal?.addEventListener('submit', async e => {
     });
     currentUser = updated;
     updateSidebarCard(updated);
-    // Update session cache
-    const cached = JSON.parse(sessionStorage.getItem('isee_user') || '{}');
-    sessionStorage.setItem('isee_user', JSON.stringify({ ...cached, ...updated }));
+    // Update local cache
+    const cached = JSON.parse(localStorage.getItem('isee_user') || '{}');
+    localStorage.setItem('isee_user', JSON.stringify({ ...cached, ...updated }));
     showToast('Profile updated successfully.');
   } catch (err) {
     showToast(err.message, true);
@@ -306,7 +306,87 @@ function renderJoinedSince(isoDate) {
   } catch { el.textContent = isoDate; }
 }
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+// ── Offline guard ─────────────────────────────────────────────────────────────
+// When the device has no network, disable all write actions (save, password
+// change, avatar upload/remove) and show a persistent notice at the top of
+// the page. Re-enable everything when connectivity returns.
+const OFFLINE_NOTICE_ID = 'profileOfflineNotice';
+
+function applyOfflineState(offline) {
+  // Disable / enable all submit and mutating buttons
+  const writeButtons = [
+    $('btnSavePersonal'),
+    $('btnSavePassword'),
+    document.querySelector('label[for="avatarInput"]'),
+    $('btnRemoveAvatar'),
+  ];
+  writeButtons.forEach(el => {
+    if (!el) return;
+    if (offline) {
+      el.setAttribute('data-was-disabled', el.disabled ? '1' : '0');
+      el.disabled = true;
+      el.style.opacity = '0.45';
+      el.style.cursor  = 'not-allowed';
+    } else {
+      const wasDisabled = el.getAttribute('data-was-disabled') === '1';
+      el.disabled = wasDisabled;
+      el.style.opacity = '';
+      el.style.cursor  = '';
+    }
+  });
+
+  // Show / hide the offline notice banner
+  let notice = $(OFFLINE_NOTICE_ID);
+  if (offline) {
+    if (!notice) {
+      notice = document.createElement('div');
+      notice.id = OFFLINE_NOTICE_ID;
+      notice.setAttribute('role', 'status');
+      notice.style.cssText = [
+        'display:flex',
+        'align-items:center',
+        'gap:0.6rem',
+        'background:rgba(60,100,160,0.15)',
+        'border:1px solid rgba(80,140,220,0.4)',
+        'border-radius:8px',
+        'padding:0.65rem 1rem',
+        'margin-bottom:1rem',
+        'font-size:0.88rem',
+        'color:#90c8f0',
+      ].join(';');
+      notice.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0">
+          <line x1="1" y1="1" x2="23" y2="23"/>
+          <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+          <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
+          <path d="M10.71 5.05A16 16 0 0 1 22.56 9"/>
+          <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>
+          <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+          <line x1="12" y1="20" x2="12.01" y2="20"/>
+        </svg>
+        <span>You're offline — profile changes are disabled. Reconnect to save.</span>`;
+
+      // Insert before the first form section on the page
+      const firstSection = document.querySelector('.prof-section, .page-body, main');
+      if (firstSection) {
+        firstSection.prepend(notice);
+      } else {
+        document.body.prepend(notice);
+      }
+    }
+    notice.hidden = false;
+  } else if (notice) {
+    notice.hidden = true;
+  }
+}
+
+// Apply on load and on connectivity changes
+applyOfflineState(!navigator.onLine);
+window.addEventListener('online',  () => applyOfflineState(false));
+window.addEventListener('offline', () => applyOfflineState(true));
+
 (async function init() {
   try {
     currentUser = await me();

@@ -39,7 +39,7 @@
         <div class="container-xl">
           <div class="row g-2 align-items-center">
             <div class="col">
-              <h2 class="page-title text-primary">&gt; Assessment Manager</h2>
+              <!-- <h2 class="page-title text-primary">&gt; Assessment Manager</h2> -->
             </div>
           </div>
         </div>
@@ -107,6 +107,11 @@
                     <i class="ti ti-trash"></i>
                   </button>
                 </div>
+
+                <!-- Pending offline sync badge -->
+                <div class="pending-sync-badge" id="pendingSyncBadge" hidden
+                  role="status" aria-live="polite" aria-atomic="true"></div>
+
                 <div class="panel-card__body" id="docList">
                   <p class="doc-empty">No saved assessments yet.</p>
                 </div>
@@ -544,6 +549,7 @@
   <script type="module" src="../../components/modal-utils.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>
   <script src="../../public/js/users/editor/script-users-editor.js"></script>
+  <script type="module" src="../../public/js/users/editor/editor-api-sync.js"></script>
 
   <!-- Android back-button handler (no-op on web) -->
   <script src="/js/back-handler.js"></script>

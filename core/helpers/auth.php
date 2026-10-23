@@ -49,7 +49,13 @@ function setSessionCookie(string $token, int $lifetime = 0): void
 {
     $secure   = filter_var(env('SESSION_SECURE', 'false'), FILTER_VALIDATE_BOOLEAN);
     $expires  = $lifetime > 0 ? time() + $lifetime : 0;
-    $sameSite = $secure ? 'None' : 'Lax';
+
+    // SameSite=Lax works correctly in Android WebView (Capacitor) and persists
+    // across app restarts. SameSite=None requires the cookie to be sent with
+    // every cross-site request and is NOT reliably persisted by Android's
+    // WebView CookieManager across process kills — causing spurious logouts.
+    // Lax is the safe default for both mobile WebView and standard browsers.
+    $sameSite = 'Lax';
 
     setcookie(sessionCookieName(), $token, [
         'expires'  => $expires,

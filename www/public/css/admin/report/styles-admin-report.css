@@ -160,6 +160,8 @@
     border-bottom: 2px solid transparent;
     transition: color 180ms, border-color 180ms;
     margin-bottom: -1px;
+    flex: 1 1 auto;
+    text-align: center;
 }
 .admin-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 .admin-tab-panel { display: none; }
@@ -205,6 +207,31 @@
 @media (max-width: 768px) {
     .report-stat-grid { grid-template-columns: 1fr 1fr; }
     .report-charts-row { grid-template-columns: 1fr; }
+
+    /* Active tab: icon only (compact anchor).
+       Inactive tabs: label only (no icon clutter). */
+    .admin-tab i             { display: none; }
+    .admin-tab__label        { display: inline; }
+
+    .admin-tab.active i            { display: inline; font-size: 1.1rem; }
+    .admin-tab.active .admin-tab__label { display: none; }
+
+    .admin-tab {
+        font-size: 0.82rem;
+        padding: 0.55rem 0.5rem;
+        min-width: 0;
+    }
+
+    /* Active tab is narrower (icon only) — don't let it hog space */
+    .admin-tab.active {
+        flex: 0 0 auto;
+        padding: 0.55rem 0.85rem;
+    }
+
+    /* Reduce card padding on tablets */
+    .admin-card {
+        padding: 1rem 1.1rem;
+    }
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -999,4 +1026,94 @@
     .cat-search-wrap    { min-width: 0; width: 100%; }
     .cat-filter-selects { flex-direction: column; }
     .cat-select-wrap    { max-width: 100%; }
+}
+
+/* ── Mobile: Catalog header & layout ── */
+@media (max-width: 480px) {
+    /* Tighten card padding on small screens */
+    .admin-card {
+        padding: 1rem;
+        border-radius: 14px;
+    }
+
+    /* Catalog header row: stack title above controls */
+    #tab-catalog .admin-card > div:first-child {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+
+    /* Controls row (toggle + add button): stretch full width */
+    #tab-catalog .admin-card > div:first-child > div {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    /* View toggle: fill available space evenly */
+    .catalog-view-toggle {
+        flex: 1;
+    }
+
+    .view-toggle-btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    /* Add Species button: auto width */
+    #btnAddSpecies {
+        white-space: nowrap;
+    }
+
+    /* Catalog search bar full width is already set by inline style;
+       ensure it doesn't overflow */
+    #catalogSearch {
+        box-sizing: border-box;
+        width: 100% !important;
+    }
+
+    /* Filter bar: column layout */
+    .cat-filter-bar {
+        gap: 0.6rem;
+    }
+
+    /* Pills: allow wrapping and smaller text */
+    .cat-pills {
+        gap: 0.3rem;
+    }
+
+    .cat-pill {
+        font-size: 0.72rem;
+        padding: 0.28rem 0.65rem;
+    }
+
+    /* Scope radio labels */
+    .cat-scope-radio span {
+        font-size: 0.78rem;
+    }
+
+    /* Filter selects: 2×2 grid to cut vertical empty space */
+    .cat-filter-selects {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        align-items: end;
+    }
+
+    .cat-select-wrap {
+        flex: unset;
+        max-width: 100%;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .admin-select {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Clear filters button: span both columns */
+    #catClearFilters {
+        grid-column: 1 / -1;
+        width: 100%;
+        justify-content: center;
+    }
 }

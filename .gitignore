@@ -1,19 +1,66 @@
+# ─── Hidden directories ───────────────────────────────────────────────────────
 .agents/
 .context/
-.git/
+.freebuff/
 .gradle/
 .idea/
-.kaggle/
 .kiro/
 .vscode/
+
+# ─── Hidden / sensitive files ─────────────────────────────────────────────────
+.dockerignore
+.env
+.env.local
+.env.railway
+.htaccess
+.tmp-Build Logs
+.tmp-Deploy Logs
+
+# ─── Credentials & tokens ─────────────────────────────────────────────────────
+token.txt
+native-app/google-services.json
+native-app/app/google-services.json
+# (native-app/app/src/ and gradle wrapper are tracked — see below)
+
+# ─── Database files (contain hashed passwords + schema secrets) ───────────────
+database/iseegrass_master-seed+mig.sql
+database/iseegrass_master_4_railway.sql
+database/seed/users.seed.sql
+database/migrattion/007_add_model_type_to_identifications.sql
+database/migrattion/008_system_settings.sql
+database/migrattion/009_add_image_filename_to_identifications.sql
+database/migrattion/010_add_title_to_identifications.sql
+database/migrattion/011_assessments_unique_title.sql
+database/migrattion/iseegrass_full_setup.sql
+
+# ─── Directories & symlinks ───────────────────────────────────────────────────
+assets/guides/
+docker/
+iSeeGrass_CNN
+iSeeGrass-cap
+iSeeGrass-na
 App-Build History/
 android/
-assets/guides/
 backup/
 build/
 iSeeGrass--CNN-v0.02/
-native-app/
 node_modules/
 
-gitguide.md
+# ─── native-app: exclude build cache & secrets, track source ──────────────────
+native-app/.gradle/
+native-app/app/build/
+native-app/app/src/
+native-app/local.properties
+
+# ─── Build & generated files ──────────────────────────────────────────────────
 nohup.out
+
+# ─── Config files (runtime / deployment specific) ─────────────────────────────
+capacitor.config.json
+docker-entrypoint.sh
+Dockerfile
+package-lock.json
+package.json
+
+# ─── Docs / guides (not source code) ─────────────────────────────────────────
+gitguide.md

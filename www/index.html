@@ -5,7 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="iSeeGrass is a web and mobile application for seagrass species identification and assessment using image recognition and CNN classification.">
   <title>iSeeGrass | Seagrass Species Identification</title>
-  
+
+  <!--
+    Auth session restore — MUST be first in <head>, before any CSS or JS loads.
+    If the user is still logged in (localStorage has isee_user with a role),
+    redirect them straight to their dashboard. This fires before any paint,
+    preventing the landing page from flashing before the redirect.
+    Covers Android app reopen (Capacitor always loads root URL on launch).
+  -->
+  <script>
+    (function () {
+      try {
+        var raw = localStorage.getItem('isee_user');
+        if (!raw) return;
+        var user = JSON.parse(raw);
+        if (!user || !user.role) return;
+        var dest = user.role === 'admin'
+          ? '/views/admin/index.html'
+          : '/views/users/index.html';
+        window.location.replace(dest);
+      } catch (_) {
+        // Corrupt localStorage — stay on landing page
+      }
+    })();
+  </script>
+
   <!-- iSeeGrass Default Theme -->
   <link rel="stylesheet" href="../../resources/tabler/css/tabler.css">
   <link rel="stylesheet" href="../../resources/tabler/css/tabler.min.css">

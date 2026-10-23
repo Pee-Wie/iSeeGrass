@@ -1,0 +1,25 @@
+Title:
+iSeeGrass Web and Mobile Application for Seagrass Species Identification and Assessment Using Image Recognition
+
+Client: Prof. Abegail A. Gelantaga-an(CFAS Dean, CFAS, Old Sagay City)
+Advisor: Glenn Mark S. Delina, MIT
+IT experts: Cristina R. Lausa, Antonio B. Celis, Jewell Ken V. Banes, Bienvenido M. Lausa
+
+Objectives of the Study
+The main objective of this study is to design and develop iSeeGrass: Web and Mobile Application for Seagrass Species Identification and Assessment Using Image Recognition to support seagrass species identification and field assessment through CNN-based image classification and digital assessment data management. 
+Specifically, it aims to:
+    1. Design and develop a web and mobile application that will identify seagrass species from captured or uploaded images using a Convolutional Neural Network (CNN).
+    2. Develop an assessment module that will allow users to record quadrat-based observations, including species occurrence, abundance, and estimated percentage cover, and will calculate and organize the corresponding assessment results.
+    3. Evaluate the performance of the CNN-based classification model in identifying seagrass species using appropriate model-performance measures.
+    4. Evaluate the software quality of the developed iSeeGrass application using McCall's Software Quality Model, as assessed by qualified IT experts.
+    5. Evaluate the usability of the developed iSeeGrass application using the Computer System Usability Questionnaire (CSUQ) among the intended users.
+    6. Implement an offline recording and synchronization mechanism that will allow users of the mobile application to record assessment data without an active internet connection and synchronize the stored records with the server when connectivity becomes available.
+
+Scope and Limitations
+This study will focus on the design and development of iSeeGrass: Web and Mobile Application for Seagrass Species Identification and Assessment Using Image Recognition. The system will support seagrass species identification, quadrat-based assessment, data recording, and offline synchronization. The system will include the following functionalities:
+    1. Seagrass Species Identification. The application will allow users to capture or upload seagrass images for identification using a Convolutional Neural Network (CNN).
+    2. Seagrass Species Catalog. The application will provide a catalog of 18 seagrass species documented in the Philippines and an Explore More section containing approximately 60 seagrass species worldwide. Species listed in the catalog will not necessarily be included in the CNN dataset.
+    3. Quadrat-Based Assessment. Users will record species occurrence, abundance, and estimated percentage cover from quadrat-based observations. The system will calculate and organize the recorded assessment data.
+    4. Identification Review. Users will be able to review and correct CNN predictions. Low-confidence predictions may be marked as Unknown/For Validation. User corrections will not automatically retrain the CNN model.
+    5. Offline Recording and Synchronization. The mobile application will allow users to record assessment data without internet access. Stored records will synchronize with the server once connectivity is available.
+    6. System Evaluation. The system will be evaluated using McCall's Software Quality Model by qualified IT experts and the CSUQ by intended users. The CNN will also be evaluated using appropriate model-performance measures.

@@ -39,22 +39,31 @@ function loadEnv(string $path): void
             $value = substr($value, 1, -1);
         }
 
-        // Only set if not already defined by the server environment
-        if (!array_key_exists($key, $_ENV)) {
-            $_ENV[$key] = $value;
-            putenv("{$key}={$value}");
-        }
+        // Always set from file — overrides any pre-existing system env value
+        // so that editing .env always takes effect without a server restart.
+        $_ENV[$key] = $value;
+        putenv("{$key}={$value}");
     }
 }
 
-// Resolve the project root: core/ is one level below root
-$projectRoot = dirname(__DIR__, 1);   // /media/codex/Shared/iSeeGrass
-loadEnv($projectRoot . '/.env');
+// Resolve the .env path.
+// On Railway (or any host with real env injection), set APP_ENV_FILE to an empty
+// string or a specific path — loadEnv() will either skip the empty path or load
+// from the explicit location. Railway injects variables natively so no file is needed.
+// On local XAMPP, APP_ENV_FILE is unset, so we fall back to two levels up from
+// core/config/ which resolves to the project root where .env lives.
+$projectRoot = dirname(__DIR__, 2);   // /media/codex/Shared/iSeeGrass (local) or DocumentRoot (production)
+$envFile     = getenv('APP_ENV_FILE') ?: ($projectRoot . '/.env');
+loadEnv($envFile);
 
 /**
  * Convenience wrapper — reads from $_ENV with an optional default.
  */
 function env(string $key, mixed $default = null): mixed
 {
-    return $_ENV[$key] ?? getenv($key) ?: $default;
+    if (array_key_exists($key, $_ENV)) {
+        return $_ENV[$key];
+    }
+    $val = getenv($key);
+    return ($val !== false) ? $val : $default;
 }

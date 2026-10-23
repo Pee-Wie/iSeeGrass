@@ -411,6 +411,32 @@ function renderMidPreview() {
     preview.appendChild(img);
     preview.appendChild(aside);
     mainBody.appendChild(preview);
+
+    // ── Seagrass upload reminder ──────────────────────────────────────────
+    // Injected into the card footer, above the caution message.
+    const reminder = document.createElement('div');
+    reminder.id        = 'uploadReminder';
+    reminder.className = 'upload-reminder';
+    reminder.setAttribute('role', 'note');
+    reminder.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span>For best results, upload a clear underwater photo of <strong>seagrass only</strong>.
+      Avoid non-plant objects, murky water, or poor lighting.</span>`;
+    const footer  = document.querySelector('.aid-main__footer');
+    const caution = footer?.querySelector('.aid-caution');
+    if (footer && caution) {
+      footer.insertBefore(reminder, caution);
+    } else if (footer) {
+      footer.prepend(reminder);
+    } else {
+      mainBody.appendChild(reminder);
+    }
   }
 
   const img    = preview.querySelector('.mid-preview__img');
@@ -433,6 +459,9 @@ function clearMid() {
 
   // Clear any catalog match card
   document.getElementById('speciesCatalogCard')?.remove();
+
+  // Clear upload reminder
+  document.getElementById('uploadReminder')?.remove();
 
   // Unlock the PC
   photoGrid.classList.remove('pc-locked');
@@ -702,7 +731,7 @@ function getOrCreateResultsContainer() {
     container = document.createElement('div');
     container.id = 'idResultsContainer';
     container.className = 'id-results';
-    mainBody.appendChild(container);
+    mainBody.after(container);
   }
   return container;
 }
@@ -741,6 +770,12 @@ function renderIdError(message) {
 const BACKGROUND_RE = /background/i;
 
 /**
+ * Confidence threshold below which a result is flagged as uncertain.
+ * Mirrors the same constant in script-users-identify.js.
+ */
+const LOW_CONFIDENCE_THRESHOLD = 60;
+
+/**
  * Cap a confidence value so it never displays as 100%.
  * Values at or above 100 are shown as 98.0.
  * @param {number} pct
@@ -754,6 +789,7 @@ function capConfidence(pct) {
  * Render identification results in the Aid panel.
  * - Background class is filtered from the scores list (but still in the data).
  * - If top result is background, show a "no seagrass" message instead of a name.
+ * - If top confidence < LOW_CONFIDENCE_THRESHOLD, show a low-confidence warning.
  * - No bar graphs — percentages only.
  * - Confidence is capped at 98% for display.
  *
@@ -764,17 +800,18 @@ function renderIdResults(result) {
   const c = getOrCreateResultsContainer();
 
   const isBackground = BACKGROUND_RE.test(top_result);
+  const isLowConf    = top_confidence < LOW_CONFIDENCE_THRESHOLD;
   const displayConf  = capConfidence(top_confidence);
 
   // Confidence badge colour (only shown for seagrass results)
-  const badgeClass = displayConf >= 75
+  const badgeClass = displayConf >= LOW_CONFIDENCE_THRESHOLD
     ? 'id-badge--high'
-    : displayConf >= 50
+    : displayConf >= 30
       ? 'id-badge--mid'
       : 'id-badge--low';
 
   if (isBackground) {
-    // ── No seagrass found ──────────────────────────────────────────────────
+    // ── Unable to identify ────────────────────────────────────────────────
     c.innerHTML = `
       <div class="id-results__inner" role="region" aria-label="Identification results">
         <div class="id-results__no-seagrass">
@@ -786,10 +823,10 @@ function renderIdResults(result) {
             <line x1="12" y1="17" x2="12.01" y2="17"/>
           </svg>
           <div>
-            <p class="id-results__no-seagrass-title">No seagrass found</p>
+            <p class="id-results__no-seagrass-title">Unable to identify</p>
             <p class="id-results__no-seagrass-sub">
-              The model did not detect seagrass in this image.
-              Try a clearer underwater photo with visible leaf structures.
+              CREYNet could not identify a seagrass species from this image.
+              The photo may be unclear, contain multiple subjects, or fall outside the model's training range. Try a clearer, focused photo.
             </p>
           </div>
         </div>
@@ -797,13 +834,29 @@ function renderIdResults(result) {
     return;
   }
 
+  // ── Low-confidence warning banner ──────────────────────────────────────────
+  const lowConfBanner = isLowConf ? `
+    <div class="id-results__low-conf-banner" role="alert">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <span>
+        <strong>Low confidence (${top_confidence.toFixed(1)}%).</strong>
+        Cross-check with the <a href="../catalog/index.html" class="id-results__low-conf-link">species catalog</a> before recording.
+      </span>
+    </div>` : '';
+
   // ── Seagrass detected ──────────────────────────────────────────────────────
   c.innerHTML = `
     <div class="id-results__inner" role="region" aria-label="Identification results">
-
+      ${lowConfBanner}
       <div class="id-results__top">
         <div class="id-results__top-info">
-          <span class="id-results__label">Result(s)</span>
+          <span class="id-results__label">Result</span>
           <h3 class="id-results__species">${escHtml(top_result)}</h3>
         </div>
         <span class="id-badge ${badgeClass}" aria-label="Confidence: ${displayConf.toFixed(1)}%">

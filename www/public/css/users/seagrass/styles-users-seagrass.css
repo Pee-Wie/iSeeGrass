@@ -1,0 +1,754 @@
+/* ═══════════════════════════════════════════════════════════════════
+   iSeeGrass — User Seagrass Catalog page styles
+   Standalone file; does NOT depend on public/css/guest/styles.css.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Page wrapper ──────────────────────────────────────────────── */
+
+.catalog-wrap {
+  padding: 0 0 3rem;
+}
+
+/* ── Hero ──────────────────────────────────────────────────────── */
+
+.catalog-hero {
+  padding: 1.25rem 0 0.75rem;
+}
+
+.catalog-hero .eyebrow {
+  display: inline-block;
+  margin-bottom: 0.55rem;
+  color: #9fe997;
+  letter-spacing: 0.18em;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.catalog-hero h2 {
+  margin: 0 0 0.4rem;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #d6f0b8;
+  line-height: 1.15;
+}
+
+.catalog-hero p.lead {
+  margin: 0;
+  max-width: 56ch;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.75;
+}
+
+/* ── Stats row (chips + Identify button) ───────────────────────── */
+
+.catalog-stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 1rem 0 1.35rem;
+}
+
+.cat-stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(124, 203, 77, 0.22);
+  background: rgba(124, 203, 77, 0.07);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.cat-stat-chip strong {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.catalog-identify-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.38rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(124, 203, 77, 0.5);
+  background: rgba(124, 203, 77, 0.12);
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  margin-left: auto;
+  transition: background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.catalog-identify-btn:hover {
+  background: rgba(124, 203, 77, 0.22);
+  box-shadow: 0 4px 18px rgba(124, 203, 77, 0.18);
+  transform: translateY(-1px);
+}
+
+.catalog-identify-btn:focus-visible {
+  outline: 2px solid rgba(124, 203, 77, 0.8);
+  outline-offset: 3px;
+}
+
+/* ── Main filter panel ─────────────────────────────────────────── */
+
+.catalog-panel {
+  background: rgba(18, 55, 22, 0.82);
+  border: 1px solid rgba(142, 214, 85, 0.22);
+  border-radius: 20px;
+  padding: 1.75rem 2rem 2rem;
+  backdrop-filter: blur(18px);
+}
+
+/* ── Filter bar — row 1 (search + scope + pills) ───────────────── */
+
+.cat-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+}
+
+/* Search box */
+.cat-search-wrap {
+  position: relative;
+  flex: 0 0 320px;
+  min-width: 220px;
+  max-width: 360px;
+}
+
+.cat-search-wrap svg {
+  position: absolute;
+  left: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+
+#cat-species-search {
+  width: 100%;
+  padding: 0.62rem 0.9rem 0.62rem 2.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(142, 214, 85, 0.32);
+  background: rgba(20, 58, 24, 0.82);
+  color: var(--text);
+  font-size: 0.92rem;
+  outline: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+#cat-species-search::placeholder {
+  color: var(--muted);
+}
+
+#cat-species-search:focus {
+  border-color: rgba(142, 214, 85, 0.65);
+  box-shadow: 0 0 0 3px rgba(142, 214, 85, 0.14);
+}
+
+/* Region scope container */
+.cat-region-scope {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  flex: 1;
+}
+
+/* Global / Local toggle */
+.cat-scope-toggle {
+  display: inline-flex;
+  gap: 0;
+  border: 1px solid rgba(142, 214, 85, 0.28);
+  border-radius: 999px;
+  overflow: hidden;
+  align-self: flex-start;
+}
+
+.cat-scope-radio {
+  cursor: pointer;
+}
+
+.cat-scope-radio input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.cat-scope-radio span {
+  display: block;
+  padding: 0.38rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  transition: background 160ms ease, color 160ms ease;
+  user-select: none;
+}
+
+.cat-scope-radio input:checked + span {
+  background: rgba(142, 214, 85, 0.20);
+  color: var(--accent);
+}
+
+.cat-scope-radio:hover span {
+  color: var(--text);
+}
+
+/* Region pills */
+.cat-filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.cat-pill {
+  padding: 0.38rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid rgba(124, 203, 77, 0.28);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
+}
+
+.cat-pill:hover {
+  border-color: rgba(124, 203, 77, 0.5);
+  color: var(--text);
+}
+
+.cat-pill.active {
+  background: rgba(124, 203, 77, 0.18);
+  border-color: rgba(124, 203, 77, 0.55);
+  color: var(--accent);
+}
+
+.cat-pill:focus-visible {
+  outline: 2px solid rgba(124, 203, 77, 0.7);
+  outline-offset: 2px;
+}
+
+/* ── Filter bar — row 2 (dropdowns + sort + clear) ─────────────── */
+
+.cat-filter-selects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+  margin-bottom: 1.1rem;
+}
+
+.cat-select-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  flex: 1 1 150px;
+  min-width: 140px;
+  max-width: 220px;
+}
+
+.cat-select-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(124, 203, 77, 0.6);
+}
+
+.cat-select-wrap select {
+  padding: 0.55rem 2rem 0.55rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid rgba(142, 214, 85, 0.32);
+  background: rgba(20, 58, 24, 0.82)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238ed655' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")
+    no-repeat right 0.65rem center;
+  background-size: 14px;
+  color: var(--text);
+  font-size: 0.87rem;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.cat-select-wrap select:focus {
+  border-color: rgba(142, 214, 85, 0.65);
+  box-shadow: 0 0 0 3px rgba(142, 214, 85, 0.14);
+}
+
+.cat-select-wrap select option {
+  background: #162e18;
+  color: var(--text);
+}
+
+.cat-btn-clear {
+  align-self: flex-end;
+  padding: 0.55rem 1.1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
+  white-space: nowrap;
+}
+
+.cat-btn-clear:hover {
+  background: rgba(255, 255, 255, 0.10);
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.cat-btn-clear:focus-visible {
+  outline: 2px solid rgba(124, 203, 77, 0.7);
+  outline-offset: 2px;
+}
+
+/* ── Results count ─────────────────────────────────────────────── */
+
+#cat-results-count {
+  font-size: 0.83rem;
+  color: var(--muted);
+  margin: 0 0 1.1rem;
+}
+
+/* ── Species grid ──────────────────────────────────────────────── */
+
+.cat-species-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 1.15rem;
+}
+
+/* ── Species card ──────────────────────────────────────────────── */
+
+.cat-species-card {
+  background: rgba(18, 56, 24, 0.72);
+  border: 1px solid rgba(142, 214, 85, 0.20);
+  border-radius: 18px;
+  padding: 1.35rem 1.45rem 1.2rem;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.cat-species-card:hover,
+.cat-species-card:focus-visible {
+  transform: translateY(-3px);
+  border-color: rgba(142, 214, 85, 0.48);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+  outline: none;
+}
+
+.cat-species-card:focus-visible {
+  outline: 2px solid rgba(124, 203, 77, 0.7);
+  outline-offset: 3px;
+}
+
+/* Card header */
+.cat-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.cat-card-names {
+  flex: 1;
+}
+
+.cat-card-common {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #dff5c8;
+  margin: 0 0 0.18rem;
+  line-height: 1.2;
+}
+
+.cat-card-scientific {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--muted);
+  margin: 0;
+}
+
+/* IUCN status badge */
+.cat-status-badge {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.18rem 0.52rem;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.cat-status-lc { background: rgba(74, 180, 74, 0.18);  color: #7ddb7d; border: 1px solid rgba(74, 180, 74, 0.32);  }
+.cat-status-nt { background: rgba(160, 200, 80, 0.16); color: #b8e05e; border: 1px solid rgba(160, 200, 80, 0.28); }
+.cat-status-vu { background: rgba(220, 170, 40, 0.16); color: #e6c44a; border: 1px solid rgba(220, 170, 40, 0.28); }
+.cat-status-en { background: rgba(220, 100, 30, 0.16); color: #e8834c; border: 1px solid rgba(220, 100, 30, 0.28); }
+.cat-status-cr { background: rgba(200, 50, 50, 0.18);  color: #e07070; border: 1px solid rgba(200, 50, 50, 0.32);  }
+.cat-status-dd { background: rgba(160, 160, 160, 0.12);color: #b0b8b0; border: 1px solid rgba(160, 160, 160, 0.24);}
+
+/* Card meta chips */
+.cat-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.cat-meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  font-size: 0.74rem;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 6px;
+  padding: 0.18rem 0.5rem;
+}
+
+.cat-meta-chip svg {
+  flex-shrink: 0;
+  color: rgba(124, 203, 77, 0.65);
+}
+
+.cat-family-chip {
+  background: rgba(124, 203, 77, 0.09);
+  border-color: rgba(124, 203, 77, 0.20);
+  font-style: italic;
+  color: rgba(183, 230, 140, 0.88);
+}
+
+/* Description preview */
+.cat-card-desc {
+  font-size: 0.83rem;
+  color: var(--muted);
+  line-height: 1.7;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Tag row */
+.cat-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.32rem;
+  margin-top: 0.1rem;
+}
+
+.cat-tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(124, 203, 77, 0.8);
+  background: rgba(124, 203, 77, 0.07);
+  border: 1px solid rgba(124, 203, 77, 0.16);
+  border-radius: 4px;
+  padding: 0.13rem 0.42rem;
+}
+
+/* "View details" footer */
+.cat-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.32rem;
+  font-size: 0.77rem;
+  font-weight: 600;
+  color: rgba(124, 203, 77, 0.55);
+  margin-top: auto;
+  transition: color 180ms ease;
+}
+
+.cat-species-card:hover .cat-card-footer,
+.cat-species-card:focus-visible .cat-card-footer {
+  color: var(--accent);
+}
+
+/* ── Empty state ───────────────────────────────────────────────── */
+
+.cat-empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem 1rem;
+  color: var(--muted);
+}
+
+.cat-empty-state svg {
+  width: 46px;
+  height: 46px;
+  opacity: 0.32;
+  margin-bottom: 1rem;
+}
+
+.cat-empty-state p {
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* ── Species detail modal ──────────────────────────────────────── */
+
+.cat-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(2, 8, 4, 0.82);
+  backdrop-filter: blur(6px);
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.cat-modal-overlay.open {
+  display: flex;
+}
+
+.cat-modal-box {
+  background: rgba(18, 52, 22, 0.98);
+  border: 1px solid rgba(142, 214, 85, 0.32);
+  border-radius: 24px;
+  padding: 2rem 2.25rem 2.25rem;
+  max-width: 680px;
+  width: 100%;
+  max-height: 90dvh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.38);
+}
+
+.cat-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 50%;
+  width: 2.2rem;
+  height: 2.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  transition: background 180ms ease, color 180ms ease;
+}
+
+.cat-modal-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text);
+}
+
+.cat-modal-close:focus-visible {
+  outline: 2px solid rgba(124, 203, 77, 0.7);
+  outline-offset: 2px;
+}
+
+.cat-modal-eyebrow {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 0.35rem;
+}
+
+.cat-modal-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #d6f0b8;
+  margin: 0 0 0.2rem;
+  padding-right: 2.5rem;
+  line-height: 1.15;
+}
+
+.cat-modal-scientific {
+  font-style: italic;
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0 0 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.cat-modal-divider {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  margin: 1rem 0;
+}
+
+.cat-modal-section-title {
+  font-size: 0.71rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(124, 203, 77, 0.6);
+  margin: 0 0 0.6rem;
+}
+
+.cat-modal-description {
+  font-size: 0.93rem;
+  color: var(--muted);
+  line-height: 1.8;
+  margin: 0 0 1rem;
+}
+
+.cat-modal-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.cat-fact-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  padding: 0.6rem 0.8rem;
+}
+
+.cat-fact-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(124, 203, 77, 0.55);
+  margin-bottom: 0.18rem;
+}
+
+.cat-fact-value {
+  font-size: 0.87rem;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.cat-modal-funfact {
+  background: rgba(142, 214, 85, 0.08);
+  border: 1px solid rgba(142, 214, 85, 0.22);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+}
+
+.cat-modal-funfact svg {
+  flex-shrink: 0;
+  color: var(--accent);
+  margin-top: 0.1rem;
+}
+
+.cat-modal-funfact p {
+  font-size: 0.86rem;
+  color: var(--muted);
+  line-height: 1.75;
+  margin: 0;
+}
+
+/* ── Utility ───────────────────────────────────────────────────── */
+
+.cat-hidden {
+  display: none !important;
+}
+
+/* ── Responsive ────────────────────────────────────────────────── */
+
+@media (max-width: 800px) {
+  .catalog-panel {
+    padding: 1.35rem 1.25rem 1.5rem;
+  }
+
+  .cat-search-wrap {
+    flex: 1 1 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .cat-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cat-region-scope {
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .catalog-identify-btn {
+    margin-left: 0;
+  }
+
+  .catalog-stats-row {
+    flex-wrap: wrap;
+  }
+
+  .cat-filter-selects {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    align-items: end;
+  }
+
+  .cat-select-wrap {
+    flex: unset;
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  /* Clear filters button spans both columns */
+  .cat-filter-selects .admin-btn,
+  .cat-filter-selects button {
+    grid-column: 1 / -1;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .cat-species-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cat-species-card {
+    padding: 1rem 1.1rem 0.9rem;
+  }
+
+  .cat-modal-box {
+    padding: 1.4rem 1.2rem 1.6rem;
+  }
+
+  .cat-modal-title {
+    font-size: 1.3rem;
+  }
+
+  .cat-filter-pills {
+    gap: 0.38rem;
+  }
+
+  .cat-pill {
+    font-size: 0.77rem;
+    padding: 0.32rem 0.75rem;
+  }
+}

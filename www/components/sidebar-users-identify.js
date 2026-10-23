@@ -83,14 +83,14 @@ class ISeeIdentifyHistory extends HTMLElement {
                 </svg>
               </button>
               <button class="hist-sidebar__clear-btn" id="histClearBtn" type="button"
-                aria-label="Clear all history" title="Clear history" hidden>
+                aria-label="Clear all history" title="Clear history (session only)" hidden>
+                <!-- Eraser icon — visually distinct from the trash/delete button -->
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
                   fill="none" stroke="currentColor" stroke-width="2.5"
                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <polyline points="3 6 5 6 21 6"/>
-                  <path d="M19 6l-1 14H6L5 6"/>
-                  <path d="M10 11v6M14 11v6"/>
-                  <path d="M9 6V4h6v2"/>
+                  <path d="M20 20H7L3 16l10-10 7 7-3.5 3.5"/>
+                  <path d="M6.0001 10.0001L14 18"/>
+                </svg>
                 </svg>
               </button>
               <!-- Close button — visible on mobile only (tab button is hidden) -->
@@ -112,13 +112,31 @@ class ISeeIdentifyHistory extends HTMLElement {
           <!-- Record list -->
           <div class="hist-sidebar__list" id="histList" aria-live="polite" aria-label="History records">
             <div class="hist-empty" id="histEmpty">
-              <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="1.25"
-                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="11" cy="11" r="8"/>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-              </svg>
-              <p>No identifications yet.<br>Run the model to see results here.</p>
+              <!-- Default: no history yet -->
+              <span class="hist-empty__state hist-empty__state--default">
+                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="1.25"
+                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <p>No identifications yet.<br>Run the model to see results here.</p>
+              </span>
+              <!-- Offline: can't load history -->
+              <span class="hist-empty__state hist-empty__state--offline" hidden>
+                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="1.25"
+                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                  <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+                  <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
+                  <path d="M10.71 5.05A16 16 0 0 1 22.56 9"/>
+                  <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>
+                  <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+                  <line x1="12" y1="20" x2="12.01" y2="20"/>
+                </svg>
+                <p>You're offline.<br>History will load when you reconnect.</p>
+              </span>
             </div>
           </div><!-- /.hist-sidebar__list -->
 
@@ -156,20 +174,51 @@ class ISeeIdentifyHistory extends HTMLElement {
     // Expose on window so script-users-identify.js can call push/clear
     window.identifyHistory = this;
 
+    // Show the right empty-state message based on current connectivity,
+    // and update it whenever the connection status changes.
+    // Start with 'default' — _loadHistory() will flip to 'offline' if
+    // the server is unreachable (covers WiFi-with-no-internet on Android).
+    this._setEmptyState('default');
+    this._onlineHandler  = () => { this._setEmptyState('default'); this._loadHistory(); };
+    this._offlineHandler = () => {
+      // Only switch to the offline message when the list is actually empty
+      if (this._records.length === 0) this._setEmptyState('offline');
+    };
+    window.addEventListener('online',  this._onlineHandler);
+    window.addEventListener('offline', this._offlineHandler);
+
     // Load persistent history from the server (admin users only)
     this._loadHistory();
+  }
+
+  // ── Empty state ───────────────────────────────────────────────────
+
+  /**
+   * Switch between the two empty-state messages inside #histEmpty.
+   * @param {'default' | 'offline'} state
+   */
+  _setEmptyState(state) {
+    const defEl = this._empty?.querySelector('.hist-empty__state--default');
+    const offEl = this._empty?.querySelector('.hist-empty__state--offline');
+    if (!defEl || !offEl) return;
+    defEl.hidden = state !== 'default';
+    offEl.hidden = state !== 'offline';
   }
 
   // ── Persistent history ────────────────────────────────────────────
 
   /**
    * Fetch persisted identification history from the API and populate the
-   * sidebar with DB records. Called once on component mount.
+   * sidebar with DB records. Called once on component mount and again after
+   * a queued job drains successfully (so cross-session results appear without
+   * a manual page refresh).
+   *
+   * Merges with any existing in-memory records: DB records already rendered
+   * (keyed as "db-{id}") are refreshed in-place; new records are prepended.
    * Silently no-ops on network/auth errors (guests, non-admin users).
    */
   async _loadHistory() {
     try {
-      // Dynamically import to avoid a hard dependency for guest pages
       let data;
       if (window.ISEE_ADMIN_IDENTIFY) {
         const { listIdentificationHistory } = await import('../public/js/api/identify.api.js');
@@ -181,16 +230,51 @@ class ISeeIdentifyHistory extends HTMLElement {
       const records = data?.records ?? [];
 
       for (const rec of records) {
-        this._pushPersisted(rec);
+        const stableId = `db-${rec.id}`;
+        const existing = this._records.find(r => r.id === stableId);
+
+        if (existing) {
+          // Refresh the card in place — e.g. title may have changed
+          Object.assign(existing, {
+            topSpecies: rec.top_result    ?? '—',
+            confidence: rec.top_confidence ?? 0,
+            title:      rec.title ?? null,
+            status:     'done',
+          });
+          this._refreshCard(stableId);
+        } else {
+          // New record not yet in memory — insert it
+          this._pushPersisted(rec);
+        }
       }
 
       if (records.length > 0) {
-        this._clearBtn.hidden    = false;
+        this._clearBtn.hidden     = false;
         this._deleteAllBtn.hidden = false;
-        this._empty.hidden       = true;
+        this._empty.hidden        = true;
       }
-    } catch (_) {
-      // Not admin, not logged in, or server unavailable — stay silent
+    } catch (err) {
+      // Show the offline message whenever the API call fails due to any
+      // network-level issue — including when navigator.onLine is true but
+      // the server is actually unreachable (e.g. WiFi with no internet,
+      // which is common on Android).
+      // For genuine auth errors (401 redirected away) we never reach here.
+      // For any other non-network server error, also show offline state when
+      // the list is empty so the user gets useful feedback.
+      const msg = (err?.message || '').toLowerCase();
+      const isNetworkFailure =
+        !navigator.onLine ||
+        msg.includes('network error') ||
+        msg.includes('failed to fetch') ||
+        msg.includes('load failed') ||
+        msg.includes('offline') ||
+        msg.includes('err_internet') ||
+        msg.includes('err_network') ||
+        (err instanceof TypeError);  // fetch() throws TypeError on connection failure
+
+      if (this._records.length === 0) {
+        this._setEmptyState(isNetworkFailure ? 'offline' : 'default');
+      }
     }
   }
 
@@ -366,8 +450,8 @@ class ISeeIdentifyHistory extends HTMLElement {
 
   _renderRecord(entry) {
     const card = this._buildCard(entry);
-    // Insert before the empty-state div so empty state stays at the bottom
-    this._list.insertBefore(card, this._empty);
+    // Insert at the very top so new/in-progress records always appear first
+    this._list.prepend(card);
   }
 
   _refreshCard(id) {
@@ -392,7 +476,7 @@ class ISeeIdentifyHistory extends HTMLElement {
     const pct = Math.min(100, Math.max(0, entry.confidence ?? 0));
 
     // Status badge
-    const statusLabel = { pending: 'Pending…', done: 'Done', error: 'Error' }[entry.status] ?? entry.status;
+    const statusLabel = { pending: 'Pending…', done: 'Done', error: 'Error', queued: 'Queued' }[entry.status] ?? entry.status;
     const statusIcon  = {
       pending: `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
                   fill="none" stroke="currentColor" stroke-width="2.5"
@@ -412,6 +496,13 @@ class ISeeIdentifyHistory extends HTMLElement {
                   <line x1="12" y1="8" x2="12" y2="12"/>
                   <line x1="12" y1="16" x2="12.01" y2="16"/>
                 </svg>`,
+      queued:  `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                  fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="1" y1="6" x2="23" y2="6"/>
+                  <line x1="1" y1="12" x2="23" y2="12"/>
+                  <line x1="1" y1="18" x2="23" y2="18"/>
+                </svg>`,
     }[entry.status] ?? '';
 
     const shortName = this._truncateName(entry.fileName);
@@ -419,11 +510,49 @@ class ISeeIdentifyHistory extends HTMLElement {
       ? (entry.topSpecies || '—')
       : entry.status === 'error'
         ? (entry.errorMsg || 'Identification failed')
-        : 'Analysing…';
+        : entry.status === 'queued'
+          ? 'Queued — will retry when online'
+          : 'Analysing…';
 
     const thumbHtml = entry.thumbUrl
       ? `<img class="hist-card__thumb" src="${entry.thumbUrl}" alt="${entry.fileName}" loading="lazy">`
       : `<div class="hist-card__thumb hist-card__thumb--placeholder" aria-hidden="true"></div>`;
+
+    // Queued cards get a retry button instead of remove/delete.
+    // Done cards show the standard remove + delete buttons.
+    const isQueued = entry.status === 'queued';
+
+    const actionButtons = isQueued ? `
+      <button class="hist-card__retry" type="button"
+        aria-label="Retry this identification now" title="Retry now">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+      </button>` : `
+      <button class="hist-card__remove" type="button"
+        aria-label="Remove this record" title="Remove">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+
+      <button class="hist-card__delete" type="button"
+        aria-label="Delete this identification" title="Delete">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14H6L5 6"/>
+          <path d="M10 11v6M14 11v6"/>
+          <path d="M9 6V4h6v2"/>
+        </svg>
+      </button>`;
 
     card.innerHTML = `
       <div class="hist-card__thumb-wrap">
@@ -434,9 +563,10 @@ class ISeeIdentifyHistory extends HTMLElement {
         </span>
       </div>
 
-      <div class="hist-card__body">
+      <div class="hist-card__body${entry.status === 'done' ? ' hist-card__body--clickable' : ''}"
+        ${entry.status === 'done' ? 'role="button" tabindex="0" title="Click to reload this result"' : ''}>
 
-        <!-- Title row — click to rename -->
+        <!-- Title row — click to rename (done only) -->
         <p class="hist-card__title" data-field="title">
           ${entry.title
             ? entry.title
@@ -467,67 +597,85 @@ class ISeeIdentifyHistory extends HTMLElement {
         </time>
       </div>
 
-      <button class="hist-card__remove" type="button"
-        aria-label="Remove this record" title="Remove">
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
-          fill="none" stroke="currentColor" stroke-width="2.5"
-          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <line x1="18" y1="6" x2="6" y2="18"/>
-          <line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
-
-      <button class="hist-card__delete" type="button"
-        aria-label="Delete this identification" title="Delete">
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
-          fill="none" stroke="currentColor" stroke-width="2.5"
-          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <polyline points="3 6 5 6 21 6"/>
-          <path d="M19 6l-1 14H6L5 6"/>
-          <path d="M10 11v6M14 11v6"/>
-          <path d="M9 6V4h6v2"/>
-        </svg>
-      </button>
+      ${actionButtons}
     `;
 
-    // ── In-session remove (hide only) ──────────────────────────────
-    card.querySelector('.hist-card__remove').addEventListener('click', () => {
-      this._records = this._records.filter(r => r.id !== entry.id);
-      card.remove();
-      if (this._records.length === 0) {
-        this._empty.hidden    = false;
-        this._clearBtn.hidden = true;
-      }
-    });
+    // ── Retry button (queued cards only) ──────────────────────────
+    const retryBtn = card.querySelector('.hist-card__retry');
+    if (retryBtn) {
+      retryBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // Dispatch event to the identify page script which owns tryDrainQueue
+        document.dispatchEvent(new CustomEvent('isee:retry-queue'));
+      });
+    }
+
+    // ── In-session remove (hide only) — done/error/pending cards ──
+    const removeBtn = card.querySelector('.hist-card__remove');
+    if (removeBtn) {
+      removeBtn.addEventListener('click', () => {
+        this._records = this._records.filter(r => r.id !== entry.id);
+        card.remove();
+        if (this._records.length === 0) {
+          this._empty.hidden       = false;
+          this._clearBtn.hidden    = true;
+          this._deleteAllBtn.hidden = true;
+        }
+      });
+    }
 
     // ── Trash (hard DB delete) ─────────────────────────────────────
-    card.querySelector('.hist-card__delete').addEventListener('click', async (e) => {
-      e.stopPropagation();
-      if (!entry.dbId) {
-        this._records = this._records.filter(r => r.id !== entry.id);
-        card.remove();
-        if (this._records.length === 0) { this._empty.hidden = false; this._clearBtn.hidden = true; }
-        return;
-      }
-      const btn = card.querySelector('.hist-card__delete');
-      btn.disabled = true;
-      try {
-        if (window.ISEE_ADMIN_IDENTIFY) {
-          const { deleteIdentification } = await import('../public/js/api/identify.api.js');
-          await deleteIdentification(entry.dbId);
-        } else {
-          const { deleteUserIdentification } = await import('../public/js/api/identify.api.js');
-          await deleteUserIdentification(entry.dbId);
+    const deleteBtn = card.querySelector('.hist-card__delete');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if (!entry.dbId) {
+          this._records = this._records.filter(r => r.id !== entry.id);
+          card.remove();
+          if (this._records.length === 0) {
+            this._empty.hidden       = false;
+            this._clearBtn.hidden    = true;
+            this._deleteAllBtn.hidden = true;
+          }
+          return;
         }
-        this._records = this._records.filter(r => r.id !== entry.id);
-        card.remove();
-        if (this._records.length === 0) { this._empty.hidden = false; this._clearBtn.hidden = true; }
-      } catch {
-        btn.disabled = false;
-        card.classList.add('hist-card--delete-error');
-        setTimeout(() => card.classList.remove('hist-card--delete-error'), 1000);
-      }
-    });
+        deleteBtn.disabled = true;
+        try {
+          if (window.ISEE_ADMIN_IDENTIFY) {
+            const { deleteIdentification } = await import('../public/js/api/identify.api.js');
+            await deleteIdentification(entry.dbId);
+          } else {
+            const { deleteUserIdentification } = await import('../public/js/api/identify.api.js');
+            await deleteUserIdentification(entry.dbId);
+          }
+          this._records = this._records.filter(r => r.id !== entry.id);
+          card.remove();
+          if (this._records.length === 0) {
+            this._empty.hidden       = false;
+            this._clearBtn.hidden    = true;
+            this._deleteAllBtn.hidden = true;
+          }
+        } catch {
+          deleteBtn.disabled = false;
+          card.classList.add('hist-card--delete-error');
+          setTimeout(() => card.classList.remove('hist-card--delete-error'), 1000);
+        }
+      });
+    }
+
+    // ── Done card body click → reload result into left panel ───────
+    const bodyEl = card.querySelector('.hist-card__body--clickable');
+    if (bodyEl) {
+      const activateLoad = (e) => {
+        // Don't trigger when clicking inside the rename field
+        if (e.target.closest('[data-field="title"]')) return;
+        document.dispatchEvent(new CustomEvent('isee:load-hist-result', { detail: { entry } }));
+      };
+      bodyEl.addEventListener('click', activateLoad);
+      bodyEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activateLoad(e); }
+      });
+    }
 
     // ── Inline title rename ────────────────────────────────────────
     card.querySelector('[data-field="title"]').addEventListener('click', () => this._startRename(entry, card));

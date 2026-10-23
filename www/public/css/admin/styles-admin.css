@@ -246,33 +246,69 @@ body {
   min-height: 100vh;
 }
 
+/* ─── Fixed sidebar on desktop — stays in place while content scrolls ── */
+
+@media (min-width: 768px) {
+  .user-navigation.position-absolute,
+  .isee-navbar.position-absolute {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  /* Push page content right so it isn't hidden under the fixed sidebar.
+     Tabler's --tblr-sidebar-width is 16rem; mirror it here explicitly so
+     the offset works regardless of how Tabler auto-margins behave. */
+  .page > .page-wrapper,
+  .page-wrapper {
+    margin-left: var(--tblr-sidebar-width, 16rem) !important;
+  }
+}
+
 .user-navigation-links {
   gap: 0.35rem;
 }
 
 @media (max-width: 767.98px) {
+  /* Lock the entire page to viewport width — no horizontal overflow */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
   .page {
     display: flex;
     flex-direction: column;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 
-  .page > isee-navbar-user {
+  .page > isee-navbar-user,
+  .page > isee-navbar-admin {
     display: block;
     position: relative;
     z-index: 20;
     flex: 0 0 auto;
     width: 100%;
+    max-width: 100%;
   }
 
   .user-navigation {
     position: relative !important;
-    width: 100%;
+    width: 100% !important;
+    max-width: 100% !important;
     min-height: auto;
   }
 
-  .page > .page-wrapper {
-    width: 100%;
-    margin-left: 0;
+  .page > .page-wrapper,
+  .page-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    overflow-x: hidden;
   }
 
   .user-navigation .container-fluid {
@@ -283,17 +319,20 @@ body {
     width: 100%;
   }
 
+  /* Nav links wrap instead of scrolling horizontally */
   .user-navigation-links {
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     gap: 0.25rem;
     padding-top: 0.75rem !important;
     padding-bottom: 0.5rem;
-    overflow-x: auto;
+    overflow-x: hidden;
   }
 
   .user-navigation-links .nav-link {
-    white-space: nowrap;
+    white-space: normal;
+    flex-shrink: 0;
   }
 }
 

@@ -289,7 +289,15 @@ function getTileFiltered() {
         if (tileState.region === 'caribbean'     && !reg.includes('caribbean'))    return false;
         if (tileState.region === 'mediterranean' && !reg.includes('mediterranean'))return false;
         if (tileState.region === 'indo-pacific'  && !(reg.includes('indo-pacific') || reg.includes('indo pacific'))) return false;
-        if (tileState.region === 'temperate'     && !(reg.includes('temperate') || reg.includes('southern') || reg.includes('north pacific') || reg.includes('north atlantic'))) return false;
+        if (tileState.region === 'temperate'     && !(
+          reg.includes('temperate') || reg.includes('southern') ||
+          reg.includes('north pacific') || reg.includes('north atlantic') ||
+          reg.includes('australia') || reg.includes('new zealand') ||
+          reg.includes('japan') || reg.includes('korea') ||
+          reg.includes('alaska') || reg.includes('russia') ||
+          reg.includes('pacific coast of north america') ||
+          reg.includes('europe') || reg.includes('north africa')
+        )) return false;
       }
     }
 
