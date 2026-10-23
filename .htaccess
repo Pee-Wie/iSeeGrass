@@ -1,0 +1,72 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# iSeeGrass — project root .htaccess
+#
+# This file sits at the project root (one level ABOVE www/).
+# Its job is to:
+#   1. Redirect all web traffic into www/ if the DocumentRoot is the project root
+#   2. Block direct HTTP access to sensitive directories
+#
+# If your Apache DocumentRoot already points directly at www/, this file is
+# not served by Apache and has no effect — that is fine.
+#
+# XAMPP / LAMPP setup options:
+#   Option A (recommended): Set DocumentRoot to .../iSeeGrass/www
+#             → This root .htaccess is never reached; only www/.htaccess applies.
+#
+#   Option B: Set DocumentRoot to .../iSeeGrass  (project root)
+#             → This file redirects / to /www/ and blocks sensitive dirs.
+# ─────────────────────────────────────────────────────────────────────────────
+
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # ── Block access to sensitive directories ─────────────────────
+    # These must never be reachable via HTTP
+
+    # .env file
+    RewriteRule ^\.env$ - [F,L]
+
+    # database/ (SQL migrations and seeds)
+    RewriteRule ^database(/.*)?$ - [F,L]
+
+    # .git/
+    RewriteRule ^\.git(/.*)?$ - [F,L]
+
+    # node_modules/
+    RewriteRule ^node_modules(/.*)?$ - [F,L]
+
+    # android/ build directory
+    RewriteRule ^android(/.*)?$ - [F,L]
+
+    # App-Build History/
+    RewriteRule ^App-Build\ History(/.*)?$ - [F,L]
+
+    # backup/
+    RewriteRule ^backup(/.*)?$ - [F,L]
+
+    # assets/ (local seagrass text/data files)
+    RewriteRule ^assets(/.*)?$ - [F,L]
+
+    # ── Redirect web root to www/ ─────────────────────────────────
+    # InfinityFree / shared hosting: htdocs/ is the DocumentRoot.
+    # All front-end files live in htdocs/www/ so redirect there.
+
+    # Don't redirect core/ — PHP needs to reach it server-side
+    RewriteRule ^core(/.*)?$ - [L]
+
+    # Already inside www/ — don't redirect again (prevents loop)
+    RewriteCond %{REQUEST_URI} !^/www/
+
+    # Skip redirect for the root index.html fallback
+    RewriteCond %{REQUEST_URI} !^/index\.html$
+
+    # Redirect everything else into www/
+    RewriteRule ^(.*)$ /www/$1 [L]
+</IfModule>
+
+# ── Block sensitive file extensions at project root ───────────────────────────
+<FilesMatch "(^\.env|\.env\..*|\.gitignore|package\.json|package-lock\.json)$">
+    Require all denied
+</FilesMatch>

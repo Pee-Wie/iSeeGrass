@@ -1,0 +1,17 @@
+# Files that should never be copied into the Docker container
+.env
+.env.local
+.env.railway
+.git
+.gitignore
+.agents
+.context
+.kiro
+node_modules/
+android/
+native-app/
+App-Build History/
+iSeeGrass--CNN-v0.02/
+*.apk
+*.md
+.tmp-*

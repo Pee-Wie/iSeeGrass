@@ -1,4 +1,4 @@
-# ─── Hidden directories ───────────────────────────────────────────────────────
+# ─── Hidden / tool directories ───────────────────────────────────────────────
 .agents/
 .context/
 .freebuff/
@@ -7,12 +7,10 @@
 .kiro/
 .vscode/
 
-# ─── Hidden / sensitive files ─────────────────────────────────────────────────
-.dockerignore
+# ─── Environment & secrets ────────────────────────────────────────────────────
 .env
 .env.local
 .env.railway
-.htaccess
 .tmp-Build Logs
 .tmp-Deploy Logs
 
@@ -20,33 +18,26 @@
 token.txt
 native-app/google-services.json
 native-app/app/google-services.json
-# (native-app/app/src/ and gradle wrapper are tracked — see below)
 
-# ─── Database files (contain hashed passwords + schema secrets) ───────────────
-database/iseegrass_master-seed+mig.sql
-database/iseegrass_master_4_railway.sql
+# ─── Database files (contain hashed passwords / deployment secrets) ───────────
+database/migration/iseegrass_master-seed+mig.sql
 database/seed/users.seed.sql
-database/migrattion/007_add_model_type_to_identifications.sql
-database/migrattion/008_system_settings.sql
-database/migrattion/009_add_image_filename_to_identifications.sql
-database/migrattion/010_add_title_to_identifications.sql
-database/migrattion/011_assessments_unique_title.sql
-database/migrattion/iseegrass_full_setup.sql
+database/iseegrass_master_4_railway.sql
+database/seed/users.seed.users.seed.sql
 
-# ─── Directories & symlinks ───────────────────────────────────────────────────
+# ─── Directories not part of the web/app source ───────────────────────────────
 assets/guides/
 docker/
-iSeeGrass_CNN
-iSeeGrass-cap
-iSeeGrass-na
+iSeeGrass_CNN (symlink)
+iSeeGrass-cap (symlink)
+iSeeGrass-na (symlink)
 App-Build History/
 android/
 backup/
-build/
 iSeeGrass--CNN-v0.02/
 node_modules/
 
-# ─── native-app: exclude build cache & secrets, track source ──────────────────
+# ─── native-app: build cache, secrets, and local config only ─────────────────
 native-app/.gradle/
 native-app/app/build/
 native-app/app/src/
@@ -54,13 +45,7 @@ native-app/local.properties
 
 # ─── Build & generated files ──────────────────────────────────────────────────
 nohup.out
-
-# ─── Config files (runtime / deployment specific) ─────────────────────────────
-capacitor.config.json
-docker-entrypoint.sh
-Dockerfile
 package-lock.json
-package.json
 
-# ─── Docs / guides (not source code) ─────────────────────────────────────────
+# ─── Docs / personal notes ────────────────────────────────────────────────────
 gitguide.md

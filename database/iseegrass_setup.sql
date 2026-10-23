@@ -1,50 +1,43 @@
 -- =============================================================================
--- iSeeGrass — Master Database Setup
+-- iSeeGrass — Database Setup
 -- =============================================================================
--- Single-file import for AwardSpace, InfinityFree, or any MySQL 5.6+ /
--- MariaDB shared host.
+-- Universal single-file import for:
+--   • Shared hosting  — AwardSpace, InfinityFree (phpMyAdmin)
+--   • Local dev       — XAMPP, LAMPP, bare MySQL/MariaDB (phpMyAdmin or CLI)
+--   • Cloud           — Railway, PlanetScale-compatible MySQL
 --
 -- WHAT THIS FILE DOES
 --   1. Runs all migrations in dependency order (001 → 011).
---   2. Seeds the catalog (all 72 species from species-data.js) and default
---      user accounts.
+--   2. Seeds the full seagrass catalog (72 species from species-data.js).
+--   User accounts are NOT seeded here — run database/seed/users.seed.sql
+--   separately after import if you need pre-populated accounts.
 --
--- HOW TO IMPORT ON AWARDSPACE
---   a) Log in to your AwardSpace control panel → MySQL Manager →
---      create a new database and note the full database name
---      (e.g. id123456_iseegrass).
---   b) Open phpMyAdmin from the control panel, select your database from the
---      left-hand tree (it will be pre-selected).
---   c) Import tab → choose this file → Go.
---   d) If phpMyAdmin splits the import into batches, click Continue on each
---      confirmation prompt — all statements are idempotent (IF NOT EXISTS /
---      ON DUPLICATE KEY UPDATE) so re-running is safe.
+-- ─── HOW TO IMPORT ───────────────────────────────────────────────────────────
 --
--- HOW TO IMPORT ON INFINITYFREE
---   a) Log in to VistaPanel → MySQL Databases → create database + user.
---   b) Open phpMyAdmin, select your database.
---   c) Import tab → choose this file → Go.
+--   phpMyAdmin (shared hosting / local XAMPP):
+--     1. Select your database from the left panel (or create one first).
+--     2. Import tab → choose this file → Go.
+--     3. Leave CREATE DATABASE / USE commented out (see section 0 below).
 --
--- NOTES
---   • AwardSpace / InfinityFree do NOT support CHECK constraints — they are
---     omitted here.
---   • ALTER TABLE … ADD COLUMN IF NOT EXISTS is not supported on MySQL 5.6;
---     columns are added directly inside the CREATE TABLE definitions instead.
---   • CREATE DATABASE and USE are commented out; shared hosts pre-select the
---     database in phpMyAdmin. Uncomment them only for local CLI imports.
+--   CLI / local server:
+--     mysql -u root -p < database/iseegrass_setup.sql
+--     (Uncomment CREATE DATABASE and USE in section 0 below first.)
+--
+-- ─── NOTES ───────────────────────────────────────────────────────────────────
+--   • CHECK constraints are omitted — not supported on MySQL 5.6 or
+--     MariaDB < 10.2 (shared hosting targets).
+--   • ALTER TABLE … ADD COLUMN IF NOT EXISTS is not used — columns from
+--     migrations 007–011 are baked directly into the CREATE TABLE definitions.
+--   • All statements are idempotent (IF NOT EXISTS / ON DUPLICATE KEY UPDATE)
+--     so re-running this file on an existing database is safe.
 --   • All tables use ENGINE=InnoDB, utf8mb4, utf8mb4_unicode_ci.
---   • Passwords seeded below are bcrypt-hashed (cost 12); plain-text shown
---     only in this comment for reference — change them after first login.
---       toplevel  → topaccess
---       clark     / emilio / ralph  → 12345678
 -- =============================================================================
+
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 0. Database selection
---    On AwardSpace / InfinityFree and other shared hosts: the database is
---    pre-created in the control panel and phpMyAdmin selects it automatically.
---    Leave these two lines commented out when importing via phpMyAdmin.
---    Uncomment only when importing via CLI on a local or root server.
+--    phpMyAdmin on shared hosts pre-selects the database — leave commented out.
+--    Uncomment both lines only when importing via CLI on a local/root server.
 -- ─────────────────────────────────────────────────────────────────────────────
 -- CREATE DATABASE IF NOT EXISTS iseegrass CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 -- USE iseegrass;
@@ -53,7 +46,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 
 -- =============================================================================
--- MIGRATIONS
+-- MIGRATIONS 001–011
 -- =============================================================================
 
 
@@ -195,8 +188,8 @@ CREATE TABLE IF NOT EXISTS seagrass (
     created_at      TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP
                                         ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_catalog_scope          (in_cnn_scope),
-    INDEX idx_catalog_status         (status),
+    INDEX idx_catalog_scope           (in_cnn_scope),
+    INDEX idx_catalog_status          (status),
     INDEX idx_catalog_scientific_name (scientific_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -231,72 +224,7 @@ ON DUPLICATE KEY UPDATE `key` = `key`;
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
--- users — seed accounts
---   toplevel  / topaccess   → role: admin
---   clark     / 12345678    → role: user, position: Student
---   emilio    / 12345678    → role: user, position: Student
---   ralph     / 12345678    → role: user, position: Student
---
--- Passwords are bcrypt-hashed (cost 12) — never stored as plain text.
--- ─────────────────────────────────────────────────────────────────────────────
-INSERT INTO users
-    (id, username, email, password_hash, first_name, last_name, middle_name,
-     position, role, institution, phone, bio, avatar_url, status,
-     created_at, updated_at)
-VALUES
-(
-    1,
-    'toplevel',
-    'admin@iseegrass.local',
-    '$2y$12$FvAAJPAE7YjoVXaUcnXuUOBSOz6l.1zZ8UdPZJ7Al1af61W7HWBve',
-    'Youie', 'Mabug-at', NULL,
-    'Researcher', 'admin', NULL, NULL, NULL, NULL, 'active',
-    '2026-10-13 22:38:10', '2026-10-13 22:38:10'
-),
-(
-    2,
-    'clark',
-    'clark@iseegrass.local',
-    '$2y$12$vIaY2Jfz3g4Pv00.0WvQPe.u8tzAQgEp.Z.BMw4.3lIUqiWbvtJ7m',
-    'Clark Glenn', 'Maahilum', NULL,
-    'Student', 'user', NULL, NULL, NULL, NULL, 'active',
-    '2026-10-13 22:38:10', '2026-10-15 07:18:47'
-),
-(
-    3,
-    'emilio',
-    'emilio@iseegrass.local',
-    '$2y$12$9QSPoecIGiwLcFJzEDhFqu8flpHVtThFdWyOWonXYKDHH0mnp85im',
-    'Emilio', 'Sumbi IV', NULL,
-    'Student', 'user', NULL, NULL, NULL, NULL, 'active',
-    '2026-10-13 22:38:10', '2026-10-15 07:15:58'
-),
-(
-    4,
-    'ralph',
-    'ralph@iseegrass.local',
-    '$2y$12$vIaY2Jfz3g4Pv00.0WvQPe.u8tzAQgEp.Z.BMw4.3lIUqiWbvtJ7m',
-    'Ralph Ivan', 'Dela Pena', NULL,
-    'Student', 'user', NULL, NULL, NULL, '/public/uploads/avatars/4.jpg', 'active',
-    '2026-10-13 22:38:10', '2026-10-15 06:23:09'
-)
-ON DUPLICATE KEY UPDATE
-    email         = VALUES(email),
-    password_hash = VALUES(password_hash),
-    first_name    = VALUES(first_name),
-    last_name     = VALUES(last_name),
-    middle_name   = VALUES(middle_name),
-    position      = VALUES(position),
-    role          = VALUES(role),
-    institution   = VALUES(institution),
-    phone         = VALUES(phone),
-    bio           = VALUES(bio),
-    avatar_url    = VALUES(avatar_url),
-    status        = VALUES(status);
-
-
--- ─────────────────────────────────────────────────────────────────────────────
--- seagrass — full catalog (all species from species-data.js)
+-- seagrass — full catalog (72 species from species-data.js)
 -- ─────────────────────────────────────────────────────────────────────────────
 INSERT INTO seagrass
     (slug, scientific_name, common_name, family, genus,
@@ -662,7 +590,7 @@ ON DUPLICATE KEY UPDATE
 
 
 -- =============================================================================
--- VERIFY (optional — review counts in phpMyAdmin Results panel)
+-- VERIFY (optional — check row counts after import)
 -- =============================================================================
 SELECT 'users'                   AS tbl, COUNT(*) AS row_count FROM users
 UNION ALL
