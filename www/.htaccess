@@ -21,9 +21,13 @@ Options -Indexes
 
 # ── Force HTTPS (required for camera/getUserMedia on non-localhost) ───────────
 # Skips redirect on localhost so local dev is unaffected.
+# On Railway, SSL is terminated at the proxy — the container receives plain HTTP.
+# We check X-Forwarded-Proto so we don't redirect when the original request was
+# already HTTPS (which would cause an infinite redirect loop on Railway).
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
     RewriteCond %{HTTP_HOST} !^localhost [NC]
     RewriteCond %{HTTP_HOST} !^127\.0\.0\.1 [NC]
     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]

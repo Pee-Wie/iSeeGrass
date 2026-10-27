@@ -57,12 +57,17 @@ $envFile     = getenv('APP_ENV_FILE') ?: ($projectRoot . '/.env');
 loadEnv($envFile);
 
 /**
- * Convenience wrapper — reads from $_ENV with an optional default.
+ * Convenience wrapper — reads from $_ENV, $_SERVER, or getenv().
+ * $_SERVER is checked because Apache passes injected env vars there even
+ * when PHP's getenv() / $_ENV don't see them (e.g. Railway, Docker).
  */
 function env(string $key, mixed $default = null): mixed
 {
     if (array_key_exists($key, $_ENV)) {
         return $_ENV[$key];
+    }
+    if (array_key_exists($key, $_SERVER)) {
+        return $_SERVER[$key];
     }
     $val = getenv($key);
     return ($val !== false) ? $val : $default;

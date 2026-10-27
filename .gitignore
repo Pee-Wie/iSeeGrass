@@ -15,26 +15,28 @@
 .tmp-Deploy Logs
 
 # ─── Credentials & tokens ─────────────────────────────────────────────────────
-token.txt
-native-app/google-services.json
 native-app/app/google-services.json
+native-app/google-services.json
+token.txt
 
 # ─── Database files (contain hashed passwords / deployment secrets) ───────────
+database/iseegrass_master_4_railway.sql
 database/migration/iseegrass_master-seed+mig.sql
 database/seed/users.seed.sql
-database/iseegrass_master_4_railway.sql
 database/seed/users.seed.users.seed.sql
 
 # ─── Directories not part of the web/app source ───────────────────────────────
-assets/guides/
-docker/
-iSeeGrass_CNN (symlink)
-iSeeGrass-cap (symlink)
-iSeeGrass-na (symlink)
 App-Build History/
 android/
+assets/guides/
 backup/
+docker/
+!docker/
+!docker/apache-railway.conf
 iSeeGrass--CNN-v0.02/
+iSeeGrass-cap (symlink)
+iSeeGrass-na (symlink)
+iSeeGrass_CNN (symlink)
 node_modules/
 
 # ─── native-app: build cache, secrets, and local config only ─────────────────
@@ -49,3 +51,4 @@ package-lock.json
 
 # ─── Docs / personal notes ────────────────────────────────────────────────────
 gitguide.md
+notes.txt
