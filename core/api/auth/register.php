@@ -25,7 +25,7 @@ $ve = [];
 if ($e = validateUsername($username))  $ve[] = $e;
 if ($e = validateEmail($email))        $ve[] = $e;
 if ($e = validatePassword($password))  $ve[] = $e;
-if ($e = validateEnum($position, ['Researcher','Student','Class Instructor','Other'], 'Position')) $ve[] = $e;
+if ($e = validateEnum($position, ['Researcher','Student','Class Instructor','Other','Admin'], 'Position')) $ve[] = $e;
 if ($ve) jsonError(implode(' ', $ve), 422);
 
 $pdo       = getDB();

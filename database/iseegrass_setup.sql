@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS users (
     first_name      VARCHAR(60)         NOT NULL,
     last_name       VARCHAR(60)         NOT NULL,
     middle_name     VARCHAR(60)         DEFAULT NULL,
-    position        ENUM('Researcher','Student','Class Instructor','Other')
+    position        ENUM('Researcher','Student','Class Instructor','Other','Admin')
                                         NOT NULL DEFAULT 'Researcher',
     role            ENUM('user','admin') NOT NULL DEFAULT 'user',
     institution     VARCHAR(120)        DEFAULT NULL,

@@ -33,7 +33,7 @@ if (empty($updateData)) jsonError('No updatable fields provided.', 422);
 
 $ve = [];
 if (isset($updateData['email'])    && $updateData['email']    && ($e = validateEmail($updateData['email'])))        $ve[] = $e;
-if (isset($updateData['position']) && $updateData['position'] && ($e = validateEnum($updateData['position'], ['Researcher','Student','Class Instructor','Other'], 'Position'))) $ve[] = $e;
+if (isset($updateData['position']) && $updateData['position'] && ($e = validateEnum($updateData['position'], ['Researcher','Student','Class Instructor','Other','Admin'], 'Position'))) $ve[] = $e;
 if (isset($updateData['status'])   && ($e = validateEnum($updateData['status'],   ['active','inactive'], 'Status'))) $ve[] = $e;
 if (isset($updateData['role'])     && ($e = validateEnum($updateData['role'],     ['user','admin'],       'Role')))   $ve[] = $e;
 if ($ve) jsonError(implode(' ', $ve), 422);
