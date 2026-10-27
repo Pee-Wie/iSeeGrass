@@ -1,0 +1,2 @@
+rootProject.name = "iSeeGrass"
+include ':app'

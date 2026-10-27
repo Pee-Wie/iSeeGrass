@@ -1,0 +1,83 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
+
+// ── Version: manual override or auto-incrementing counter ──────────────────
+// Usage:
+//   ./gradlew assembleDebug                    → auto-increments counter
+//   ./gradlew assembleDebug -PappVersion=1.011 → uses exactly "1.011"
+//
+def versionPropsFile = rootProject.file('version.properties')
+def versionProps = new Properties()
+if (versionPropsFile.exists()) {
+    versionPropsFile.withReader('UTF-8') { reader -> versionProps.load(reader) }
+}
+def buildNumber = (versionProps['BUILD_NUMBER'] ?: '1').toInteger()
+
+def manualVersion = project.hasProperty('appVersion') ? project.appVersion : null
+
+// Only auto-increment when no manual version is provided
+gradle.taskGraph.whenReady { taskGraph ->
+    if (manualVersion == null && taskGraph.allTasks.any { it.name.startsWith('assemble') }) {
+        versionProps['BUILD_NUMBER'] = (buildNumber + 1).toString()
+        versionPropsFile.withWriter('UTF-8') { writer -> versionProps.store(writer, null) }
+    }
+}
+
+def appVersionName = manualVersion ?: "1.${buildNumber}"
+// ───────────────────────────────────────────────────────────────────────────
+
+android {
+    namespace 'com.iseegrass.native_app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.iseegrass.native_app"
+        minSdk 24
+        targetSdk 34
+        versionCode buildNumber
+        versionName appVersionName
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def buildType = variant.buildType.name
+            outputFileName = "iSeeGrass-N-${buildType}-v${appVersionName}.apk"
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.6.2'
+    implementation 'androidx.lifecycle:lifecycle-livedata:2.6.2'
+    implementation 'androidx.fragment:fragment:1.8.5'
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.11.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.11.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
+}
