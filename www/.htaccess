@@ -36,6 +36,44 @@ Options -Indexes
 # ── MIME type for ES module scripts (.js served as module) ────────────────────
 AddType application/javascript .js .mjs
 
+# ── Native-app API routing ────────────────────────────────────────────────────
+# The native Android app calls clean URLs like /api/auth/login.
+# These rules map them to the actual PHP files under core/api/ BEFORE the
+# core/ block rule fires. The [QSA] flag preserves query-string parameters
+# (e.g. ?id=5&limit=20) so PHP receives them unchanged.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Auth
+    RewriteRule ^api/auth/login$                        core/api/auth/login.php [QSA,L]
+    RewriteRule ^api/auth/logout$                       core/api/auth/logout.php [QSA,L]
+    RewriteRule ^api/auth/me$                           core/api/auth/me.php [QSA,L]
+
+    # Identify (image classification)
+    RewriteRule ^api/identify$                          core/api/identify.php [QSA,L]
+
+    # Identifications (user history / delete / rename)
+    RewriteRule ^api/identifications/user-history$      core/api/identifications/user-history.php [QSA,L]
+    RewriteRule ^api/identifications/user-delete-all$   core/api/identifications/user-delete-all.php [QSA,L]
+    RewriteRule ^api/identifications/user-delete$       core/api/identifications/user-delete.php [QSA,L]
+    RewriteRule ^api/identifications/user-update-title$ core/api/identifications/user-update-title.php [QSA,L]
+
+    # Assessments
+    RewriteRule ^api/assessments/create$                core/api/assessments/create.php [QSA,L]
+    RewriteRule ^api/assessments/update$                core/api/assessments/update.php [QSA,L]
+    RewriteRule ^api/assessments/delete$                core/api/assessments/delete.php [QSA,L]
+    RewriteRule ^api/assessments/show$                  core/api/assessments/show.php [QSA,L]
+    RewriteRule ^api/assessments$                       core/api/assessments/index.php [QSA,L]
+
+    # Users / profile
+    RewriteRule ^api/users/change_password$             core/api/users/change_password.php [QSA,L]
+    RewriteRule ^api/users/avatar$                      core/api/users/avatar.php [QSA,L]
+    RewriteRule ^api/users/show$                        core/api/users/show.php [QSA,L]
+
+    # Catalog (seagrass species)
+    RewriteRule ^api/catalog$                           core/api/catalog.php [QSA,L]
+</IfModule>
+
 # ── Block sensitive paths from browser access ────────────────────────────────
 <IfModule mod_rewrite.c>
     RewriteEngine On

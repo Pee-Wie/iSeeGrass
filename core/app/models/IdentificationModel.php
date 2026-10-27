@@ -97,6 +97,18 @@ class IdentificationModel
     }
 
     /**
+     * Return the total number of identification runs for one user.
+     */
+    public function countByUser(int $userId): int
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT COUNT(*) FROM identifications WHERE user_id = :uid'
+        );
+        $stmt->execute([':uid' => $userId]);
+        return (int) $stmt->fetchColumn();
+    }
+
+    /**
      * Return identification history for one user, newest first.
      */
     public function getByUser(int $userId, int $limit = 20, int $offset = 0): array
@@ -153,7 +165,7 @@ class IdentificationModel
     ): int {
         $stmt = $this->pdo->prepare(
             'INSERT INTO identification_results
-               (identification_id, species_id, scientific_name, common_name, confidence, rank)
+               (identification_id, species_id, scientific_name, common_name, confidence, `rank`)
              VALUES
                (:ident_id, :species_id, :scientific_name, :common_name, :confidence, :rank)'
         );
@@ -176,7 +188,7 @@ class IdentificationModel
         $stmt = $this->pdo->prepare(
             'SELECT * FROM identification_results
               WHERE identification_id = :ident_id
-              ORDER BY rank ASC'
+              ORDER BY `rank` ASC'
         );
         $stmt->execute([':ident_id' => $identificationId]);
         return $stmt->fetchAll();

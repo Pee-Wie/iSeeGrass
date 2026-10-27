@@ -42,9 +42,11 @@ $offset = max(0,           (int) ($_GET['offset'] ?? 0));
 $pdo   = getDB();
 $model = new IdentificationModel($pdo);
 
-$rows = $model->getByUser((int) $currentUser['id'], $limit, $offset);
+$uid   = (int) $currentUser['id'];
+$rows  = $model->getByUser($uid, $limit, $offset);
+$total = $model->countByUser($uid);
 
-// Return only the fields the sidebar needs
+// Return only the fields the app needs
 $records = array_map(static function (array $row): array {
     return [
         'id'             => (int)   $row['id'],
@@ -60,4 +62,4 @@ $records = array_map(static function (array $row): array {
     ];
 }, $rows);
 
-jsonSuccess(['records' => $records, 'total' => count($records)]);
+jsonSuccess(['records' => $records, 'total' => $total]);
