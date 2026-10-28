@@ -1294,15 +1294,57 @@ function renderIdentifyResults(result) {
   container.innerHTML = `
     ${lowConfBanner}
     <div style="margin-bottom:.75rem;padding-bottom:.75rem;border-bottom:1px solid rgba(255,255,255,.1)">
-      <div style="font-size:.72rem;color:#9fe997;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem">Result</div>
-      <div style="font-size:1.2rem;font-weight:700;color:#d6f0b8">${displayTopResult}</div>
-      <div style="font-size:.85rem;color:${confColour};margin-top:.2rem">Confidence: ${topConf.toFixed(1)}%</div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.72rem;color:#9fe997;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem">Result</div>
+          <div style="font-size:1.2rem;font-weight:700;color:#d6f0b8">${displayTopResult}</div>
+          <div style="font-size:.85rem;color:${confColour};margin-top:.2rem">Confidence: ${topConf.toFixed(1)}%</div>
+        </div>
+        <button id="btnFlagResult" class="flag-result-btn" title="Flag as wrong prediction" aria-label="Flag as wrong prediction">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+            <line x1="4" y1="22" x2="4" y2="15"/>
+          </svg>
+          <span class="flag-result-btn__label">Flag</span>
+        </button>
+      </div>
     </div>
+
     ${IS_ADMIN && scoresHtml ? `<div>
       <div style="font-size:.72rem;color:#9fe997;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">All Scores</div>
       ${scoresHtml}
     </div>` : ''}
+
+    <div id="flagResultForm" class="flag-result-form" hidden>
+      <div class="flag-result-form__title">Flag this result</div>
+      <p class="flag-result-form__desc">Tell us what you actually observed (optional). This helps improve the model.</p>
+      <div class="flag-result-form__row">
+        <label class="flag-result-form__label" for="flagCorrection">What species did you see?</label>
+        <input id="flagCorrection" class="flag-result-form__input" type="text"
+          placeholder="e.g. Halophila ovalis, or leave blank if unsure" maxlength="120" autocomplete="off" />
+      </div>
+      <div class="flag-result-form__row">
+        <label class="flag-result-form__label" for="flagNotes">Notes <span style="color:#666">(optional)</span></label>
+        <textarea id="flagNotes" class="flag-result-form__input flag-result-form__textarea"
+          placeholder="e.g. Image was blurry, multiple species present…" maxlength="500" rows="2"></textarea>
+      </div>
+      <div class="flag-result-form__actions">
+        <button id="btnFlagSubmit" class="flag-result-form__submit">Submit flag</button>
+        <button id="btnFlagCancel" class="flag-result-form__cancel">Cancel</button>
+      </div>
+      <div id="flagFormMsg" class="flag-result-form__msg" hidden></div>
+    </div>
+
     ${result.identification_id ? `<div style="margin-top:.6rem;font-size:.75rem;color:#555">Saved to history · ID #${result.identification_id}</div>` : ''}`;
+
+  // ── Flag button wiring ────────────────────────────────────────────────────
+  _wireResultFlag({
+    identificationId : result.identification_id ?? null,
+    modelPrediction  : topResult,
+    modelConfidence  : rawTopConf,
+  });
 
   // Defer the catalog lookup so the result panel paints first
   setTimeout(() => fetchAndRenderCatalogMatch(topResult), 0);
@@ -1416,4 +1458,97 @@ async function fetchAndRenderCatalogMatch(topResult) {
   if (resultsPanel) {
     resultsPanel.insertAdjacentElement('afterend', card);
   }
+}
+
+// ─── Flag result wiring ────────────────────────────────────────────────────────
+
+/**
+ * Wire up the flag button and inline form for a freshly rendered result panel.
+ *
+ * @param {object} opts
+ * @param {number|null} opts.identificationId  Server-side ID of this identification run.
+ * @param {string}      opts.modelPrediction   Top result label CREYNet returned.
+ * @param {number}      opts.modelConfidence   Raw confidence value (0–100).
+ */
+function _wireResultFlag({ identificationId, modelPrediction, modelConfidence }) {
+  const btn       = document.getElementById('btnFlagResult');
+  const form      = document.getElementById('flagResultForm');
+  const btnSubmit = document.getElementById('btnFlagSubmit');
+  const btnCancel = document.getElementById('btnFlagCancel');
+  const msgEl     = document.getElementById('flagFormMsg');
+
+  if (!btn || !form) return;
+
+  let flagged = false;
+
+  // Toggle form open/close
+  btn.addEventListener('click', () => {
+    if (flagged) return;
+    const isOpen = !form.hidden;
+    form.hidden = isOpen;
+    btn.setAttribute('aria-expanded', String(!isOpen));
+  });
+
+  // Cancel — collapse form
+  btnCancel.addEventListener('click', () => {
+    form.hidden = true;
+    btn.setAttribute('aria-expanded', 'false');
+    msgEl.hidden = true;
+  });
+
+  // Submit
+  btnSubmit.addEventListener('click', async () => {
+    if (flagged) return;
+
+    const correction = document.getElementById('flagCorrection')?.value.trim() ?? '';
+    const notes      = document.getElementById('flagNotes')?.value.trim()      ?? '';
+
+    btnSubmit.disabled = true;
+    btnSubmit.textContent = 'Submitting…';
+    msgEl.hidden = true;
+
+    try {
+      const res = await fetch('/api/identifications/flag', {
+        method      : 'POST',
+        headers     : { 'Content-Type': 'application/json' },
+        credentials : 'include',
+        body        : JSON.stringify({
+          identification_id : identificationId,
+          model_prediction  : modelPrediction,
+          model_confidence  : modelConfidence,
+          user_correction   : correction || null,
+          notes             : notes      || null,
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && data.success) {
+        // Mark as flagged — turn button red, hide form
+        flagged = true;
+        btn.classList.add('flag-result-btn--flagged');
+        btn.title = 'Flagged — thank you for the feedback';
+        btn.querySelector('svg').setAttribute('fill', 'currentColor');
+        form.hidden = true;
+        _showFlagMsg(msgEl, 'success', '✓ Flagged — thank you. We\'ll review this prediction.');
+        form.hidden = false; // show thank-you inside form area briefly
+        setTimeout(() => { form.hidden = true; }, 4000);
+      } else {
+        const errMsg = data.message ?? 'Something went wrong. Please try again.';
+        _showFlagMsg(msgEl, 'error', errMsg);
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = 'Submit flag';
+      }
+    } catch {
+      _showFlagMsg(msgEl, 'error', 'Network error — please check your connection and try again.');
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = 'Submit flag';
+    }
+  });
+}
+
+function _showFlagMsg(el, type, text) {
+  el.textContent = text;
+  el.className   = `flag-result-form__msg flag-result-form__msg--${type}`;
+  el.hidden      = false;
 }

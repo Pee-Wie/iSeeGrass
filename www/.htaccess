@@ -57,6 +57,7 @@ AddType application/javascript .js .mjs
     RewriteRule ^api/identifications/user-delete-all$   core/api/identifications/user-delete-all.php [QSA,L]
     RewriteRule ^api/identifications/user-delete$       core/api/identifications/user-delete.php [QSA,L]
     RewriteRule ^api/identifications/user-update-title$ core/api/identifications/user-update-title.php [QSA,L]
+    RewriteRule ^api/identifications/flag$              core/api/identifications/flag.php [QSA,L]
 
     # Assessments
     RewriteRule ^api/assessments/create$                core/api/assessments/create.php [QSA,L]

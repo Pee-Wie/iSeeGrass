@@ -1898,3 +1898,157 @@
 .direct-preview--history .direct-preview__aside {
   gap: 0.6rem;
 }
+
+/* ── Flag result button ──────────────────────────────────────────────────────── */
+
+.flag-result-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.6rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.72rem;
+  font-weight: 500;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+  line-height: 1;
+}
+
+.flag-result-btn:hover {
+  color: #e0b060;
+  border-color: rgba(224, 176, 96, 0.4);
+  background: rgba(224, 176, 96, 0.08);
+}
+
+.flag-result-btn--flagged {
+  color: #e05252 !important;
+  border-color: rgba(224, 82, 82, 0.4) !important;
+  background: rgba(224, 82, 82, 0.08) !important;
+  cursor: default;
+}
+
+.flag-result-btn__label {
+  letter-spacing: 0.04em;
+}
+
+/* ── Flag inline form ────────────────────────────────────────────────────────── */
+
+.flag-result-form {
+  margin-top: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: rgba(224, 176, 96, 0.06);
+  border: 1px solid rgba(224, 176, 96, 0.2);
+  border-radius: 8px;
+  animation: hist-card-in 180ms ease;
+}
+
+.flag-result-form__title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #e0b060;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.flag-result-form__desc {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 0.75rem;
+  line-height: 1.5;
+}
+
+.flag-result-form__row {
+  margin-bottom: 0.65rem;
+}
+
+.flag-result-form__label {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 0.3rem;
+}
+
+.flag-result-form__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.45rem 0.65rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: #d6f0b8;
+  font-size: 0.82rem;
+  outline: none;
+  transition: border-color 0.15s;
+  font-family: inherit;
+  resize: none;
+}
+
+.flag-result-form__input:focus {
+  border-color: rgba(224, 176, 96, 0.5);
+}
+
+.flag-result-form__textarea {
+  line-height: 1.5;
+}
+
+.flag-result-form__actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.flag-result-form__submit {
+  padding: 0.4rem 1rem;
+  background: #e0b060;
+  border: none;
+  border-radius: 6px;
+  color: #1a1a1a;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.flag-result-form__submit:hover   { opacity: 0.88; }
+.flag-result-form__submit:disabled { opacity: 0.5; cursor: default; }
+
+.flag-result-form__cancel {
+  padding: 0.4rem 0.85rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.flag-result-form__cancel:hover {
+  color: rgba(255, 255, 255, 0.75);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.flag-result-form__msg {
+  margin-top: 0.6rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  padding: 0.4rem 0.6rem;
+  border-radius: 5px;
+}
+
+.flag-result-form__msg--success {
+  color: #9fe997;
+  background: rgba(124, 203, 77, 0.1);
+  border: 1px solid rgba(124, 203, 77, 0.25);
+}
+
+.flag-result-form__msg--error {
+  color: #e07070;
+  background: rgba(224, 82, 82, 0.1);
+  border: 1px solid rgba(224, 82, 82, 0.25);
+}
