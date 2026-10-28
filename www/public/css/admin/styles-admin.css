@@ -23,6 +23,11 @@ html, body {
   background: linear-gradient(180deg, rgba(8, 17, 8, 0.75), rgba(4, 8, 4, 0.92)), url('/public/icons/iSeeGrass.png') center/cover no-repeat fixed;
 }
 
+/* Override the body background set by styles-users.css (loaded before this on admin pages) */
+html, body {
+  background: linear-gradient(180deg, rgba(8, 17, 8, 0.75), rgba(4, 8, 4, 0.92)), url('/public/icons/iSeeGrass.png') center/cover no-repeat fixed !important;
+}
+
 body::before {
   content: "";
   position: fixed;
@@ -32,6 +37,7 @@ body::before {
   background-size: 18px 18px, cover;
   pointer-events: none;
   opacity: 0.96;
+  z-index: 0;
 }
 
 body {

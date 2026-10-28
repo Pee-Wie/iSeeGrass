@@ -73,6 +73,9 @@ AddType application/javascript .js .mjs
 
     # Catalog (seagrass species)
     RewriteRule ^api/catalog$                           core/api/catalog.php [QSA,L]
+
+    # Admin
+    RewriteRule ^api/admin/stats$                       core/api/admin/stats.php [QSA,L]
 </IfModule>
 
 # ── Block sensitive paths from browser access ────────────────────────────────
