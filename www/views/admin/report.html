@@ -74,9 +74,9 @@
                                 <label class="admin-label">To
                                     <input type="date" id="reportDateTo" class="admin-input">
                                 </label>
-                                <button id="btnGenerateReport" class="admin-btn admin-btn--primary">
+                                <!-- <button id="btnGenerateReport" class="admin-btn admin-btn--primary">
                                     <i class="ti ti-chart-bar"></i> Generate Report
-                                </button>
+                                </button> -->
                             </div>
 
                             <!-- Stats summary -->
@@ -107,28 +107,28 @@
                             <!-- Chart placeholders -->
                             <div class="report-charts-row">
                                 <div class="report-chart-panel">
-                                    <h4>Assessments Over Time</h4>
-                                    <div id="chartAssessments" class="chart-placeholder">
-                                        Chart will render here
+                                    <h4>Flagged Predictions <span style="font-size:0.75rem;font-weight:400;color:var(--muted);">— pending review</span></h4>
+                                    <div id="flaggedList" style="min-height:120px;">
+                                        <p style="color:var(--muted);font-size:0.83rem;text-align:center;padding:2rem 0;">Generate a report to load.</p>
                                     </div>
                                 </div>
                                 <div class="report-chart-panel">
-                                    <h4>Top Identified Species</h4>
-                                    <div id="chartSpecies" class="chart-placeholder">
-                                        Chart will render here
+                                    <h4>Top Identified Species <span style="font-size:0.75rem;font-weight:400;color:var(--muted);">— Top 3</span></h4>
+                                    <div id="chartSpecies" style="min-height:120px;">
+                                        <p style="color:var(--muted);font-size:0.83rem;text-align:center;padding:2rem 0;">Generate a report to load.</p>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Export -->
-                            <div style="display:flex; gap:0.75rem; margin-top:1.25rem; flex-wrap:wrap;">
+                            <!-- <div style="display:flex; gap:0.75rem; margin-top:1.25rem; flex-wrap:wrap;">
                                 <button id="btnExportCsv" class="admin-btn admin-btn--ghost">
                                     <i class="ti ti-file-spreadsheet"></i> Export CSV
                                 </button>
                                 <button id="btnExportPdf" class="admin-btn admin-btn--ghost">
                                     <i class="ti ti-file-text"></i> Export PDF
                                 </button>
-                            </div>
+                            </div> -->
 
                         </div><!-- /.admin-card -->
                     </div><!-- /#tab-stats -->

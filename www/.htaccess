@@ -76,6 +76,7 @@ AddType application/javascript .js .mjs
 
     # Admin
     RewriteRule ^api/admin/stats$                       core/api/admin/stats.php [QSA,L]
+    RewriteRule ^api/admin/report-stats$                core/api/admin/report-stats.php [QSA,L]
 </IfModule>
 
 # ── Block sensitive paths from browser access ────────────────────────────────

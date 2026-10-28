@@ -32,7 +32,7 @@
       return;
     }
 
-    list.innerHTML = items.map(item => {
+    list.innerHTML = items.slice(0, 2).map(item => {
       const isBackground = /background substrate/i.test(item.top_result ?? '');
       const species = isBackground ? 'No seagrass detected' : (item.top_result ?? 'Unknown');
       const conf    = item.top_confidence != null

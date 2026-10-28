@@ -787,3 +787,125 @@ document.querySelectorAll('.admin-tab').forEach(tab => {
     }
   });
 });
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Platform Statistics Tab — Generate Report
+// ══════════════════════════════════════════════════════════════════════════════
+
+(function initReportStats() {
+  const btnGenerate = document.getElementById('btnGenerateReport');
+  if (!btnGenerate) return;
+
+  // Auto-load on page open with no date filter
+  loadReportStats('', '');
+
+  btnGenerate.addEventListener('click', () => {
+    const from = document.getElementById('reportDateFrom')?.value ?? '';
+    const to   = document.getElementById('reportDateTo')?.value   ?? '';
+    loadReportStats(from, to);
+  });
+})();
+
+async function loadReportStats(dateFrom, dateTo) {
+  const btnGenerate = document.getElementById('btnGenerateReport');
+  if (btnGenerate) { btnGenerate.disabled = true; btnGenerate.textContent = 'Loading…'; }
+
+  try {
+    const params = new URLSearchParams();
+    if (dateFrom) params.set('date_from', dateFrom);
+    if (dateTo)   params.set('date_to',   dateTo);
+
+    const res  = await fetch(`/api/admin/report-stats?${params}`, { credentials: 'include' });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.message ?? 'Failed to load stats');
+
+    const d = json.data;
+
+    // Stat cards
+    const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val ?? '—'; };
+    setEl('rpt-assessments',   d.total_assessments);
+    setEl('rpt-identifications', d.total_identifications);
+    setEl('rpt-users',         d.active_users);
+    setEl('rpt-top-species',   d.top_species ?? '—');
+
+    // Top 3 Species panel
+    renderTopSpecies(d.top_species_list ?? []);
+
+    // Flagged Predictions panel
+    renderFlaggedList(d.flagged_predictions ?? []);
+
+  } catch (err) {
+    toast('Could not load report stats: ' + err.message, false);
+  } finally {
+    if (btnGenerate) { btnGenerate.disabled = false; btnGenerate.innerHTML = '<i class="ti ti-chart-bar"></i> Generate Report'; }
+  }
+}
+
+function renderTopSpecies(list) {
+  const el = document.getElementById('chartSpecies');
+  if (!el) return;
+
+  if (!list.length) {
+    el.innerHTML = '<p style="color:var(--muted);font-size:0.83rem;text-align:center;padding:1.5rem 0;">No identification data in range.</p>';
+    return;
+  }
+
+  const max = list[0].count || 1;
+  const colors = ['#7ccb4d', '#5aaa33', '#3d7a22'];
+
+  el.innerHTML = list.map((item, i) => {
+    const pct = Math.round((item.count / max) * 100);
+    return `
+      <div style="margin-bottom:0.85rem;">
+        <div style="display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:0.25rem;">
+          <span style="color:#d6f0b8;font-style:italic;">${esc(item.species)}</span>
+          <span style="color:${colors[i]};font-weight:600;">${item.count}</span>
+        </div>
+        <div style="height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;">
+          <div style="width:${pct}%;height:100%;background:${colors[i]};border-radius:4px;transition:width 0.5s;"></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderFlaggedList(list) {
+  const el = document.getElementById('flaggedList');
+  if (!el) return;
+
+  if (!list.length) {
+    el.innerHTML = '<p style="color:var(--muted);font-size:0.83rem;text-align:center;padding:1.5rem 0;">No pending flagged predictions.</p>';
+    return;
+  }
+
+  el.innerHTML = list.map(item => {
+    const date = item.created_at
+      ? new Date(item.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })
+      : '';
+    const user = item.username
+      ? `<span style="color:var(--accent);">@${esc(item.username)}</span>`
+      : '<span style="color:var(--muted);">Guest</span>';
+    const correction = item.user_correction
+      ? `→ <em style="color:#d6f0b8;">${esc(item.user_correction)}</em>`
+      : '';
+    const conf = item.model_confidence != null
+      ? ` (${parseFloat(item.model_confidence).toFixed(1)}%)`
+      : '';
+
+    return `
+      <div style="padding:0.65rem 0;border-bottom:1px solid rgba(255,255,255,0.07);">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;">
+          <div>
+            <div style="font-size:0.83rem;color:var(--text);font-weight:500;">
+              <i class="ti ti-flag" style="color:#e07070;margin-right:0.3em;font-size:0.85rem;"></i>
+              ${esc(item.model_prediction)}${conf} ${correction}
+            </div>
+            <div style="font-size:0.75rem;color:var(--muted);margin-top:0.15rem;">
+              ${user} &nbsp;·&nbsp; ${date}
+              ${item.notes ? ` &nbsp;·&nbsp; <em>${esc(item.notes.slice(0, 60))}${item.notes.length > 60 ? '…' : ''}</em>` : ''}
+            </div>
+          </div>
+          <span style="font-size:0.7rem;padding:0.15rem 0.5rem;background:rgba(224,176,96,0.15);border:1px solid rgba(224,176,96,0.3);border-radius:4px;color:#e0b060;white-space:nowrap;">pending</span>
+        </div>
+      </div>`;
+  }).join('');
+}
