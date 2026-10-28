@@ -1,5 +1,9 @@
 {
   "appId": "com.iseegrass.app",
   "appName": "iSeeGrass",
-  "webDir": "www"
+  "webDir": "www",
+  "server": {
+    "url": "https://iseegrass-res.up.railway.app",
+    "cleartext": false
+  }
 }

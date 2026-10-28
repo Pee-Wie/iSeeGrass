@@ -31,8 +31,6 @@ android/
 assets/guides/
 backup/
 docker/
-!docker/
-!docker/apache-railway.conf
 iSeeGrass--CNN-v0.02/
 iSeeGrass-cap (symlink)
 iSeeGrass-na (symlink)
