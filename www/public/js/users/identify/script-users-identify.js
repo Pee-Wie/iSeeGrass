@@ -1216,16 +1216,56 @@ function renderIdentifyResults(result) {
           <line x1="12" y1="9" x2="12" y2="13"/>
           <line x1="12" y1="17" x2="12.01" y2="17"/>
         </svg>
-        <div>
-          <div style="font-size:.72rem;color:#9fe997;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.2rem">Result</div>
-          <div style="font-size:1.1rem;font-weight:700;color:#e0b060">Unable to identify</div>
-          <div style="font-size:.82rem;color:#aaa;margin-top:.3rem;line-height:1.5">
-            CREYNet could not identify a seagrass species from this image.<br>
-            The photo may be unclear, contain multiple subjects, or fall outside the model's training range. Try a clearer, focused photo.
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem">
+            <div>
+              <div style="font-size:.72rem;color:#9fe997;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.2rem">Result</div>
+              <div style="font-size:1.1rem;font-weight:700;color:#e0b060">Unable to identify</div>
+              <div style="font-size:.82rem;color:#aaa;margin-top:.3rem;line-height:1.5">
+                CREYNet could not identify a seagrass species from this image.<br>
+                The photo may be unclear, contain multiple subjects, or fall outside the model's training range. Try a clearer, focused photo.
+              </div>
+            </div>
+            <button id="btnFlagResult" class="flag-result-btn" title="Flag as wrong prediction" aria-label="Flag as wrong prediction">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+                <line x1="4" y1="22" x2="4" y2="15"/>
+              </svg>
+              <span class="flag-result-btn__label">Flag</span>
+            </button>
           </div>
         </div>
       </div>
+
+      <div id="flagResultForm" class="flag-result-form" hidden>
+        <div class="flag-result-form__title">Flag this result</div>
+        <p class="flag-result-form__desc">Tell us what you actually observed (optional). This helps improve the model.</p>
+        <div class="flag-result-form__row">
+          <label class="flag-result-form__label" for="flagCorrection">What species did you see?</label>
+          <input id="flagCorrection" class="flag-result-form__input" type="text"
+            placeholder="e.g. Halophila ovalis, or leave blank if unsure" maxlength="120" autocomplete="off" />
+        </div>
+        <div class="flag-result-form__row">
+          <label class="flag-result-form__label" for="flagNotes">Notes <span style="color:#666">(optional)</span></label>
+          <textarea id="flagNotes" class="flag-result-form__input flag-result-form__textarea"
+            placeholder="e.g. Image was blurry, multiple species present…" maxlength="500" rows="2"></textarea>
+        </div>
+        <div class="flag-result-form__actions">
+          <button id="btnFlagSubmit" class="flag-result-form__submit">Submit flag</button>
+          <button id="btnFlagCancel" class="flag-result-form__cancel">Cancel</button>
+        </div>
+        <div id="flagFormMsg" class="flag-result-form__msg" hidden></div>
+      </div>
+
       ${result.identification_id ? `<div style="margin-top:.75rem;padding-top:.6rem;border-top:1px solid rgba(255,255,255,.08);font-size:.75rem;color:#555">Saved to history · ID #${result.identification_id}</div>` : ''}`;
+
+    _wireResultFlag({
+      identificationId : result.identification_id ?? null,
+      modelPrediction  : topResult,
+      modelConfidence  : rawTopConf,
+    });
     return;
   }
 
