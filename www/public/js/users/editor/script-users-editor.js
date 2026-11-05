@@ -43,6 +43,8 @@ const TRANSECT_HTML = `
     <tr><td>6 (25m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
     <tr><td>7 (50m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
     <tr><td>8 (75m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>9</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>10</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
   </tbody>
 </table>
 <p data-coverage-summary contenteditable="false" aria-live="polite">Transect summary will appear when quadrat cover values are entered.</p>`;

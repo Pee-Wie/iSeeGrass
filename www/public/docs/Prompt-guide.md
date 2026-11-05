@@ -107,7 +107,7 @@ DB seed files → `database/seed/`
 
 ### Assessment Editor (users/editor.html)
 - Rich-text editor (contenteditable + formatting toolbar)
-- Templates: Blank, Transect Quadrat (8-quadrat table), Species Observation
+- Templates: Blank, Transect Quadrat (10-quadrat table), Species Observation
 - Saved Assessments list in left sidebar
 - Status flow: Draft → In Progress → Finalized
 - Actions: Save Draft, In Progress, Finalize, Clear, Preview, Insert Transect Table, Import, Print
