@@ -20,7 +20,7 @@ const state = {
 /* Seagrass transect table template */
 const TRANSECT_HTML = `
 <p><strong>Transect Quadrat Data</strong></p>
-<p><em>Click a species cell for recent identifications; selecting one inserts its scientific name with a count of 1. Edit the count, or enter a code/name followed by a space and count (for example, CR 1, Cymodocea rotundata 1).</em></p>
+<p><em>Enter a species name/code by itself when only one species is present; its count defaults to 1. For multiple species, enter each species followed by a space and its relative count (for example, CR 2, HR 1). Click a species suggestion to insert its name.</em></p>
 <p><em>Estimate total cover with the field guide. Counts apportion that cover by relative species share; use comparable composition counts, not raw shoot counts.</em></p>
 <table data-assessment-transect>
   <thead>

@@ -112,8 +112,9 @@ function renderSuggestions(cell) {
     return;
   }
 
-  const query = currentEntry(cell).replace(/\s+\d+$/, '').trim().toLocaleLowerCase();
-  if (/\s+\d+$/.test(currentEntry(cell))) {
+  const entry = currentEntry(cell);
+  const query = entry.replace(/\s+\d+$/, '').trim().toLocaleLowerCase();
+  if (/\s+\d+$/.test(entry) || allSuggestions().some(species => normalize(species.scientificName) === normalize(entry))) {
     hideSuggestions();
     return;
   }
@@ -196,7 +197,7 @@ function selectSuggestion(index) {
   const current = cell.innerText || cell.textContent || '';
   const delimiter = Math.max(current.lastIndexOf(','), current.lastIndexOf(';'), current.lastIndexOf('\n'));
   const prefix = delimiter < 0 ? '' : `${current.slice(0, delimiter + 1)} `;
-  cell.textContent = `${prefix}${species.scientificName} 1`;
+  cell.textContent = `${prefix}${species.scientificName}`;
   const range = document.createRange();
   range.selectNodeContents(cell);
   range.collapse(false);
@@ -213,14 +214,12 @@ function parseSpeciesEntries(value) {
   if (!text) return { entries: [], error: '' };
 
   const entriesByName = new Map();
+  let hasUncountedSpecies = false;
   for (const rawPart of text.split(/[,;\n]+/).map(part => part.trim()).filter(Boolean)) {
     const match = rawPart.match(/^(.+?)\s+(\d+)$/);
-    if (!match) {
-      return { entries: [], error: `Use a species name/code followed by a count, for example CR 2: "${rawPart}"` };
-    }
-
-    const name = match[1].trim();
-    const count = Number(match[2]);
+    if (!match) hasUncountedSpecies = true;
+    const name = match ? match[1].trim() : rawPart;
+    const count = match ? Number(match[2]) : 1;
     if (!name || !Number.isSafeInteger(count) || count < 0) {
       return { entries: [], error: `Enter a valid non-negative whole-number count for "${name}".` };
     }
@@ -228,6 +227,9 @@ function parseSpeciesEntries(value) {
     const entry = entriesByName.get(key) || { name, count: 0 };
     entry.count += count;
     entriesByName.set(key, entry);
+  }
+  if (hasUncountedSpecies && entriesByName.size > 1) {
+    return { entries: [], error: 'Add a count after each species when more than one species is present.' };
   }
   return { entries: [...entriesByName.values()], error: '' };
 }
