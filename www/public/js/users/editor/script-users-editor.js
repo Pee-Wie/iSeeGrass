@@ -20,27 +20,32 @@ const state = {
 /* Seagrass transect table template */
 const TRANSECT_HTML = `
 <p><strong>Transect Quadrat Data</strong></p>
-<p><em>% Seagrass species composition must total 100%</em></p>
-<table>
+<p><em>Click a species cell for recent identifications; selecting one inserts its scientific name with a count of 1. Edit the count, or enter a code/name followed by a space and count (for example, CR 1, Cymodocea rotundata 1).</em></p>
+<p><em>Estimate total cover with the field guide. Counts apportion that cover by relative species share; use comparable composition counts, not raw shoot counts.</em></p>
+<table data-assessment-transect>
   <thead>
     <tr>
-      <th>Quadrat</th><th>Sediment</th><th>Comments</th>
-      <th>% Seagrass Coverage</th><th>Canopy Height (cm)</th>
-      <th>ZC (%)</th><th>HU (%)</th><th>HO (%)</th>
-      <th>% Algae Cover</th><th>% Epi-cover</th>
+      <th>Quadrat</th>
+      <th>Seagrass name/code and count</th>
+      <th>Total seagrass cover (%)<br><small>Estimate from field guide</small></th>
+      <th>Species composition (%)<br><small>Calculated from counts</small></th>
+      <th>Species cover (%)<br><small>Calculated</small></th>
+      <th>Sediment</th><th>Comments</th>
+      <th>Canopy Height (cm)</th><th>% Algae Cover</th><th>% Epi-cover</th>
     </tr>
   </thead>
   <tbody>
-    <tr><td>1 (0m)</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td>2 (5m)</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td>3 (10m)</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td>4 (15m)</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td>5 (20m)</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td>6 (25m)</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td>7 (50m)</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td>8 (75m)</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>1 (0m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>2 (5m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>3 (10m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>4 (15m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>5 (20m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>6 (25m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>7 (50m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>8 (75m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
   </tbody>
-</table>`;
+</table>
+<p data-coverage-summary contenteditable="false" aria-live="polite">Transect summary will appear when quadrat cover values are entered.</p>`;
 
 /* Templates */
 const TEMPLATES = {
