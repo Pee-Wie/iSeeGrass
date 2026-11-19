@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Learn how iSeeGrass collects, uses, stores, and protects account and research data.">
+  <title>Privacy Notice | iSeeGrass</title>
+  <link rel="icon" type="image/png" href="icons/favicon.png">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <isee-header></isee-header>
+  <main class="container legal-container">
+    <header class="legal-intro">
+      <p class="eyebrow">iSeeGrass policies</p>
+      <h1>Privacy Notice</h1>
+      <p>Last updated: November 19, 2026</p>
+    </header>
+
+    <article class="legal-document">
+      <p class="legal-note"><strong>Privacy contact:</strong> Add an approved, working privacy contact email before public launch. The project contact details currently shown elsewhere on this site use placeholder addresses.</p>
+
+      <section>
+        <h2>Who operates iSeeGrass</h2>
+        <p>iSeeGrass is an academic research and education project of the State University of Northern Negros (SUNN), through its CCIS and CFIN departments. This notice applies to the iSeeGrass website and the web application when used in a mobile browser or the Capacitor app.</p>
+      </section>
+
+      <section>
+        <h2>Information we handle</h2>
+        <ul>
+          <li><strong>Account information:</strong> name, username, email address, and a password stored as a one-way hash. The application assigns a default account position; optional profile details such as institution, phone number, biography, and avatar may be added later by the user.</li>
+          <li><strong>Research content:</strong> images submitted for identification, their file names and optional titles, identification results and history, and assessment titles, content, and status.</li>
+          <li><strong>Session information:</strong> a random session token, account ID, and expiry are used to keep an account signed in. A minimal account profile is cached in browser storage so the interface can restore the signed-in session. The application no longer records IP addresses or browser user-agents in new session rows; older session rows may retain them until expired-session cleanup removes those rows.</li>
+          <li><strong>Temporary offline data:</strong> when a signed-in user works offline, queued identification images and assessment drafts may be held in IndexedDB on that device until they sync or are removed. Photo Collector items are also stored locally on the device.</li>
+        </ul>
+        <p>Do not upload images or assessment content containing personal or confidential information unless you have permission to do so. Image files may themselves contain embedded metadata.</p>
+      </section>
+
+      <section>
+        <h2>Why we use this information</h2>
+        <p>We use the information above only as needed to create and secure accounts, provide seagrass identification and assessment features, save and display user-requested records, synchronize offline work, and operate and troubleshoot the service. We do not request phone number, institution, or biography during sign-up.</p>
+      </section>
+
+      <section>
+        <h2>Image processing and service providers</h2>
+        <p>When an image is submitted for identification, the server forwards the image and selected model type to the configured CNN processing service. The current backend documentation identifies Google Colab as the model host. The image is temporarily stored on the application server during processing. A guest identification is not saved to account history; images from signed-in users may be retained with their identification history.</p>
+        <p>We also rely on the hosting and database services needed to run iSeeGrass. These providers may process information on our behalf. Confirm the providers, their terms, and processing locations for the live deployment before public launch.</p>
+      </section>
+
+      <section>
+        <h2>Storage and retention</h2>
+        <p>Account details and saved research records are kept while needed to provide the service. Users can delete supported identification and assessment records within the app; contact the project using the privacy contact above for account or other data requests. Server sessions are removed on logout or by expired-session cleanup. Offline browser data remains on the device until it syncs, is removed in the app, or the browser/app storage is cleared.</p>
+        <p>The application does not currently define an automated inactive-account deletion period. The project should set and publish an approved retention schedule before public launch. Hosting providers may separately process or retain connection and operational logs under their own retention practices.</p>
+      </section>
+
+      <section>
+        <h2>Your choices and requests</h2>
+        <p>You may update optional profile details, remove supported saved records, clear locally stored browser/app data, or request access, correction, or deletion of account information by contacting the project. Requests will be handled in accordance with applicable Philippine law, including the Data Privacy Act of 2012. A working privacy contact must be added before this notice is published for general use.</p>
+      </section>
+
+      <section>
+        <h2>Security and changes</h2>
+        <p>Passwords are stored as hashes and account sessions use an HttpOnly session cookie. No internet transmission or storage system can be guaranteed completely secure. We will update this notice when the service’s data practices change and show the latest revision date here.</p>
+      </section>
+    </article>
+    <isee-wp-site-footer></isee-wp-site-footer>
+  </main>
+  <script type="module" src="../components/wp-site-header.js"></script>
+  <script type="module" src="../components/wp-site-footer.js"></script>
+</body>
+</html>

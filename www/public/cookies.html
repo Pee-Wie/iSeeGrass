@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Cookie and browser-storage information for iSeeGrass.">
+  <title>Cookie Policy | iSeeGrass</title>
+  <link rel="icon" type="image/png" href="icons/favicon.png">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <isee-header></isee-header>
+  <main class="container legal-container">
+    <header class="legal-intro">
+      <p class="eyebrow">iSeeGrass policies</p>
+      <h1>Cookie Policy</h1>
+      <p>Last updated: November 19, 2026</p>
+    </header>
+
+    <article class="legal-document">
+      <p class="legal-note">The current application uses a necessary sign-in session cookie. No advertising or analytics cookies were found in the application code reviewed for this policy.</p>
+
+      <section>
+        <h2>Necessary session cookie</h2>
+        <p>When you sign in, iSeeGrass uses a cookie containing a random session token so the server can recognize your authenticated requests. Its default name is <code>iseegsess</code> (the deployment may configure another name). The cookie is HttpOnly and is configured for secure transport according to the deployment; its default lifetime is seven days. Signing out clears it.</p>
+        <p>This cookie is necessary for account features. We do not use it for advertising or cross-site tracking. Because it is needed for sign-in, the app does not show a separate cookie-consent banner.</p>
+      </section>
+
+      <section>
+        <h2>Browser and app storage</h2>
+        <p>In addition to cookies, iSeeGrass uses local storage for a minimal cached account profile and IndexedDB for user-requested offline work, such as queued identification images, assessment drafts, and Photo Collector items. These are browser or app storage, not cookies. They remain on the device until they sync, are removed in the app, or browser/app data is cleared.</p>
+      </section>
+
+      <section>
+        <h2>Your controls</h2>
+        <p>You can sign out to end the current session, and you can clear site or app storage through your browser or device settings. Blocking the session cookie prevents sign-in and other account features from working correctly. Clearing local storage may remove unsynchronized offline work.</p>
+      </section>
+
+      <section>
+        <h2>Changes</h2>
+        <p>If we add non-essential cookies or change our use of browser storage, we will update this policy and provide any consent controls required by applicable law before enabling them.</p>
+      </section>
+    </article>
+    <isee-wp-site-footer></isee-wp-site-footer>
+  </main>
+  <script type="module" src="../components/wp-site-header.js"></script>
+  <script type="module" src="../components/wp-site-footer.js"></script>
+</body>
+</html>

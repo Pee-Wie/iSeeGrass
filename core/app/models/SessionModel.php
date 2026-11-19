@@ -19,19 +19,15 @@ class SessionModel
      */
     public function create(int $userId, int $lifetimeSec, string $token): string
     {
-        $ip        = $_SERVER['REMOTE_ADDR']     ?? null;
-        $ua        = $_SERVER['HTTP_USER_AGENT'] ?? null;
         $expiresAt = date('Y-m-d H:i:s', time() + $lifetimeSec);
 
         $stmt = $this->pdo->prepare(
-            'INSERT INTO sessions (id, user_id, ip_address, user_agent, expires_at)
-             VALUES (:id, :user_id, :ip, :ua, :expires_at)'
+            'INSERT INTO sessions (id, user_id, expires_at)
+             VALUES (:id, :user_id, :expires_at)'
         );
         $stmt->execute([
             ':id'         => $token,
             ':user_id'    => $userId,
-            ':ip'         => $ip ? substr($ip, 0, 45) : null,
-            ':ua'         => $ua ? substr($ua, 0, 255) : null,
             ':expires_at' => $expiresAt,
         ]);
 

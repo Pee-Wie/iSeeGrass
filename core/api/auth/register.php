@@ -5,7 +5,6 @@ require_once __DIR__ . '/../../helpers/response.php';
 require_once __DIR__ . '/../../helpers/auth.php';
 require_once __DIR__ . '/../../helpers/validate.php';
 require_once __DIR__ . '/../../app/models/UserModel.php';
-require_once __DIR__ . '/../../app/models/SessionModel.php';
 
 setCorsHeaders();
 requireMethod('POST');
@@ -13,6 +12,9 @@ requireMethod('POST');
 $body   = getJsonBody();
 $errors = requireFields($body, ['username','email','password','first_name','last_name','position']);
 if ($errors) jsonError(implode(' ', $errors), 422);
+if (($body['terms_accepted'] ?? false) !== true) {
+    jsonError('You must agree to the Terms and Conditions and acknowledge the Privacy and Cookie Policies.', 422);
+}
 
 $username  = trim((string)($body['username']  ?? ''));
 $email     = strtolower(trim((string)($body['email'] ?? '')));
@@ -45,14 +47,9 @@ $newId = $userModel->create([
     'institution'   => inputStr($body,'institution'),
     'phone'         => inputStr($body,'phone'),
     'bio'           => inputStr($body,'bio'),
+    'status'        => 'inactive',
 ]);
 
 $newUser = $userModel->findById($newId);
-
-$sessionModel = new SessionModel($pdo);
-$lifetime     = sessionLifetimeSeconds();
-$token        = generateSessionToken();
-$sessionModel->create($newId, $lifetime, $token);
-setSessionCookie($token, $lifetime);
 
 jsonSuccess(UserModel::sanitise($newUser), 201);

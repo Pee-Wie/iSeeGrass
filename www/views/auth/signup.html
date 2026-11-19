@@ -7,24 +7,32 @@
   <form id="signupFormElem" method="POST" autocomplete="off">
     <div class="input-box">
       <label for="signup-fullname">Full Name:</label>
-      <input type="text" name="fullname" id="signup-fullname" placeholder="e.g. Jan Mark Reyes" required />
+      <input type="text" name="fullname" id="signup-fullname" placeholder="e.g. Jan Mark Reyes" autocomplete="name" required />
     </div>
     <div class="input-box">
       <label for="signup-username">Username:</label>
-      <input type="text" name="username" id="signup-username" placeholder="e.g. JM Reyes" required />
+      <input type="text" name="username" id="signup-username" placeholder="e.g. JM Reyes" autocomplete="username" required />
     </div>
     <div class="input-box">
       <label for="signup-email">Email:</label>
-      <input type="email" name="email" id="signup-email" placeholder="e.g. jmreyes@example.com" required />
+      <input type="email" name="email" id="signup-email" placeholder="e.g. jmreyes@example.com" autocomplete="email" required />
     </div>
     <div class="input-box">
       <label for="signup-password">Password:</label>
-      <input type="password" name="password" id="signup-password" placeholder="Create a strong password" required />
+      <input type="password" name="password" id="signup-password" placeholder="Create a strong password" autocomplete="new-password" required />
     </div>
     <div class="input-box">
       <label for="signup-confirm-password">Confirm Password:</label>
-      <input type="password" name="confirm-password" id="signup-confirm-password" placeholder="Confirm your password"
+      <input type="password" name="confirm-password" id="signup-confirm-password" placeholder="Confirm your password" autocomplete="new-password"
         required />
+    </div>
+    <div class="signup-consent">
+      <input type="checkbox" id="signup-terms" name="terms-accepted" required />
+      <label for="signup-terms">
+        I agree to the <a href="../../public/terms.html" target="_blank" rel="noopener noreferrer">Terms and Conditions</a>
+        and acknowledge that I have read the <a href="../../public/privacy.html" target="_blank" rel="noopener noreferrer">Privacy Notice</a>
+        and <a href="../../public/cookies.html" target="_blank" rel="noopener noreferrer">Cookie Policy</a>.
+      </label>
     </div>
     <button class="btn btn-primary" type="submit" name="signup_submit">Create Account</button>
   </form>

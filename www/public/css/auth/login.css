@@ -500,6 +500,33 @@ body::before {
   margin-top: 8px;
 }
 
+.signup-pending-notice {
+  padding: 1rem;
+  border: 1px solid rgba(142, 214, 85, 0.4);
+  border-radius: 12px;
+  background: rgba(30, 72, 34, 0.75);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 0.75rem;
+  }
+
+  .modal-content {
+    width: 100%;
+    max-height: calc(100vh - 1.5rem);
+    padding: 1.25rem;
+  }
+
+  @supports (height: 100dvh) {
+    .modal-content {
+      max-height: calc(100dvh - 1.5rem);
+    }
+  }
+}
+
 .modal-body .text {
   margin-top: 16px;
 }

@@ -143,17 +143,17 @@ class UserModel
      * Insert a new user row. Returns the new user's ID.
      *
      * @param array $data  Keys: username, email, password_hash, first_name, last_name,
-     *                     middle_name?, position, role?, institution?, phone?, bio?
+     *                     middle_name?, position, role?, institution?, phone?, bio?, status?
      */
     public function create(array $data): int
     {
         $stmt = $this->pdo->prepare(
             'INSERT INTO users
                (username, email, password_hash, first_name, last_name, middle_name,
-                position, role, institution, phone, bio)
+                position, role, institution, phone, bio, status)
              VALUES
                (:username, :email, :password_hash, :first_name, :last_name, :middle_name,
-                :position, :role, :institution, :phone, :bio)'
+                :position, :role, :institution, :phone, :bio, :status)'
         );
 
         $stmt->execute([
@@ -168,6 +168,7 @@ class UserModel
             ':institution'   => $data['institution']   ?? null,
             ':phone'         => $data['phone']         ?? null,
             ':bio'           => $data['bio']           ?? null,
+            ':status'        => $data['status']         ?? 'active',
         ]);
 
         return (int) $this->pdo->lastInsertId();

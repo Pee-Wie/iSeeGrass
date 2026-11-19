@@ -45,7 +45,7 @@ if ($user === null || !verifyPassword($password, $user['password_hash'])) {
 }
 
 if ($user['status'] !== 'active') {
-    jsonError('Your account has been deactivated. Please contact an administrator.', 403);
+    jsonError('Your account is awaiting administrator approval or has been deactivated. Please contact an administrator.', 403);
 }
 
 // ── Create session ────────────────────────────────────────────────────────────
