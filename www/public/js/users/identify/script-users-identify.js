@@ -22,7 +22,7 @@ import { identifyImage, manualIdentifyImage, findCatalogMatch } from '../../api/
 import { drain, OfflineQueuedError } from '../../utils/identify-queue.js?v=5';
 import { saveCollectorPhoto, updateCollectorPhotoLabel, removeCollectorPhoto, clearCollectorPhotos, restoreCollectorPhotos } from '../../utils/photo-collector-store.js';
 import { assetUrl } from '../../config/api.config.js?v=4';
-import { openManualIdentificationDialog } from './manual-identification-key.js?v=4';
+import { openManualIdentificationDialog } from './manual-identification-key.js?v=6';
 
 function getCollectorUserId() {
   try {

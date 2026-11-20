@@ -27,12 +27,22 @@
         required />
     </div>
     <div class="signup-consent">
-      <input type="checkbox" id="signup-terms" name="terms-accepted" required />
+      <input
+        type="checkbox"
+        id="signup-terms"
+        name="terms-accepted"
+        aria-describedby="signup-consent-error"
+        required />
       <label for="signup-terms">
-        I agree to the <a href="../../public/terms.html" target="_blank" rel="noopener noreferrer">Terms and Conditions</a>
-        and acknowledge that I have read the <a href="../../public/privacy.html" target="_blank" rel="noopener noreferrer">Privacy Notice</a>
+        I agree to the
+        <a href="../../public/terms.html" target="_blank" rel="noopener noreferrer">Terms and Conditions</a>
+        and acknowledge that I have read the
+        <a href="../../public/privacy.html" target="_blank" rel="noopener noreferrer">Privacy Notice</a>
         and <a href="../../public/cookies.html" target="_blank" rel="noopener noreferrer">Cookie Policy</a>.
       </label>
+      <small id="signup-consent-error" class="signup-consent-error" role="alert" hidden>
+        You must agree to the Terms and Conditions and acknowledge the Privacy and Cookie Policies.
+      </small>
     </div>
     <button class="btn btn-primary" type="submit" name="signup_submit">Create Account</button>
   </form>

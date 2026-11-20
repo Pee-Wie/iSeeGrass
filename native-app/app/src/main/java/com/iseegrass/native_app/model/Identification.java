@@ -28,6 +28,12 @@ public class Identification {
     @SerializedName("title")
     private String title;
 
+    @SerializedName("latitude")
+    private Double latitude;
+
+    @SerializedName("longitude")
+    private Double longitude;
+
     public int    getId()            { return id; }
     public String getImageFilename() { return imageFilename; }
     public String getImageUrl()      { return imageUrl; }
@@ -37,4 +43,6 @@ public class Identification {
     public boolean isManual() { return "manual_key".equals(identificationMethod); }
     public String getCreatedAt()     { return createdAt; }
     public String getTitle()         { return title; }
+    public Double getLatitude()       { return latitude; }
+    public Double getLongitude()      { return longitude; }
 }

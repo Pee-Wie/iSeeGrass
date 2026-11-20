@@ -72,6 +72,9 @@ native-app/app/src/*
 !native-app/app/src/main/
 native-app/app/src/main/*
 !native-app/app/src/main/AndroidManifest.xml
+!native-app/app/src/main/assets/
+native-app/app/src/main/assets/*
+!native-app/app/src/main/assets/assessment-editor.html
 !native-app/app/src/main/java/
 native-app/app/src/main/java/*
 !native-app/app/src/main/java/com/
@@ -106,11 +109,14 @@ native-app/app/src/main/java/com/iseegrass/native_app/ui/identify/*
 !native-app/app/src/main/java/com/iseegrass/native_app/ui/assessment/
 native-app/app/src/main/java/com/iseegrass/native_app/ui/assessment/*
 !native-app/app/src/main/java/com/iseegrass/native_app/ui/assessment/AssessmentEditorActivity.java
+!native-app/app/src/main/java/com/iseegrass/native_app/ui/assessment/AssessmentAdapter.java
+!native-app/app/src/main/java/com/iseegrass/native_app/model/Assessment.java
 !native-app/app/src/main/res/
 native-app/app/src/main/res/*
 !native-app/app/src/main/res/layout/
 native-app/app/src/main/res/layout/*
 !native-app/app/src/main/res/layout/fragment_identify.xml
+!native-app/app/src/main/res/layout/item_assessment.xml
 !native-app/app/src/test/
 native-app/app/src/test/*
 !native-app/app/src/test/java/

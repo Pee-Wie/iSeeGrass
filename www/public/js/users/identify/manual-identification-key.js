@@ -66,7 +66,6 @@ const QUESTIONS = {
     choices: [
       { label: 'Cylindrical leaf that tapers to a point', illustration: 'cylindrical', outcome: 'isoetifolium' },
       { label: 'Flat, strap-shaped leaf', illustration: 'strap', next: 'strap-traits' },
-      { label: 'Neither or unsure', illustration: 'unsure', outcome: null },
     ],
   },
   'strap-traits': {
@@ -84,10 +83,10 @@ const QUESTIONS = {
   branched: {
     prompt: 'Which branch pattern do you see?',
     number: 2,
+    availabilityMessage: 'Branched-leaf species are not included in the current assessment scope.',
     choices: [
-      { label: 'Short and mostly straight', illustration: 'branch-short', outcome: null },
-      { label: 'Long and spiralled', illustration: 'branch-spiral', outcome: null },
-      { label: 'Neither or unsure', illustration: 'unsure', outcome: null },
+      { label: 'Short and mostly straight', illustration: 'branch-short', disabled: true },
+      { label: 'Long and spiralled', illustration: 'branch-spiral', disabled: true },
     ],
   },
   'oval-surface': {
@@ -114,7 +113,6 @@ const QUESTIONS = {
     choices: [
       { label: 'Opposite pairs along the stem', illustration: 'fern-pairs', outcome: 'spinulosa' },
       { label: 'A fan of leaflets around the stem', illustration: 'fern-fan', outcome: 'tricostata' },
-      { label: 'Neither or unsure', illustration: 'unsure', outcome: null },
     ],
   },
 };
@@ -144,6 +142,10 @@ export class ManualIdentificationKey {
     }
 
     const choice = question.choices[index];
+    if (choice.disabled) {
+      throw new RangeError('Answer is not available in the current assessment scope.');
+    }
+
     this.previousStages.push(this.stage);
     if (choice.next) {
       this.stage = choice.next;
@@ -283,6 +285,10 @@ export function openManualIdentificationDialog({ onSelect, onClose } = {}) {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'manual-key-choice';
+      button.disabled = choice.disabled === true;
+      if (button.disabled) {
+        button.setAttribute('aria-describedby', 'manualKeyAvailability');
+      }
       button.innerHTML = illustrationSvg(choice.illustration);
       const label = document.createElement('span');
       label.textContent = choice.label;
@@ -294,10 +300,21 @@ export function openManualIdentificationDialog({ onSelect, onClose } = {}) {
       grid.append(button);
     });
 
-    body.append(step, prompt, note, grid);
+    body.append(step, prompt, note);
+    if (question.availabilityMessage) {
+      const availability = document.createElement('p');
+      availability.id = 'manualKeyAvailability';
+      availability.className = 'manual-key-dialog__availability';
+      availability.setAttribute('role', 'status');
+      availability.textContent = question.availabilityMessage;
+      body.append(availability);
+    }
+    body.append(grid);
     backButton.disabled = !key.canGoBack();
     restartButton.disabled = !key.canGoBack();
-    grid.querySelector('button')?.focus();
+    const firstEnabledChoice = grid.querySelector('button:not(:disabled)');
+    if (firstEnabledChoice) firstEnabledChoice.focus();
+    else if (question.availabilityMessage) backButton.focus();
   };
 
   backButton.addEventListener('click', () => {

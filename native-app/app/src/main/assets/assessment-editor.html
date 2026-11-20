@@ -1,0 +1,841 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+  <style>
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body { background: #d9dedb; color: #202820; font: 16px Arial, sans-serif; padding: 4px; }
+    #editor {
+      width: 100%; height: 100%; min-height: 100%; overflow-x: auto; overflow-y: auto;
+      padding: 16px 14px;
+      background: #fff; outline: none; line-height: 1.55;
+      -webkit-user-select: text; user-select: text;
+      box-shadow: 0 1px 5px rgba(0,0,0,.24);
+    }
+    #editor::-webkit-scrollbar { width: 6px; height: 7px; }
+    #editor::-webkit-scrollbar-track { background: #e7ece8; }
+    #editor::-webkit-scrollbar-thumb { background: #718276; border-radius: 4px; }
+    #editor:empty::before { content: "Start writing your assessment…"; color: #8a928a; }
+    #editor h1, #editor h2, #editor h3 { line-height: 1.25; }
+    #editor table {
+      width: max-content; min-width: 100%; max-width: none; margin: 14px 0;
+      border-collapse: collapse; table-layout: auto;
+    }
+    #editor th, #editor td {
+      min-width: 88px; border: 1px solid #879187; padding: 7px;
+      text-align: left; vertical-align: top;
+    }
+    #editor table[data-assessment-transect] {
+      width: 1880px; min-width: 1880px; table-layout: fixed;
+    }
+    #editor table[data-assessment-transect] col:nth-child(1) { width: 80px; }
+    #editor table[data-assessment-transect] col:nth-child(2) { width: 230px; }
+    #editor table[data-assessment-transect] col:nth-child(3) { width: 150px; }
+    #editor table[data-assessment-transect] col:nth-child(4),
+    #editor table[data-assessment-transect] col:nth-child(5) { width: 200px; }
+    #editor table[data-assessment-transect] col:nth-child(6) { width: 140px; }
+    #editor table[data-assessment-transect] col:nth-child(7) { width: 220px; }
+    #editor table[data-assessment-transect] col:nth-child(8) { width: 140px; }
+    #editor table[data-assessment-transect] col:nth-child(9) { width: 180px; }
+    #editor table[data-assessment-transect] col:nth-child(10) { width: 190px; }
+    #editor table[data-assessment-transect] col:nth-child(11) { width: 150px; }
+    #editor table[data-assessment-transect] th,
+    #editor table[data-assessment-transect] td { box-sizing: border-box; }
+    #editor table[data-assessment-transect] th:nth-child(1),
+    #editor table[data-assessment-transect] td:nth-child(1) { width: 80px; }
+    #editor table[data-assessment-transect] th:nth-child(2),
+    #editor table[data-assessment-transect] td:nth-child(2) { width: 230px; }
+    #editor table[data-assessment-transect] th:nth-child(3),
+    #editor table[data-assessment-transect] td:nth-child(3) { width: 150px; }
+    #editor table[data-assessment-transect] th:nth-child(4),
+    #editor table[data-assessment-transect] td:nth-child(4),
+    #editor table[data-assessment-transect] th:nth-child(5),
+    #editor table[data-assessment-transect] td:nth-child(5) { width: 200px; }
+    #editor table[data-assessment-transect] th:nth-child(6),
+    #editor table[data-assessment-transect] td:nth-child(6) { width: 140px; }
+    #editor table[data-assessment-transect] th:nth-child(7),
+    #editor table[data-assessment-transect] td:nth-child(7) { width: 220px; }
+    #editor table[data-assessment-transect] th:nth-child(8),
+    #editor table[data-assessment-transect] td:nth-child(8) { width: 140px; }
+    #editor table[data-assessment-transect] th:nth-child(9),
+    #editor table[data-assessment-transect] td:nth-child(9) { width: 180px; }
+    #editor table[data-assessment-transect] th:nth-child(10),
+    #editor table[data-assessment-transect] td:nth-child(10) { width: 190px; }
+    #editor table[data-assessment-transect] th:nth-child(11),
+    #editor table[data-assessment-transect] td:nth-child(11) { width: 150px; }
+    #editor [data-coverage-species-entry],
+    #editor [data-coverage-total] { background: #fffbea; }
+    #editor [data-coverage-location] { background: #fffbea; }
+    #editor [data-coverage-species-entry],
+    #editor [data-coverage-location] { white-space: pre-line; }
+    #editor [data-coverage-species-entry]:empty::before,
+    #editor [data-coverage-total]:empty::before,
+    #editor [data-coverage-location]:empty::before {
+      content: attr(data-placeholder); color: #777; pointer-events: none;
+    }
+    #editor [data-coverage-composition],
+    #editor [data-coverage-species-cover] { white-space: pre-line; }
+    #editor [data-coverage-summary] {
+      padding: 9px 11px; border-left: 3px solid #70ad47; background: #f1f7e9;
+    }
+    .coverage-suggestions {
+      position: fixed; z-index: 20; max-height: 260px; overflow-y: auto;
+      border: 1px solid #9bbd7c; border-radius: 6px; background: #fff;
+      color: #172516; box-shadow: 0 8px 24px rgba(0,0,0,.2);
+    }
+    .coverage-suggestions[hidden] { display: none; }
+    .coverage-suggestion {
+      display: grid; grid-template-columns: 2.7rem 1fr; gap: 2px 8px;
+      width: 100%; min-height: 48px; padding: 8px 10px; border: 0;
+      border-bottom: 1px solid #e8eee2; background: #fff; color: #172516;
+      text-align: left; font: inherit;
+    }
+    .coverage-suggestion:active { background: #eff8e7; }
+    .coverage-suggestion strong { grid-row: span 2; align-self: center; color: #35691f; }
+    .coverage-suggestion small, .coverage-suggestion-message {
+      padding: 8px 10px; color: #596653; font-size: 13px;
+    }
+    .coverage-suggestion small { grid-column: 2; padding: 0; font-size: 11px; }
+    #editor th { background: #e8eee8; font-weight: 700; }
+    #editor img { max-width: 100%; height: auto; }
+    #editor blockquote { margin-left: 0; padding-left: 12px; border-left: 3px solid #8a9c8a; color: #526052; }
+    #editor a { color: #176b3a; }
+    #editor[contenteditable="false"] { cursor: default; }
+    #editor pre { white-space: pre-wrap; background: #f2f4f2; padding: 8px; }
+    @media print {
+      @page { margin: 8mm; }
+      html, body {
+        width: auto !important; height: auto !important; min-height: 0 !important;
+        overflow: visible !important; background: #fff !important;
+      }
+      body {
+        margin: 0 !important; padding: 0 !important; color: #111;
+        font-size: 8pt; -webkit-print-color-adjust: exact; print-color-adjust: exact;
+      }
+      #editor {
+        width: 100% !important; height: auto !important; min-height: 0 !important;
+        max-height: none !important; overflow: visible !important;
+        padding: 0 !important; box-shadow: none !important; line-height: 1.25;
+      }
+      #editor table {
+        width: 100% !important; min-width: 0 !important; max-width: 100% !important;
+        table-layout: fixed; border-collapse: collapse; break-inside: auto;
+      }
+      #editor table[data-assessment-transect] {
+        width: 100% !important; min-width: 0 !important; max-width: 100% !important;
+        table-layout: fixed;
+      }
+      #editor table[data-assessment-transect] th:nth-child(n),
+      #editor table[data-assessment-transect] td:nth-child(n) { width: auto !important; }
+      #editor th, #editor td {
+        width: auto !important; min-width: 0 !important; padding: 3px 2px;
+        font-size: 6.5pt; white-space: normal !important;
+        overflow-wrap: anywhere; word-break: break-word;
+      }
+      #editor thead { display: table-header-group; }
+      #editor tfoot { display: table-footer-group; }
+      #editor tr { break-inside: avoid; page-break-inside: avoid; }
+      #editor img { max-width: 100% !important; }
+    }
+  </style>
+</head>
+<body>
+  <div id="editor" contenteditable="true" role="textbox" aria-multiline="true"
+       spellcheck="true"></div>
+  <script>
+    (function () {
+      "use strict";
+      const editor = document.getElementById("editor");
+      let savedRange = null;
+      const allowedTags = new Set([
+        "P", "BR", "STRONG", "B", "EM", "I", "U", "S", "STRIKE", "UL", "OL", "LI",
+        "H1", "H2", "H3", "BLOCKQUOTE", "PRE", "CODE", "TABLE", "THEAD", "TBODY",
+        "TFOOT", "TR", "TH", "TD", "COLGROUP", "COL", "HR", "A", "SPAN", "DIV", "IMG"
+      ]);
+      const preservedDataAttributes = new Set([
+        "data-assessment-transect", "data-coverage-species-entry", "data-placeholder",
+        "data-coverage-location", "data-coverage-total", "data-coverage-composition",
+        "data-coverage-species-cover", "data-coverage-summary"
+      ]);
+      const forbiddenTags = new Set([
+        "SCRIPT", "STYLE", "IFRAME", "OBJECT", "EMBED", "FORM", "INPUT", "BUTTON",
+        "VIDEO", "AUDIO", "SVG", "MATH", "LINK", "META"
+      ]);
+
+      function safeStyle(style) {
+        const output = [];
+        const rules = {
+          color: /^(#[0-9a-f]{3,8}|rgba?\([0-9.,%\s]+\)|[a-z]{3,20})$/i,
+          "background-color": /^(#[0-9a-f]{3,8}|rgba?\([0-9.,%\s]+\)|[a-z]{3,20})$/i,
+          "font-size": /^\d+(?:\.\d+)?(?:px|pt|em|rem|%)$/i,
+          "font-weight": /^(normal|bold|[1-9]00)$/i,
+          "font-style": /^(normal|italic|oblique)$/i,
+          "text-decoration": /^(none|underline|line-through)$/i,
+          "text-align": /^(left|center|right|justify)$/i
+        };
+        for (const property of Object.keys(rules)) {
+          const value = style.getPropertyValue(property).trim();
+          if (value && rules[property].test(value)
+              && (property !== "color" || isReadableTextColor(value))) {
+            output.push(property + ":" + value);
+          }
+        }
+        return output.join(";");
+      }
+
+      function isReadableTextColor(value) {
+        const normalized = value.toLowerCase().replace(/\s/g, "");
+        if (["white", "ivory", "snow", "lightyellow", "lemonchiffon"].includes(normalized)) {
+          return false;
+        }
+        let red, green, blue;
+        const hex = normalized.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/);
+        if (hex) {
+          const digits = hex[1].length === 3
+            ? hex[1].split("").map(digit => digit + digit).join("")
+            : hex[1];
+          red = parseInt(digits.slice(0, 2), 16);
+          green = parseInt(digits.slice(2, 4), 16);
+          blue = parseInt(digits.slice(4, 6), 16);
+        } else {
+          const rgb = normalized.match(/^rgba?\((\d+),(\d+),(\d+)(?:,[\d.]+)?\)$/);
+          if (!rgb) return true;
+          red = Number(rgb[1]);
+          green = Number(rgb[2]);
+          blue = Number(rgb[3]);
+        }
+        const luminance = (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255;
+        return luminance < 0.78;
+      }
+
+      function sanitizeHtml(html) {
+        const parsed = new DOMParser().parseFromString(html, "text/html");
+        const elements = Array.from(parsed.body.querySelectorAll("*"));
+        for (const element of elements) {
+          if (!element.parentNode) continue;
+          if (forbiddenTags.has(element.tagName)) {
+            element.remove();
+            continue;
+          }
+          if (!allowedTags.has(element.tagName)) {
+            element.replaceWith(...Array.from(element.childNodes));
+            continue;
+          }
+          const attrs = {};
+          for (const attr of Array.from(element.attributes)) attrs[attr.name] = attr.value;
+          const oldStyle = attrs.style || "";
+          for (const attr of Array.from(element.attributes)) element.removeAttribute(attr.name);
+          if (element.tagName === "A") {
+            const href = attrs.href || "";
+            if (/^(https?:\/\/|mailto:)/i.test(href)) {
+              element.setAttribute("href", href);
+              element.setAttribute("rel", "noopener noreferrer");
+            }
+          }
+          if (element.tagName === "IMG") {
+            const src = attrs.src || "";
+            if (/^https?:\/\//i.test(src)
+                || /^data:image\/(?:png|jpeg|gif|webp);base64,/i.test(src)) {
+              element.setAttribute("src", src);
+              const alt = attrs.alt;
+              if (alt) element.setAttribute("alt", alt.slice(0, 300));
+            } else {
+              element.remove();
+              continue;
+            }
+          }
+          if (["TH", "TD"].includes(element.tagName)) {
+            for (const name of ["colspan", "rowspan"]) {
+              const value = attrs[name];
+              if (/^[1-9]\d?$/.test(value || "")) element.setAttribute(name, value);
+            }
+          }
+          for (const name of preservedDataAttributes) {
+            if (Object.prototype.hasOwnProperty.call(attrs, name)) {
+              element.setAttribute(name, attrs[name]);
+            }
+          }
+          if (attrs.contenteditable === "false") {
+            element.setAttribute("contenteditable", "false");
+          }
+          if (attrs["aria-live"] === "polite") {
+            element.setAttribute("aria-live", "polite");
+          }
+          if (oldStyle) {
+            const temporary = parsed.createElement("span");
+            temporary.setAttribute("style", oldStyle);
+            const safe = safeStyle(temporary.style);
+            if (safe) element.setAttribute("style", safe);
+          }
+        }
+        return parsed.body.innerHTML;
+      }
+
+      function notifyChange() {
+        const text = editor.innerText || "";
+        const trimmed = text.trim();
+        const words = trimmed ? trimmed.split(/\s+/).length : 0;
+        if (window.NativeEditor) {
+          window.NativeEditor.onContentChanged(editor.innerHTML, words, text.length);
+        }
+      }
+
+      function saveEditorSelection() {
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount && editor.contains(selection.anchorNode)) {
+          savedRange = selection.getRangeAt(0).cloneRange();
+        }
+      }
+
+      function restoreEditorSelection() {
+        editor.focus();
+        if (!savedRange) return;
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(savedRange);
+      }
+
+      function runEditorCommand(command, value) {
+        restoreEditorSelection();
+        document.execCommand(command, false, value || null);
+        saveEditorSelection();
+        notifyChange();
+      }
+
+      function insertHtmlAtSelection(html) {
+        editor.focus();
+        const selection = window.getSelection();
+        if (savedRange) {
+          selection.removeAllRanges();
+          selection.addRange(savedRange);
+        } else {
+          const range = document.createRange();
+          range.selectNodeContents(editor);
+          range.collapse(false);
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
+        document.execCommand("insertHTML", false, sanitizeHtml(String(html || "")));
+        saveEditorSelection();
+        notifyChange();
+      }
+
+      function setEditorContent(content) {
+        const source = String(content || "");
+        editor.contentEditable = "true";
+        if (/<\/?[a-z][\s\S]*?>/i.test(source)) {
+          editor.innerHTML = sanitizeHtml(source);
+        } else {
+          editor.textContent = "";
+          const lines = source.split(/\r?\n/);
+          lines.forEach((line, index) => {
+            if (index) editor.appendChild(document.createElement("br"));
+            editor.appendChild(document.createTextNode(line));
+          });
+          if (!source) editor.innerHTML = "";
+        }
+        savedRange = null;
+        updateCoverageTables();
+        return editor.innerHTML;
+      }
+
+      function insertTable(rows, columns) {
+        rows = Math.max(1, Math.min(12, Number(rows) || 3));
+        columns = Math.max(1, Math.min(10, Number(columns) || 3));
+        restoreEditorSelection();
+        let html = "<table><thead><tr>";
+        for (let column = 1; column <= columns; column++) {
+          html += "<th>Column " + column + "</th>";
+        }
+        html += "</tr></thead><tbody>";
+        for (let row = 1; row < rows; row++) {
+          html += "<tr>";
+          for (let column = 0; column < columns; column++) html += "<td><br></td>";
+          html += "</tr>";
+        }
+        html += "</tbody></table><p><br></p>";
+        document.execCommand("insertHTML", false, html);
+        saveEditorSelection();
+        notifyChange();
+      }
+
+      function insertTransectTable() {
+        restoreEditorSelection();
+        const html = transectTemplate();
+        document.execCommand("insertHTML", false, html);
+        saveEditorSelection();
+        updateCoverageTables();
+        notifyChange();
+      }
+
+      const transectRows = [
+        "1 (0m)", "2 (5m)", "3 (10m)", "4 (15m)", "5 (20m)",
+        "6 (25m)", "7 (50m)", "8 (75m)", "9", "10"
+      ];
+
+      function transectTemplate() {
+        const headers = [
+          "Quadrat", "Seagrass name/code and count",
+          "Location (latitude, longitude)",
+          "Total seagrass cover (%)<br><small>Estimate from field guide</small>",
+          "Species composition (%)<br><small>Calculated from counts</small>",
+          "Species cover (%)<br><small>Calculated</small>", "Sediment", "Comments",
+          "Canopy Height (cm)", "% Algae Cover", "% Epi-cover"
+        ];
+        const head = headers.map(label => "<th>" + label + "</th>").join("");
+        const columns = Array.from({ length: headers.length }, () => "<col>").join("");
+        const rows = transectRows.map(label => "<tr><td>" + label + "</td>"
+          + '<td data-coverage-species-entry data-placeholder="e.g. CR 1"></td>'
+          + '<td data-coverage-location data-placeholder="e.g. 10.123456, 123.123456"></td>'
+          + '<td data-coverage-total data-placeholder="0–100"></td>'
+          + '<td data-coverage-composition contenteditable="false"></td>'
+          + '<td data-coverage-species-cover contenteditable="false"></td>'
+          + "<td></td><td></td><td></td><td></td><td></td></tr>").join("");
+        return "<p><strong>Transect Quadrat Data</strong></p>"
+          + "<p><em>Enter a species name/code by itself when only one species is present; "
+          + "its count defaults to 1. For multiple species, put each species on a new line "
+          + "followed by its relative count. Tap a suggestion, enter its count, then press "
+          + "Enter for the next species.</em></p>"
+          + "<p><em>Estimate total cover with the field guide. Counts apportion that cover "
+          + "by relative species share; use comparable composition counts, not raw shoot counts.</em></p>"
+          + '<table data-assessment-transect><colgroup>' + columns + "</colgroup><thead><tr>" + head + "</tr></thead><tbody>"
+          + rows + "</tbody></table>"
+          + '<p data-coverage-summary contenteditable="false" aria-live="polite">'
+          + "Transect summary will appear when quadrat cover values are entered.</p>";
+      }
+
+      const speciesCatalog = [
+        ["ZC", "Zostera capricorni"], ["SI", "Syringodium isoetifolium"],
+        ["HO", "Halophila ovalis"], ["HS", "Halophila spinulosa"],
+        ["HU", "Halodule uninervis"], ["CS", "Cymodocea serrulata"],
+        ["CR", "Cymodocea rotundata"], ["HM", "Halophila minor"],
+        ["HT", "Halophila tricostata"], ["TH", "Thalassia hemprichii"]
+      ].map(([code, scientificName]) => ({ code, scientificName }));
+      const suggestions = document.createElement("div");
+      suggestions.className = "coverage-suggestions";
+      suggestions.setAttribute("role", "listbox");
+      suggestions.hidden = true;
+      document.body.appendChild(suggestions);
+      let historySpecies = [];
+      let activeSpeciesCell = null;
+      let activeSpeciesSuggestions = [];
+      let activeSpeciesSuggestion = 0;
+
+      function normalize(value) {
+        return String(value || "").trim().toLocaleLowerCase().replace(/\s+/g, " ");
+      }
+
+      function allSpeciesSuggestions() {
+        const historyNames = new Set(historySpecies.map(species => normalize(species.scientificName)));
+        return [
+          ...historySpecies,
+          ...speciesCatalog.filter(species => !historyNames.has(normalize(species.scientificName)))
+            .map(species => ({ ...species, source: "catalog" }))
+        ];
+      }
+
+      function currentSpeciesEntry(cell) {
+        return (cell.innerText || cell.textContent || "").split(/[,;\n]/).pop().trim();
+      }
+
+      function getActiveSpeciesCell() {
+        const selection = window.getSelection();
+        const node = selection && selection.anchorNode;
+        const element = node && node.nodeType === Node.ELEMENT_NODE
+          ? node : node && node.parentElement;
+        return element && element.closest("[data-coverage-species-entry]");
+      }
+
+      function positionSuggestions(cell) {
+        if (suggestions.hidden || !cell || !cell.isConnected) return;
+        const rect = cell.getBoundingClientRect();
+        const viewport = window.visualViewport;
+        const leftEdge = viewport ? viewport.offsetLeft : 0;
+        const topEdge = viewport ? viewport.offsetTop : 0;
+        const width = viewport ? viewport.width : window.innerWidth;
+        const height = viewport ? viewport.height : window.innerHeight;
+        const rightEdge = leftEdge + width;
+        const bottomEdge = topEdge + height;
+        const popupWidth = Math.min(360, Math.max(0, width - 16));
+        const above = Math.max(0, rect.top - topEdge - 8);
+        const below = Math.max(0, bottomEdge - rect.bottom - 8);
+        const placeAbove = above > below;
+        suggestions.style.width = popupWidth + "px";
+        suggestions.style.left = Math.max(leftEdge + 8,
+          Math.min(rect.left, rightEdge - popupWidth - 8)) + "px";
+        suggestions.style.maxHeight = Math.min(260, placeAbove ? above : below) + "px";
+        const popupHeight = suggestions.offsetHeight;
+        suggestions.style.top = (placeAbove
+          ? Math.max(topEdge + 8, rect.top - popupHeight - 4)
+          : Math.min(bottomEdge - popupHeight - 8, rect.bottom + 4)) + "px";
+      }
+
+      function hideSuggestions() {
+        suggestions.hidden = true;
+        activeSpeciesCell = null;
+        activeSpeciesSuggestions = [];
+      }
+
+      function formatCoordinates(record) {
+        if (record.latitude == null || record.longitude == null
+            || String(record.latitude).trim() === "" || String(record.longitude).trim() === "") {
+          return "";
+        }
+        const latitude = Number(record.latitude);
+        const longitude = Number(record.longitude);
+        if (!Number.isFinite(latitude) || Math.abs(latitude) > 90
+            || !Number.isFinite(longitude) || Math.abs(longitude) > 180) return "";
+        return latitude.toFixed(6) + ", " + longitude.toFixed(6);
+      }
+
+      function appendSpeciesEntry(speciesText, locationText, species, coordinates) {
+        const parts = String(speciesText || "").replace(/\r/g, "").split(/[,;\n]/);
+        parts.pop();
+        const previousSpecies = parts.map(part => part.trim()).filter(Boolean);
+        const locations = String(locationText || "").replace(/\r\n?/g, "\n").split("\n")
+          .slice(0, previousSpecies.length);
+        while (locations.length < previousSpecies.length) locations.push("");
+        locations.push(coordinates);
+        return {
+          speciesText: [...previousSpecies, species].join("\n"),
+          locationText: locations.join("\n")
+        };
+      }
+
+      function alignLocationEntries(speciesText, locationText) {
+        const speciesCount = String(speciesText || "").split(/[,;\n]+/)
+          .filter(part => part.trim()).length;
+        const locations = String(locationText || "").replace(/\r\n?/g, "\n")
+          .split("\n").slice(0, speciesCount);
+        while (locations.length < speciesCount) locations.push("");
+        return locations.join("\n");
+      }
+
+      function selectSpeciesSuggestion(index) {
+        const species = activeSpeciesSuggestions[index];
+        if (!species || !activeSpeciesCell) return;
+        const cell = activeSpeciesCell;
+        const current = cell.innerText || cell.textContent || "";
+        const locationCell = cell.closest("tr").querySelector("[data-coverage-location]");
+        const result = appendSpeciesEntry(
+          current,
+          locationCell ? locationCell.innerText || locationCell.textContent || "" : "",
+          species.scientificName,
+          species.source === "history" ? formatCoordinates(species) : ""
+        );
+        cell.textContent = result.speciesText;
+        if (locationCell) locationCell.textContent = result.locationText;
+        const range = document.createRange();
+        range.selectNodeContents(cell);
+        range.collapse(false);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        cell.focus();
+        updateCoverageTables();
+        notifyChange();
+        hideSuggestions();
+      }
+
+      function renderSuggestions(cell) {
+        if (!cell || !cell.isConnected) {
+          hideSuggestions();
+          return;
+        }
+        const entry = currentSpeciesEntry(cell);
+        const query = entry.replace(/\s+\d+$/, "").trim().toLocaleLowerCase();
+        const all = allSpeciesSuggestions();
+        if (/\s+\d+$/.test(entry) || all.some(species =>
+            normalize(species.scientificName) === normalize(entry))) {
+          hideSuggestions();
+          return;
+        }
+        const matches = all.filter(species => !query
+          ? historySpecies.some(item => normalize(item.scientificName) === normalize(species.scientificName))
+            || historySpecies.length === 0
+          : species.scientificName.toLocaleLowerCase().includes(query)
+            || species.code.toLocaleLowerCase().startsWith(query))
+          .slice(0, 8);
+        activeSpeciesCell = cell;
+        activeSpeciesSuggestion = 0;
+        activeSpeciesSuggestions = matches;
+        suggestions.replaceChildren();
+        if (!matches.length) {
+          const empty = document.createElement("div");
+          empty.className = "coverage-suggestion-message";
+          empty.textContent = "No matching species. Try a code or scientific name.";
+          suggestions.appendChild(empty);
+        } else {
+          matches.forEach((species, index) => {
+            const option = document.createElement("button");
+            option.type = "button";
+            option.className = "coverage-suggestion";
+            option.setAttribute("role", "option");
+            option.setAttribute("aria-selected", String(index === activeSpeciesSuggestion));
+            const code = document.createElement("strong");
+            code.textContent = species.code;
+            const name = document.createElement("span");
+            name.textContent = species.scientificName;
+            const source = document.createElement("small");
+            source.textContent = species.source === "history"
+              ? "ID #" + species.identificationId + " · "
+                + (species.title || species.createdAt || "Saved identification")
+              : "Species guide";
+            option.append(code, name, source);
+            option.addEventListener("mousedown", event => event.preventDefault());
+            option.addEventListener("click", () => selectSpeciesSuggestion(index));
+            suggestions.appendChild(option);
+          });
+        }
+        suggestions.hidden = false;
+        positionSuggestions(cell);
+      }
+
+      function formatPercent(value) {
+        return value.toFixed(1) + "%";
+      }
+
+      function calculateQuadrat(speciesText, totalCoverText) {
+        const rawEntries = String(speciesText || "").trim()
+          .split(/[,;\n]+/).map(part => part.trim()).filter(Boolean);
+        const entries = new Map();
+        let hasUncounted = false;
+        for (const raw of rawEntries) {
+          const match = raw.match(/^(.+?)\s+(\d+)$/);
+          if (!match) hasUncounted = true;
+          const name = (match ? match[1] : raw).trim();
+          const count = match ? Number(match[2]) : 1;
+          if (!name || !Number.isSafeInteger(count) || count < 0) {
+            return { error: "Enter a valid non-negative whole-number count.", entries: [] };
+          }
+          const key = normalize(name);
+          const previous = entries.get(key) || { name, count: 0 };
+          previous.count += count;
+          entries.set(key, previous);
+        }
+        if (hasUncounted && entries.size > 1) {
+          return { error: "Add a count after each species when more than one species is present.", entries: [] };
+        }
+        const coverText = String(totalCoverText || "").trim().replace(/%$/, "").trim();
+        let totalCover = null;
+        if (coverText) {
+          if (!/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(coverText)
+              || Number(coverText) < 0 || Number(coverText) > 100) {
+            return { error: "Enter total cover from 0 to 100%.", entries: [] };
+          }
+          totalCover = Number(coverText);
+        }
+        const totalCount = Array.from(entries.values())
+          .reduce((sum, item) => sum + item.count, 0);
+        return {
+          error: "",
+          totalCover,
+          totalCount,
+          entries: Array.from(entries.values()).map(item => {
+            const composition = totalCount ? item.count / totalCount * 100 : 0;
+            return {
+              ...item,
+              composition,
+              cover: totalCover === null ? null : composition * totalCover / 100
+            };
+          })
+        };
+      }
+
+      function updateCoverageTables() {
+        editor.querySelectorAll("table[data-assessment-transect]").forEach(table => {
+          const totals = [];
+          const speciesTotals = new Map();
+          let completeRows = 0;
+          table.querySelectorAll("tbody tr").forEach(row => {
+            const speciesCell = row.querySelector("[data-coverage-species-entry]");
+            const coverCell = row.querySelector("[data-coverage-total]");
+            const compositionCell = row.querySelector("[data-coverage-composition]");
+            const speciesCoverCell = row.querySelector("[data-coverage-species-cover]");
+            if (!speciesCell || !coverCell || !compositionCell || !speciesCoverCell) return;
+            const result = calculateQuadrat(speciesCell.innerText || speciesCell.textContent,
+              coverCell.innerText || coverCell.textContent);
+            speciesCell.removeAttribute("aria-invalid");
+            coverCell.removeAttribute("aria-invalid");
+            if (result.error) {
+              speciesCell.setAttribute("aria-invalid", "true");
+              compositionCell.textContent = result.error;
+              speciesCoverCell.textContent = "Fix the input above to calculate.";
+              return;
+            }
+            if (!result.entries.length) {
+              compositionCell.textContent = "Enter species and counts.";
+              speciesCoverCell.textContent = "Enter species and total cover.";
+              return;
+            }
+            if (result.totalCount === 0) {
+              speciesCell.setAttribute("aria-invalid", "true");
+              compositionCell.textContent = "Total count must be greater than 0.";
+              speciesCoverCell.textContent = "No species counts to apportion.";
+              return;
+            }
+            compositionCell.textContent = result.entries.map(item =>
+              item.name + ": " + formatPercent(item.composition)).join("\n");
+            speciesCoverCell.textContent = result.totalCover === null
+              ? "Enter total cover to calculate species cover."
+              : result.entries.map(item => item.name + ": " + formatPercent(item.cover)).join("\n");
+            if (result.totalCover !== null) {
+              totals.push(result.totalCover);
+              completeRows++;
+              result.entries.forEach(item => {
+                speciesTotals.set(item.name, (speciesTotals.get(item.name) || 0) + item.cover);
+              });
+            }
+          });
+          const summary = table.nextElementSibling;
+          if (!summary || !summary.matches("[data-coverage-summary]")) return;
+          if (!totals.length) {
+            summary.textContent = "Transect summary will appear when quadrat cover values are entered.";
+            return;
+          }
+          const mean = totals.reduce((sum, value) => sum + value, 0) / totals.length;
+          const speciesSummary = Array.from(speciesTotals.entries())
+            .map(([name, value]) => name + " " + formatPercent(value / completeRows)).join(", ");
+          summary.textContent = "Mean total cover: " + formatPercent(mean) + " across "
+            + totals.length + " quadrat(s). Species mean cover: " + speciesSummary
+            + " (n=" + completeRows + ").";
+        });
+      }
+
+      editor.addEventListener("input", function (event) {
+        const cell = event.target.closest("[data-coverage-species-entry]")
+          || getActiveSpeciesCell();
+        if (cell) {
+          const locationCell = cell.closest("tr").querySelector("[data-coverage-location]");
+          if (locationCell) {
+            locationCell.textContent = alignLocationEntries(
+              cell.innerText || cell.textContent || "",
+              locationCell.innerText || locationCell.textContent || ""
+            );
+          }
+        }
+        updateCoverageTables();
+        if (cell) renderSuggestions(cell);
+        else hideSuggestions();
+      });
+      editor.addEventListener("focusin", function (event) {
+        const cell = event.target.closest("[data-coverage-species-entry]")
+          || getActiveSpeciesCell();
+        if (cell) renderSuggestions(cell);
+      });
+      editor.addEventListener("click", function (event) {
+        const cell = event.target.closest("[data-coverage-species-entry]")
+          || getActiveSpeciesCell();
+        if (cell) {
+          renderSuggestions(cell);
+          requestAnimationFrame(() => positionSuggestions(cell));
+        }
+      });
+      editor.addEventListener("keydown", function (event) {
+        if (!activeSpeciesCell || suggestions.hidden) return;
+        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+          event.preventDefault();
+          const direction = event.key === "ArrowDown" ? 1 : -1;
+          activeSpeciesSuggestion = (activeSpeciesSuggestion + direction
+            + activeSpeciesSuggestions.length) % activeSpeciesSuggestions.length;
+          suggestions.querySelectorAll('[role="option"]').forEach((option, index) =>
+            option.setAttribute("aria-selected", String(index === activeSpeciesSuggestion)));
+        } else if (event.key === "Enter" && activeSpeciesSuggestions.length) {
+          event.preventDefault();
+          selectSpeciesSuggestion(activeSpeciesSuggestion);
+        } else if (event.key === "Escape") hideSuggestions();
+      });
+      document.addEventListener("pointerdown", function (event) {
+        if (!suggestions.contains(event.target)
+            && !event.target.closest("[data-coverage-species-entry]")) hideSuggestions();
+      });
+      window.addEventListener("resize", () => positionSuggestions(activeSpeciesCell));
+      window.addEventListener("scroll", () => positionSuggestions(activeSpeciesCell), true);
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", () => positionSuggestions(activeSpeciesCell));
+        window.visualViewport.addEventListener("scroll", () => positionSuggestions(activeSpeciesCell));
+      }
+      window.setIdentificationHistory = function (records) {
+        historySpecies = (Array.isArray(records) ? records : [])
+          .map(record => typeof record === "string" ? { top_result: record } : record || {})
+          .map(record => {
+            const scientificName = String(record.top_result || "").trim();
+            if (!scientificName || /background|unknown|not identified/i.test(scientificName)) return null;
+            const catalogItem = speciesCatalog.find(item =>
+              normalize(item.scientificName) === normalize(scientificName));
+            return {
+              ...(catalogItem || {
+              code: scientificName.split(/\s+/).slice(0, 2)
+                .map(part => part.charAt(0)).join("").toUpperCase(),
+              scientificName
+              }),
+              source: "history",
+              identificationId: record.id,
+              title: record.title || "",
+              createdAt: record.created_at || "",
+              latitude: record.latitude,
+              longitude: record.longitude
+            };
+          })
+          .filter(Boolean);
+        if (activeSpeciesCell) renderSuggestions(activeSpeciesCell);
+      };
+
+      function setPreviewMode(enabled) {
+        editor.contentEditable = enabled ? "false" : "true";
+        if (!enabled) editor.focus();
+      }
+
+      const templates = [
+        "",
+        "<h1>Field Survey</h1><p><strong>Location:</strong> </p><p><strong>Date and time:</strong> </p>"
+          + "<p><strong>Observer(s):</strong> </p><h2>Survey observations</h2>"
+          + "<table><thead><tr><th>Site</th><th>Coordinates</th><th>Observations</th></tr></thead>"
+          + "<tbody><tr><td><br></td><td><br></td><td><br></td></tr></tbody></table>"
+          + "<h2>Notes</h2><p><br></p>",
+        "<h1>Species Observation</h1><p><strong>Species:</strong> </p>"
+          + "<p><strong>Location:</strong> </p><p><strong>Date and time:</strong> </p>"
+          + "<p><strong>Observer(s):</strong> </p><h2>Identification notes</h2><p><br></p>"
+          + "<h2>Habitat and condition</h2><p><br></p>"
+          + "<table><thead><tr><th>Measure</th><th>Result</th></tr></thead>"
+          + "<tbody><tr><td><br></td><td><br></td></tr></tbody></table>"
+      ];
+
+      function loadTemplate(index) {
+        if (editor.innerText.trim()
+            && !window.confirm("Loading a template will replace the current content.")) return;
+        editor.innerHTML = templates[index] || "";
+        savedRange = null;
+        notifyChange();
+      }
+
+      document.addEventListener("selectionchange", saveEditorSelection);
+      editor.addEventListener("input", notifyChange);
+      editor.addEventListener("paste", function (event) {
+        event.preventDefault();
+        const clipboard = event.clipboardData;
+        const html = clipboard && clipboard.getData("text/html");
+        if (html) {
+          document.execCommand("insertHTML", false, sanitizeHtml(html));
+        } else {
+          document.execCommand("insertText", false,
+            clipboard ? clipboard.getData("text/plain") : "");
+        }
+        notifyChange();
+      });
+
+      window.setEditorContent = setEditorContent;
+      window.getEditorContent = () => editor.innerHTML;
+      window.saveEditorSelection = saveEditorSelection;
+      window.runEditorCommand = runEditorCommand;
+      window.insertHtmlAtSelection = insertHtmlAtSelection;
+      window.insertTable = insertTable;
+      window.insertTransectTable = insertTransectTable;
+      window.loadTemplate = loadTemplate;
+      window.setPreviewMode = setPreviewMode;
+    })();
+  </script>
+</body>
+</html>

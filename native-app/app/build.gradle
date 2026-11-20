@@ -1,14 +1,13 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 
-// ── Version: 0.MAJOR.MINOR.PATCH scheme ────────────────────────────────────
+// ── Version: 0.MAJOR.MINOR scheme ─────────────────────────────────────────
 // version.properties holds:
 //   VERSION_MAJOR=8
-//   VERSION_MINOR=20
-//   VERSION_PATCH=0    <- auto-incremented on each assemble
+//   VERSION_MINOR=8    <- next automatic build is 0.8.9
+//   VERSION_CODE=820002 <- next Android versionCode is 820003
 //
-// Produces versionName 0.8.20.1 on the next automatic build.
-// Manual override: ./gradlew assembleDebug -PappVersion=0.8.20
+// Auto-increments through 0.8.20. Manual override: ./gradlew assembleDebug -PappVersion=0.8.8
 //
 def versionPropsFile = rootProject.file('version.properties')
 def versionProps = new Properties()
@@ -17,21 +16,24 @@ if (versionPropsFile.exists()) {
 }
 def vMajor = (versionProps['VERSION_MAJOR'] ?: '5').toInteger()
 def vMinor = (versionProps['VERSION_MINOR'] ?: '16').toInteger()
-def vPatch = (versionProps['VERSION_PATCH'] ?: '0').toInteger()
+def lastVersionCode = (versionProps['VERSION_CODE']
+        ?: (vMajor * 100000 + vMinor * 1000).toString()).toInteger()
 
 def manualVersion = project.hasProperty('appVersion') ? project.appVersion : null
 
-// Auto-increment the patch number on every assemble (unless manual override).
+// Keep Android's version code increasing even when a manual version name is used.
 gradle.taskGraph.whenReady { taskGraph ->
-    if (manualVersion == null && taskGraph.allTasks.any { it.name.startsWith('assemble') }) {
-        versionProps['VERSION_MAJOR'] = vMajor.toString()
-        versionProps['VERSION_MINOR'] = vMinor.toString()
-        versionProps['VERSION_PATCH'] = (vPatch + 1).toString()
+    if (taskGraph.allTasks.any { it.name.startsWith('assemble') }) {
+        if (manualVersion == null) {
+            versionProps['VERSION_MAJOR'] = vMajor.toString()
+            versionProps['VERSION_MINOR'] = (vMinor + 1).toString()
+        }
+        versionProps['VERSION_CODE'] = (lastVersionCode + 1).toString()
         versionPropsFile.withWriter('UTF-8') { writer -> versionProps.store(writer, null) }
     }
 }
 
-def appVersionName  = manualVersion ?: "0.${vMajor}.${vMinor}.${vPatch + 1}"
+def appVersionName  = manualVersion ?: "0.${vMajor}.${vMinor + 1}"
 def versionParts = appVersionName.tokenize('.')
 if (!(versionParts.size() in [3, 4]) || versionParts[0] != '0') {
     throw new GradleException("App version must use the 0.MAJOR.MINOR or 0.MAJOR.MINOR.PATCH format")
@@ -39,10 +41,7 @@ if (!(versionParts.size() in [3, 4]) || versionParts[0] != '0') {
 def appVersionMajor = versionParts[1].toInteger()
 def appVersionMinor = versionParts[2].toInteger()
 def appVersionPatch = versionParts.size() == 4 ? versionParts[3].toInteger() : 0
-def appVersionCode = (
-        appVersionMajor * 100000
-                + appVersionMinor * 1000
-                + appVersionPatch)
+def appVersionCode = lastVersionCode + 1
 // ───────────────────────────────────────────────────────────────────────────
 
 android {

@@ -1,5 +1,10 @@
 import { listUserIdentificationHistory } from '../../api/identify.api.js';
 import { SEAGRASS_SPECIES } from '../../species-data.js';
+import {
+  alignLocationLines,
+  appendSpeciesEntryWithLocation,
+  formatSpeciesCoordinates,
+} from './assessment-entry-utils.js';
 
 const HISTORY_LIMIT = 50;
 const SUGGESTION_LIMIT = 8;
@@ -212,9 +217,15 @@ function selectSuggestion(index) {
 
   const cell = activeCell;
   const current = cell.innerText || cell.textContent || '';
-  const delimiter = Math.max(current.lastIndexOf(','), current.lastIndexOf(';'), current.lastIndexOf('\n'));
-  const prefix = delimiter < 0 ? '' : `${current.slice(0, delimiter + 1)} `;
-  cell.textContent = `${prefix}${species.scientificName}`;
+  const locationCell = cell.closest('tr')?.querySelector('[data-coverage-location]');
+  const result = appendSpeciesEntryWithLocation(
+    current,
+    locationCell?.innerText || locationCell?.textContent || '',
+    species.scientificName,
+    species.source === 'history' ? formatSpeciesCoordinates(species) : '',
+  );
+  cell.textContent = result.speciesText;
+  if (locationCell) locationCell.textContent = result.locationText;
   const range = document.createRange();
   range.selectNodeContents(cell);
   range.collapse(false);
@@ -222,17 +233,6 @@ function selectSuggestion(index) {
   selection.removeAllRanges();
   selection.addRange(range);
   cell.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
-  const locationCell = cell.closest('tr')?.querySelector('[data-coverage-location]');
-  if (locationCell) {
-    const latitude = Number(species.latitude);
-    const longitude = Number(species.longitude);
-    const hasLocation = species.source === 'history'
-      && Number.isFinite(latitude) && Math.abs(latitude) <= 90
-      && Number.isFinite(longitude) && Math.abs(longitude) <= 180;
-    locationCell.textContent = hasLocation
-      ? `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
-      : '';
-  }
   cell.focus();
   hideSuggestions();
 }
@@ -397,7 +397,12 @@ if (canvas) {
     if (cell) {
       if (cell.matches('[data-coverage-species-entry]')) {
         const locationCell = cell.closest('tr')?.querySelector('[data-coverage-location]');
-        if (locationCell) locationCell.textContent = '';
+        if (locationCell) {
+          locationCell.textContent = alignLocationLines(
+            cell.innerText || cell.textContent || '',
+            locationCell.innerText || locationCell.textContent || '',
+          );
+        }
       }
       updateCoverageTables();
       if (cell.matches('[data-coverage-species-entry]')) renderSuggestions(cell);

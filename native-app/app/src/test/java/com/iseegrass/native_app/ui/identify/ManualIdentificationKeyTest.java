@@ -34,7 +34,16 @@ public class ManualIdentificationKeyTest {
 
         ManualIdentificationKey key = new ManualIdentificationKey();
         key.selectAnswer(0);
-        assertEquals("strap", key.getQuestion().getIllustration(1));
+        key.selectAnswer(1);
+        String[] strapTraitIllustrations = {
+                "rounded-tip", "serrated-tip", "trident-tip", "rhizome", "cross-veins"
+        };
+        for (int i = 0; i < strapTraitIllustrations.length; i++) {
+            String illustration = key.getQuestion().getIllustration(i);
+            assertEquals(strapTraitIllustrations[i], illustration);
+            assertTrue("Missing illustration: " + illustration,
+                    ManualKeyIllustrations.hasIllustration(illustration));
+        }
     }
 
     @Test
@@ -52,13 +61,43 @@ public class ManualIdentificationKeyTest {
     }
 
     @Test
-    public void unsupportedBranchesDoNotReturnAnUnlistedSpecies() {
+    public void branchedSpeciesAreShownAsUnavailable() {
         ManualIdentificationKey key = new ManualIdentificationKey();
         key.selectAnswer(1);
-        key.selectAnswer(1);
+        ManualIdentificationKey.Question question = key.getQuestion();
 
-        assertFalse(key.getOutcome().hasMatch());
-        assertTrue(key.getOutcome().getFieldNote().contains("ten species"));
+        assertEquals(2, question.getAnswers().size());
+        assertTrue(question.getAvailabilityMessage().contains("assessment scope"));
+        assertFalse(question.isAnswerEnabled(0));
+        assertFalse(question.isAnswerEnabled(1));
+    }
+
+    @Test
+    public void strapAndFernBranchesOmitNeitherOrUnsure() {
+        ManualIdentificationKey key = new ManualIdentificationKey();
+        key.selectAnswer(0);
+        assertEquals(2, key.getQuestion().getAnswers().size());
+
+        key.restart();
+        key.selectAnswer(3);
+        assertEquals(2, key.getQuestion().getAnswers().size());
+        for (String answer : key.getQuestion().getAnswers()) {
+            assertFalse("Neither or unsure".equals(answer));
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void unavailableBranchChoicesCannotBeSelected() {
+        ManualIdentificationKey key = new ManualIdentificationKey();
+        key.selectAnswer(1);
+        key.selectAnswer(0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void removedNeitherOrUnsureChoiceCannotBeSelected() {
+        ManualIdentificationKey key = new ManualIdentificationKey();
+        key.selectAnswer(0);
+        key.selectAnswer(2);
     }
 
     @Test

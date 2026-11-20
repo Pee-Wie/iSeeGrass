@@ -41,16 +41,16 @@ public static final String BASE_URL = "https://your-new-url.trycloudflare.com/";
 
 ### 5. Build the APK
 ```bash
-java -classpath /media/codex/Shared/iSeeGrass/native-app/gradle/wrapper/gradle-wrapper.jar \
-  org.gradle.wrapper.GradleWrapperMain \
-  -p /media/codex/Shared/iSeeGrass/native-app \
-  assembleDebug -PappVersion=1.10
+cd /media/codex/Shared/iSeeGrass/native-app
+./gradlew assembleDebug
 ```
 Output APK location:
 ```
-native-app/app/build/outputs/apk/debug/iSeeGrass-Native-debug-1.10.apk
+app/build/outputs/apk/debug/iSeeGrass-N-debug-v0.8.8.apk
 ```
-> Increment `-PappVersion=` each build (1.10, 1.11, etc.)
+The released build is 0.8.8; the next automatic build is 0.8.9. Later builds increment the final
+version segment through 0.8.20. Android's internal version code also increments independently to
+allow installation over earlier builds.
 
 ---
 

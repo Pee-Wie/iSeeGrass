@@ -102,6 +102,9 @@ public final class ManualIdentificationDialog {
         addText(question.getPrompt(), 19, true, Color.WHITE);
         addText("Choose the closest visible trait. Illustrations are schematic; if unsure, stop.",
                 13, false, Color.LTGRAY);
+        if (question.getAvailabilityMessage() != null) {
+            addText(question.getAvailabilityMessage(), 13, true, Color.LTGRAY);
+        }
 
         GridLayout choices = new GridLayout(context);
         choices.setColumnCount(2);
@@ -112,12 +115,18 @@ public final class ManualIdentificationDialog {
         for (int i = 0; i < question.getAnswers().size(); i++) {
             final int answerIndex = i;
             MaterialCardView card = new MaterialCardView(context);
+            boolean answerEnabled = question.isAnswerEnabled(i);
             card.setRadius(dp(12));
             card.setCardElevation(dp(2));
             card.setUseCompatPadding(true);
             card.setCardBackgroundColor(Color.rgb(45, 59, 48));
             card.setStrokeWidth(dp(1));
-            card.setStrokeColor(Color.rgb(100, 145, 105));
+            card.setStrokeColor(answerEnabled
+                    ? Color.rgb(100, 145, 105) : Color.rgb(105, 110, 105));
+            card.setEnabled(answerEnabled);
+            card.setClickable(answerEnabled);
+            card.setFocusable(answerEnabled);
+            card.setAlpha(answerEnabled ? 1f : 0.42f);
 
             LinearLayout cardContent = new LinearLayout(context);
             cardContent.setGravity(Gravity.CENTER);
@@ -141,12 +150,12 @@ public final class ManualIdentificationDialog {
             cardContent.addView(label, labelParams);
             card.addView(cardContent);
 
-            card.setClickable(true);
-            card.setFocusable(true);
-            card.setOnClickListener(v -> {
-                key.selectAnswer(answerIndex);
-                render();
-            });
+            if (answerEnabled) {
+                card.setOnClickListener(v -> {
+                    key.selectAnswer(answerIndex);
+                    render();
+                });
+            }
 
             GridLayout.LayoutParams cardParams = new GridLayout.LayoutParams(
                     GridLayout.spec(i / 2, 1f), GridLayout.spec(i % 2, 1f));

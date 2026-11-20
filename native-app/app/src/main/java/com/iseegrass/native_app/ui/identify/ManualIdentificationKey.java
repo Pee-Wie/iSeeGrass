@@ -13,13 +13,18 @@ public final class ManualIdentificationKey {
         private final String prompt;
         private final List<String> answers;
         private final List<String> illustrations;
+        private final boolean[] enabledAnswers;
+        private final String availabilityMessage;
         private final int number;
 
-        private Question(String prompt, int number, String[] answers, String[] illustrations) {
+        private Question(String prompt, int number, String[] answers, String[] illustrations,
+                         String availabilityMessage, boolean[] enabledAnswers) {
             this.prompt = prompt;
             this.number = number;
             this.answers = Collections.unmodifiableList(Arrays.asList(answers));
             this.illustrations = Collections.unmodifiableList(Arrays.asList(illustrations));
+            this.availabilityMessage = availabilityMessage;
+            this.enabledAnswers = enabledAnswers.clone();
         }
 
         public String getPrompt() {
@@ -36,6 +41,14 @@ public final class ManualIdentificationKey {
 
         public int getNumber() {
             return number;
+        }
+
+        public boolean isAnswerEnabled(int index) {
+            return enabledAnswers[index];
+        }
+
+        public String getAvailabilityMessage() {
+            return availabilityMessage;
         }
     }
 
@@ -92,10 +105,9 @@ public final class ManualIdentificationKey {
                 return question("Is the leaf flat or cylindrical in cross-section?", 2,
                         new String[]{
                                 "Cylindrical leaf that tapers to a point",
-                                "Flat, strap-shaped leaf",
-                                "Neither or unsure"
+                                "Flat, strap-shaped leaf"
                         },
-                        new String[]{"cylindrical", "strap", "unsure"});
+                        new String[]{"cylindrical", "strap"});
             case "strap-traits":
                 return question("Which combination of tip, veins, and attachment matches best?",
                         3,
@@ -108,17 +120,18 @@ public final class ManualIdentificationKey {
                                 "None of these or unsure"
                         },
                         new String[]{
-                                "rotundata", "serrulata", "uninervis",
-                                "hemprichii", "capricorni", "unsure"
+                                "rounded-tip", "serrated-tip", "trident-tip",
+                                "rhizome", "cross-veins", "unsure"
                         });
             case "branched":
                 return question("Which branch pattern do you see?", 2,
                         new String[]{
                                 "Short and mostly straight",
-                                "Long and spiralled",
-                                "Neither or unsure"
+                                "Long and spiralled"
                         },
-                        new String[]{"branch-short", "branch-spiral", "unsure"});
+                        new String[]{"branch-short", "branch-spiral"},
+                        "Branched-leaf species are not included in the current assessment scope.",
+                        new boolean[]{false, false});
             case "oval-surface":
                 return question("Are there hairs on the leaf surface?", 2,
                         new String[]{
@@ -139,10 +152,9 @@ public final class ManualIdentificationKey {
                 return question("How are the small leaflets arranged on the stem?", 2,
                         new String[]{
                                 "Opposite pairs along the stem",
-                                "A fan of leaflets around the stem",
-                                "Neither or unsure"
+                                "A fan of leaflets around the stem"
                         },
-                        new String[]{"fern-pairs", "fern-fan", "unsure"});
+                        new String[]{"fern-pairs", "fern-fan"});
             default:
                 throw new IllegalStateException("Unknown manual key stage: " + stage);
         }
@@ -161,6 +173,9 @@ public final class ManualIdentificationKey {
         if (question == null || answerIndex < 0 || answerIndex >= question.getAnswers().size()) {
             throw new IllegalArgumentException("Answer is not available for the current question");
         }
+        if (!question.isAnswerEnabled(answerIndex)) {
+            throw new IllegalArgumentException("Answer is not available in the current assessment scope");
+        }
 
         String currentStage = stage;
         previousStages.push(currentStage);
@@ -175,10 +190,8 @@ public final class ManualIdentificationKey {
                 if (answerIndex == 0) {
                     outcome = match("Syringodium isoetifolium",
                             "Its leaves are cylindrical in cross-section and taper to a point.");
-                } else if (answerIndex == 1) {
-                    stage = "strap-traits";
                 } else {
-                    outcome = NO_MATCH;
+                    stage = "strap-traits";
                 }
                 break;
             case "strap-traits":
@@ -226,8 +239,6 @@ public final class ManualIdentificationKey {
                 } else if (answerIndex == 1) {
                     outcome = match("Halophila tricostata",
                             "The fern-like leaflets form a fan around the stem.");
-                } else {
-                    outcome = NO_MATCH;
                 }
                 break;
             default:
@@ -252,7 +263,19 @@ public final class ManualIdentificationKey {
 
     private static Question question(String prompt, int number,
                                      String[] answers, String[] illustrations) {
-        return new Question(prompt, number, answers, illustrations);
+        boolean[] enabledAnswers = new boolean[answers.length];
+        Arrays.fill(enabledAnswers, true);
+        return new Question(prompt, number, answers, illustrations, null, enabledAnswers);
+    }
+
+    private static Question question(String prompt, int number, String[] answers,
+                                     String[] illustrations, String availabilityMessage,
+                                     boolean[] enabledAnswers) {
+        if (answers.length != illustrations.length || answers.length != enabledAnswers.length) {
+            throw new IllegalArgumentException("Question choices must have matching metadata");
+        }
+        return new Question(prompt, number, answers, illustrations,
+                availabilityMessage, enabledAnswers);
     }
 
     private static Outcome match(String scientificName, String fieldNote) {

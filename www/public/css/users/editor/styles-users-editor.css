@@ -197,9 +197,9 @@
 }
 
 .doc-section-heading {
-  margin: 0.6rem 0 0.1rem;
-  padding: 0.45rem 0.2rem 0.25rem;
-  border-top: 1px solid rgba(142, 214, 85, 0.18);
+  margin: 0.8rem 0 0.15rem;
+  padding: 0.55rem 0.2rem 0.3rem;
+  border-top: 1px solid rgba(142, 214, 85, 0.48);
   color: #b6efb6;
   font-size: 0.7rem;
   font-weight: 700;
@@ -777,10 +777,22 @@
 }
 
 .editor-canvas table[data-assessment-transect] {
-  width: 1730px;
-  min-width: 1730px;
+  width: 1880px;
+  min-width: 1880px;
   table-layout: fixed;
 }
+
+.editor-canvas table[data-assessment-transect] col:nth-child(1) { width: 80px; }
+.editor-canvas table[data-assessment-transect] col:nth-child(2) { width: 230px; }
+.editor-canvas table[data-assessment-transect] col:nth-child(3) { width: 150px; }
+.editor-canvas table[data-assessment-transect] col:nth-child(4),
+.editor-canvas table[data-assessment-transect] col:nth-child(5) { width: 200px; }
+.editor-canvas table[data-assessment-transect] col:nth-child(6) { width: 140px; }
+.editor-canvas table[data-assessment-transect] col:nth-child(7) { width: 220px; }
+.editor-canvas table[data-assessment-transect] col:nth-child(8) { width: 140px; }
+.editor-canvas table[data-assessment-transect] col:nth-child(9) { width: 180px; }
+.editor-canvas table[data-assessment-transect] col:nth-child(10) { width: 190px; }
+.editor-canvas table[data-assessment-transect] col:nth-child(11) { width: 150px; }
 
 .editor-canvas table[data-assessment-transect] th:nth-child(1),
 .editor-canvas table[data-assessment-transect] td:nth-child(1) { width: 80px; }
@@ -802,6 +814,8 @@
 .editor-canvas table[data-assessment-transect] td:nth-child(9) { width: 180px; }
 .editor-canvas table[data-assessment-transect] th:nth-child(10),
 .editor-canvas table[data-assessment-transect] td:nth-child(10) { width: 190px; }
+.editor-canvas table[data-assessment-transect] th:nth-child(11),
+.editor-canvas table[data-assessment-transect] td:nth-child(11) { width: 150px; }
 
 .editor-canvas table[data-assessment-transect] th,
 .editor-canvas table[data-assessment-transect] td {
@@ -811,6 +825,11 @@
 .editor-canvas [data-coverage-species-entry],
 .editor-canvas [data-coverage-total] {
   background: #fffbea;
+}
+
+.editor-canvas [data-coverage-species-entry],
+.editor-canvas [data-coverage-location] {
+  white-space: pre-line;
 }
 
 .editor-canvas [data-coverage-species-entry]:empty::before,

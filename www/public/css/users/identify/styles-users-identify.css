@@ -1096,6 +1096,16 @@
   line-height: 1.55;
 }
 
+.manual-key-dialog__availability {
+  margin: 0.65rem 0 0;
+  padding: 0.55rem 0.7rem;
+  color: rgba(240, 245, 235, 0.8);
+  background: rgba(255, 255, 255, 0.04);
+  border-left: 3px solid rgba(200, 200, 200, 0.55);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
 .manual-key-choices {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1135,6 +1145,15 @@
 
 .manual-key-choice:hover {
   transform: translateY(-2px);
+}
+
+.manual-key-choice:disabled,
+.manual-key-choice:disabled:hover {
+  opacity: 0.42;
+  background: rgba(255, 255, 255, 0.025);
+  border-color: rgba(255, 255, 255, 0.18);
+  cursor: not-allowed;
+  transform: none;
 }
 
 .manual-key-choice svg {

@@ -201,19 +201,25 @@ function openSignupModal() {
   const formContainer  = document.getElementById('signupFormContainer');
   if (!modal || !formContainer) return;
 
-  fetch('signup.html')
-    .then(r => r.text())
+  fetch('signup.html', { cache: 'no-store' })
+    .then(r => {
+      if (!r.ok) throw new Error('Could not load the signup form.');
+      return r.text();
+    })
     .then(html => {
       const parser  = new DOMParser();
       const doc     = parser.parseFromString(html, 'text/html');
       const content = doc.querySelector('.form-container');
+      if (!content?.querySelector('#signupFormElem #signup-terms')) {
+        throw new Error('The signup form is missing the required policy acknowledgement.');
+      }
       formContainer.innerHTML = content ? content.outerHTML : html;
       modal.classList.add('active');
       wireSignupForm();
     })
     .catch(() => {
       formContainer.innerHTML =
-        '<p style="color:#b00;padding:1rem">Could not load the sign-up form. Please try again.</p>';
+        '<p style="color:#b00;padding:1rem">Could not load the sign-up form with its required policy acknowledgement. Please refresh and try again.</p>';
       modal.classList.add('active');
     });
 }
@@ -243,6 +249,24 @@ function wireSignupForm() {
   const form       = document.getElementById('signupFormElem');
   if (!form) return;
 
+  const consentEl  = form.querySelector('#signup-terms');
+  const consentError = form.querySelector('#signup-consent-error');
+  if (!consentEl) {
+    const banner = showFormError(
+      'signupBannerError',
+      'The required policy acknowledgement is unavailable. Please refresh and try again.'
+    );
+    if (!form.contains(banner)) form.prepend(banner);
+    return;
+  }
+
+  consentEl.addEventListener('change', () => {
+    if (consentEl.checked) {
+      consentEl.removeAttribute('aria-invalid');
+      if (consentError) consentError.hidden = true;
+    }
+  });
+
   const submitBtn  = form.querySelector('button[type="submit"]');
   if (submitBtn) submitBtn.removeAttribute('onclick');
 
@@ -271,6 +295,12 @@ function wireSignupForm() {
     if (!email)             { showFieldError(emEl, 'Email is required.');        valid = false; }
     if (password.length < 8){ showFieldError(pwEl, 'Minimum 8 characters.');    valid = false; }
     if (password !== confirm){ showFieldError(cpEl, 'Passwords do not match.');  valid = false; }
+    if (!consentEl.checked) {
+      consentEl.setAttribute('aria-invalid', 'true');
+      if (consentError) consentError.hidden = false;
+      consentEl.focus();
+      valid = false;
+    }
 
     if (!valid) return;
 
@@ -291,7 +321,7 @@ function wireSignupForm() {
         first_name : firstName,
         last_name  : lastName,
         position   : 'Student',   // default for self-registration; user can update in profile
-        terms_accepted: document.getElementById('signup-terms')?.checked === true,
+        terms_accepted: consentEl.checked,
       });
 
       if (user.status !== 'active') {

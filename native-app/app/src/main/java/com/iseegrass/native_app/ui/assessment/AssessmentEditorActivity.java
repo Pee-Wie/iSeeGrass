@@ -134,13 +134,9 @@ public class AssessmentEditorActivity extends AppCompatActivity {
 
     private void updateSpeciesSuggestionHistory() {
         if (!editorReady) return;
-        List<String> names = new ArrayList<>();
-        for (Identification item : identificationHistory) {
-            if (item.getTopResult() != null) names.add(item.getTopResult());
-        }
         binding.webEditor.evaluateJavascript(
                 "window.setIdentificationHistory("
-                        + gson.toJson(names) + ")", null);
+                        + gson.toJson(identificationHistory) + ")", null);
     }
 
     // ------------------------------------------------------------------ //
