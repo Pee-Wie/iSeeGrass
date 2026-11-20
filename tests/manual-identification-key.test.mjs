@@ -34,7 +34,9 @@ test('the key refuses unsupported traits and branched outcomes', () => {
 
 test('users can go back and change an answer', () => {
   const key = new ManualIdentificationKey();
+  assert.equal(key.canGoBack(), false);
   key.selectAnswer(0);
+  assert.equal(key.canGoBack(), true);
   key.selectAnswer(1);
   key.selectAnswer(0);
   assert.equal(key.getOutcome().scientificName, 'Cymodocea rotundata');
@@ -42,6 +44,8 @@ test('users can go back and change an answer', () => {
   assert.equal(key.goBack(), true);
   key.selectAnswer(4);
   assert.equal(key.getOutcome().scientificName, 'Zostera capricorni');
+  key.restart();
+  assert.equal(key.canGoBack(), false);
 });
 
 test('invalid answers are rejected', () => {

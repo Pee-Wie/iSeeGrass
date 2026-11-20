@@ -8,12 +8,15 @@ final class IdentificationImageStorage
 
     public static function directory(): string
     {
+        $storagePath = trim((string) env('IDENTIFICATION_STORAGE_DIR', ''));
         $volumePath = trim((string) env('RAILWAY_VOLUME_MOUNT_PATH', ''));
 
-        if ($volumePath !== '') {
+        if ($storagePath !== '') {
+            $directory = $storagePath;
+        } elseif ($volumePath !== '') {
             $directory = $volumePath;
         } elseif (env('RAILWAY_ENVIRONMENT') !== null || env('RAILWAY_PROJECT_ID') !== null) {
-            throw new RuntimeException('Railway identification volume is not configured.');
+            $directory = dirname(__DIR__, 2) . '/www/public/uploads';
         } else {
             $directory = dirname(__DIR__, 2) . '/www/public/uploads/identifications';
             if (!is_dir($directory) && !mkdir($directory, 0755, true) && !is_dir($directory)) {

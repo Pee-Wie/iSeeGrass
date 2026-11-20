@@ -32,7 +32,7 @@
 
 import { get, put, del, upload } from './client.js';
 import { getEngineTrack } from './settings.api.js';
-import { enqueue, isOfflineError, OfflineQueuedError } from '../utils/identify-queue.js?v=3';
+import { enqueue, isOfflineError, OfflineQueuedError } from '../utils/identify-queue.js?v=4';
 
 /**
  * @typedef {'original'|'improved_original'|'6_species_proto'} ModelType

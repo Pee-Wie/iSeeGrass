@@ -262,6 +262,7 @@ export function openManualIdentificationDialog({ onSelect, onClose } = {}) {
       }
       body.append(result);
       backButton.disabled = !key.canGoBack();
+      restartButton.disabled = !key.canGoBack();
       return;
     }
 
@@ -295,6 +296,7 @@ export function openManualIdentificationDialog({ onSelect, onClose } = {}) {
 
     body.append(step, prompt, note, grid);
     backButton.disabled = !key.canGoBack();
+    restartButton.disabled = !key.canGoBack();
     grid.querySelector('button')?.focus();
   };
 

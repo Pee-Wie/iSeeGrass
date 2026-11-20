@@ -19,11 +19,11 @@
 
 'use strict';
 
-import { identifyImage, manualIdentifyImage, findCatalogMatch } from '../../api/identify.api.js?v=3';
-import { drain, OfflineQueuedError } from '../../utils/identify-queue.js?v=3';
+import { identifyImage, manualIdentifyImage, findCatalogMatch } from '../../api/identify.api.js?v=4';
+import { drain, OfflineQueuedError } from '../../utils/identify-queue.js?v=4';
 import { saveCollectorPhoto, updateCollectorPhotoLabel, removeCollectorPhoto, clearCollectorPhotos, restoreCollectorPhotos } from '../../utils/photo-collector-store.js';
-import { assetUrl } from '../../config/api.config.js?v=3';
-import { openManualIdentificationDialog } from './manual-identification-key.js';
+import { assetUrl } from '../../config/api.config.js?v=4';
+import { openManualIdentificationDialog } from './manual-identification-key.js?v=4';
 
 function getCollectorUserId() {
   try {

@@ -1,4 +1,4 @@
-import { assetUrl } from '../public/js/config/api.config.js?v=3';
+import { assetUrl } from '../public/js/config/api.config.js?v=4';
 
 /**
  * <isee-identify-history> — Identification History Sidebar
@@ -223,10 +223,10 @@ class ISeeIdentifyHistory extends HTMLElement {
     try {
       let data;
       if (window.ISEE_ADMIN_IDENTIFY) {
-        const { listIdentificationHistory } = await import('../public/js/api/identify.api.js');
+        const { listIdentificationHistory } = await import('../public/js/api/identify.api.js?v=4');
         data = await listIdentificationHistory({ limit: 50 });
       } else {
-        const { listUserIdentificationHistory } = await import('../public/js/api/identify.api.js');
+        const { listUserIdentificationHistory } = await import('../public/js/api/identify.api.js?v=4');
         data = await listUserIdentificationHistory({ limit: 50 });
       }
       const records = data?.records ?? [];
@@ -424,7 +424,7 @@ class ISeeIdentifyHistory extends HTMLElement {
         const fnName = window.ISEE_ADMIN_IDENTIFY
           ? 'deleteAllIdentifications'
           : 'deleteAllUserIdentifications';
-        const { [fnName]: deleteFn } = await import('../public/js/api/identify.api.js');
+        const { [fnName]: deleteFn } = await import('../public/js/api/identify.api.js?v=4');
         await deleteFn();
       }
       this.clear();
@@ -654,10 +654,10 @@ class ISeeIdentifyHistory extends HTMLElement {
         deleteBtn.disabled = true;
         try {
           if (window.ISEE_ADMIN_IDENTIFY) {
-            const { deleteIdentification } = await import('../public/js/api/identify.api.js');
+            const { deleteIdentification } = await import('../public/js/api/identify.api.js?v=4');
             await deleteIdentification(entry.dbId);
           } else {
-            const { deleteUserIdentification } = await import('../public/js/api/identify.api.js');
+            const { deleteUserIdentification } = await import('../public/js/api/identify.api.js?v=4');
             await deleteUserIdentification(entry.dbId);
           }
           this._records = this._records.filter(r => r.id !== entry.id);
@@ -722,10 +722,10 @@ class ISeeIdentifyHistory extends HTMLElement {
       if (entry.dbId) {
         try {
           if (window.ISEE_ADMIN_IDENTIFY) {
-            const { updateIdentificationTitle } = await import('../public/js/api/identify.api.js');
+            const { updateIdentificationTitle } = await import('../public/js/api/identify.api.js?v=4');
             await updateIdentificationTitle(entry.dbId, newTitle);
           } else {
-            const { updateUserIdentificationTitle } = await import('../public/js/api/identify.api.js');
+            const { updateUserIdentificationTitle } = await import('../public/js/api/identify.api.js?v=4');
             await updateUserIdentificationTitle(entry.dbId, newTitle);
           }
         } catch { /* silently ignore */ }
