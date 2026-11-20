@@ -16,6 +16,15 @@ ln -sf /etc/apache2/mods-available/mpm_prefork.conf \
 echo "[entrypoint] MPM files in mods-enabled:"
 ls /etc/apache2/mods-enabled/mpm_* 2>&1
 
+# Railway mounts volumes as root-owned directories. Give Apache write access
+# to the mounted uploads directory without changing ownership of stored files.
+UPLOAD_DIR="${RAILWAY_VOLUME_MOUNT_PATH:-/var/www/html/www/public/uploads}"
+if [ -d "$UPLOAD_DIR" ]; then
+    chown www-data:www-data "$UPLOAD_DIR"
+    chmod u+rwx "$UPLOAD_DIR"
+    echo "[entrypoint] Enabled Apache writes to ${UPLOAD_DIR}."
+fi
+
 # Railway sets $PORT dynamically — Apache must listen on that port.
 # Default to 80 for local use.
 LISTEN_PORT="${PORT:-80}"
