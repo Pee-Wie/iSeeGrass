@@ -10,13 +10,32 @@ final class IdentificationImageStorage
     {
         $storagePath = trim((string) env('IDENTIFICATION_STORAGE_DIR', ''));
         $volumePath = trim((string) env('RAILWAY_VOLUME_MOUNT_PATH', ''));
+        $isRailway = env('RAILWAY_ENVIRONMENT') !== null || env('RAILWAY_PROJECT_ID') !== null;
 
         if ($storagePath !== '') {
             $directory = $storagePath;
+            $realDirectory = realpath($directory);
+            if ($realDirectory === false || !is_dir($realDirectory) || !is_writable($realDirectory)) {
+                throw new RuntimeException('Configured identification image storage is unavailable or not writable.');
+            }
+            return $realDirectory;
+        }
+
+        if ($isRailway) {
+            $candidates = array_filter([
+                $volumePath,
+                '/var/www/html/www/public/uploads',
+                dirname(__DIR__, 2) . '/www/public/uploads',
+            ]);
+            foreach ($candidates as $candidate) {
+                $realDirectory = realpath($candidate);
+                if ($realDirectory !== false && is_dir($realDirectory) && is_writable($realDirectory)) {
+                    return $realDirectory;
+                }
+            }
+            throw new RuntimeException('Railway identification volume is unavailable or not writable.');
         } elseif ($volumePath !== '') {
             $directory = $volumePath;
-        } elseif (env('RAILWAY_ENVIRONMENT') !== null || env('RAILWAY_PROJECT_ID') !== null) {
-            $directory = dirname(__DIR__, 2) . '/www/public/uploads';
         } else {
             $directory = dirname(__DIR__, 2) . '/www/public/uploads/identifications';
             if (!is_dir($directory) && !mkdir($directory, 0755, true) && !is_dir($directory)) {
