@@ -68,13 +68,14 @@ AddType application/javascript .js .mjs
     RewriteRule ^api/assessments/show$                  core/api/assessments/show.php [QSA,L]
     RewriteRule ^api/assessments$                       core/api/assessments/index.php [QSA,L]
 
+    # Catalog (seagrass species)
+    RewriteRule ^api/catalog/(index|show|create|update|delete)$ core/api/catalog/$1.php [QSA,L]
+    RewriteRule ^api/catalog$                           core/api/catalog.php [QSA,L]
+
     # Users / profile
     RewriteRule ^api/users/change_password$             core/api/users/change_password.php [QSA,L]
     RewriteRule ^api/users/avatar$                      core/api/users/avatar.php [QSA,L]
     RewriteRule ^api/users/show$                        core/api/users/show.php [QSA,L]
-
-    # Catalog (seagrass species)
-    RewriteRule ^api/catalog$                           core/api/catalog.php [QSA,L]
 
     # Admin
     RewriteRule ^api/admin/stats$                       core/api/admin/stats.php [QSA,L]

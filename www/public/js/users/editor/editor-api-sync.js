@@ -32,6 +32,14 @@ import {
 
 let apiAssessmentId = null;   // DB id of the assessment currently open in the editor
 let assessmentsCache = [];    // latest list from the API (refreshed on save/load/delete)
+let isReadOnlyAssessment = false;
+
+function setAssessmentReadOnly(readOnly, message = '') {
+  isReadOnlyAssessment = readOnly;
+  document.dispatchEvent(new CustomEvent('isee:assessment-readonly-changed', {
+    detail: { readOnly, message },
+  }));
+}
 
 /* ── Toast helper ────────────────────────────────────────────────── */
 
@@ -100,6 +108,10 @@ async function loadAssessmentIntoEditor(id) {
     if (titleEl)  titleEl.value      = full.title   || '';
     if (canvasEl) canvasEl.innerHTML = full.content || '';
     apiAssessmentId = full.id;
+    const readOnly = full.viewer_group === 'students' || full.can_edit === false;
+    setAssessmentReadOnly(readOnly, full.viewer_group === 'students'
+      ? 'Student assessments are available to researchers as read-only.'
+      : 'Finalized assessments are read-only.');
     markSaved();
     updateCounts();
     showEditorToast(`Loaded: ${full.title || 'Untitled'}`, 'success');
@@ -117,6 +129,11 @@ const STATUS_MAP = {
 };
 
 async function syncToApi(localStatus) {
+  if (isReadOnlyAssessment) {
+    showEditorToast('This assessment is read-only.', 'error');
+    return;
+  }
+
   const status = STATUS_MAP[localStatus] || 'draft';
   const { title, content } = getEditorState();
 
@@ -263,6 +280,11 @@ document.addEventListener('isee:load-assessment', async e => {
 document.addEventListener('isee:delete-assessment', async e => {
   const { id, title } = e.detail || {};
   if (!id) return;
+  const assessment = assessmentsCache.find(row => row.id === id);
+  if (assessment?.can_delete === false) {
+    showEditorToast('This assessment cannot be deleted.', 'error');
+    return;
+  }
   const ok = await modalConfirm(
     `Delete "${title || 'Untitled'}"?\nThis cannot be undone.`,
     'Delete Assessment',
@@ -289,6 +311,12 @@ document.addEventListener('isee:delete-assessment', async e => {
 document.addEventListener('isee:rename-assessment', async e => {
   const { id, newTitle } = e.detail || {};
   if (!id || !newTitle) return;
+  const assessment = assessmentsCache.find(row => row.id === id);
+  if (assessment?.can_edit === false || assessment?.viewer_group === 'students') {
+    showEditorToast('This assessment cannot be edited.', 'error');
+    await loadAndRenderList();
+    return;
+  }
 
   const conflict = assessmentsCache.find(
     r => r.id !== id && r.title.trim().toLowerCase() === newTitle.trim().toLowerCase()
@@ -318,23 +346,26 @@ document.addEventListener('isee:rename-assessment', async e => {
 
 // Delete all assessments
 document.addEventListener('isee:delete-all-assessments', async () => {
-  const count = assessmentsCache.length;
+  const deletable = assessmentsCache.filter(row => row.can_delete !== false);
+  const count = deletable.length;
   if (!count) return;
   const ok = await modalConfirm(
-    `This will permanently delete all ${count} saved assessment${count !== 1 ? 's' : ''}.\nThis cannot be undone.`,
+    `This will permanently delete all ${count} deletable assessment${count !== 1 ? 's' : ''}.\nThis cannot be undone.`,
     'Delete All Assessments',
     'Delete All'
   );
   if (!ok) return;
   try {
-    await Promise.all(assessmentsCache.map(r => deleteAssessment(r.id)));
-    apiAssessmentId = null;
-    assessmentsCache = [];
-    const titleEl  = document.getElementById('editorTitle');
-    const canvasEl = document.getElementById('editorCanvas');
-    if (titleEl)  titleEl.value      = '';
-    if (canvasEl) canvasEl.innerHTML = '';
-    refreshDocList([], null);
+    await Promise.all(deletable.map(r => deleteAssessment(r.id)));
+    if (deletable.some(row => row.id === apiAssessmentId)) {
+      apiAssessmentId = null;
+      const titleEl  = document.getElementById('editorTitle');
+      const canvasEl = document.getElementById('editorCanvas');
+      if (titleEl)  titleEl.value      = '';
+      if (canvasEl) canvasEl.innerHTML = '';
+      setAssessmentReadOnly(false);
+    }
+    await loadAndRenderList();
     await refreshPendingBadge();
     showEditorToast('All assessments deleted', 'success');
   } catch {
@@ -345,6 +376,7 @@ document.addEventListener('isee:delete-all-assessments', async () => {
 // Editor cleared (Clear button or template load) — reset the open-record tracker
 document.addEventListener('isee:editor-cleared', () => {
   apiAssessmentId = null;
+  setAssessmentReadOnly(false);
 });
 
 // Supplemental hook for external integrations
@@ -363,7 +395,9 @@ document.addEventListener('isee:editor-save', e => {
 
   // Open the most-recent assessment in the editor on page load
   if (assessmentsCache.length) {
-    await loadAssessmentIntoEditor(assessmentsCache[0].id);
+    const initialAssessment = assessmentsCache.find(row => row.viewer_group === 'mine')
+      || assessmentsCache[0];
+    await loadAssessmentIntoEditor(initialAssessment.id);
   }
 
   // Drain any assessments that were queued while offline

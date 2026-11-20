@@ -5,6 +5,7 @@
 'use strict';
 
 import { listUsers, createUser, updateUser, deleteUser } from '../../api/users.api.js';
+import { assetUrl } from '../../config/api.config.js';
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let currentPage = 1;
@@ -47,7 +48,7 @@ function renderTable(users) {
     const name     = `${u.first_name ?? ''} ${u.last_name ?? ''}`.trim() || '—';
     const initials = ((u.first_name?.[0] ?? '') + (u.last_name?.[0] ?? '')).toUpperCase() || '?';
     const avatarCell = u.avatar_url
-      ? `<img src="${esc(u.avatar_url)}" alt="${esc(name)}"
+      ? `<img src="${esc(assetUrl(u.avatar_url))}" alt="${esc(name)}"
               style="width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1.5px solid rgba(255,255,255,0.12);"
               onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
          <span style="display:none;width:34px;height:34px;border-radius:50%;background:var(--accent,#7ccb4d);color:#1a2e0a;font-size:.78rem;font-weight:700;align-items:center;justify-content:center;flex-shrink:0;">${esc(initials)}</span>`

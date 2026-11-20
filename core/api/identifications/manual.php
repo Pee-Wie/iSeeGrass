@@ -3,7 +3,8 @@
  * POST /api/identifications/manual
  *
  * Save a manually-keyed result for an authenticated user. A request may
- * include an uploaded image, or reference a saved CNN identification.
+ * include an uploaded image, or reference a saved CNN identification. An
+ * uploaded image's GPS EXIF takes precedence over optional device coordinates.
  */
 
 require_once __DIR__ . '/../../config/cors.php';
@@ -12,6 +13,7 @@ require_once __DIR__ . '/../../app/middleware/require_auth.php';
 require_once __DIR__ . '/../../app/models/IdentificationModel.php';
 require_once __DIR__ . '/../../app/models/FlaggedPredictionModel.php';
 require_once __DIR__ . '/../../helpers/identification_image_storage.php';
+require_once __DIR__ . '/../../helpers/identification_image_location.php';
 
 requireMethod('POST');
 
@@ -52,6 +54,8 @@ $imageFilename = null;
 $imagePath = null;
 $mimeType = null;
 $extension = null;
+$latitude = null;
+$longitude = null;
 
 if ($sourceIdentificationId !== null) {
     $pdo = getDB();
@@ -73,6 +77,8 @@ if ($sourceIdentificationId !== null) {
 
     $imageFilename = $source['image_filename'] ?? null;
     $imagePath = basename((string) $source['image_path']);
+    $latitude = isset($source['latitude']) ? (float) $source['latitude'] : null;
+    $longitude = isset($source['longitude']) ? (float) $source['longitude'] : null;
 } else {
     if (empty($_FILES['image']) || $_FILES['image']['error'] !== UPLOAD_ERR_OK) {
         jsonError('A selected image is required.', 422);
@@ -90,6 +96,13 @@ if ($sourceIdentificationId !== null) {
     }
 
     $extension = $extensions[$mimeType];
+    $location = IdentificationImageLocation::preferImageCoordinates(
+        IdentificationImageLocation::fromImage($_FILES['image']['tmp_name']),
+        $_POST['latitude'] ?? null,
+        $_POST['longitude'] ?? null
+    );
+    $latitude = $location['latitude'];
+    $longitude = $location['longitude'];
     $rawFilename = trim((string) ($_POST['image_filename'] ?? $_FILES['image']['name'] ?? ''));
     $imageFilename = $rawFilename !== '' ? substr($rawFilename, 0, 255) : null;
 }
@@ -143,7 +156,9 @@ try {
             null,
             null,
             $imagePath,
-            'manual_key'
+            'manual_key',
+            $latitude,
+            $longitude
         );
 
         $speciesId = strtolower(str_replace(' ', '-', $scientificName));
@@ -192,6 +207,8 @@ jsonSuccess([
     'image_url' => IdentificationImageStorage::imageUrl($imagePath),
     'model_type' => null,
     'identification_method' => 'manual_key',
+    'latitude' => $latitude,
+    'longitude' => $longitude,
     'top_result' => $scientificName,
     'top_confidence' => null,
     'scores' => [],

@@ -34,6 +34,7 @@ $allowed = array_filter([
     'http://127.0.0.1',
     'http://127.0.0.1:3000',
     'capacitor://localhost',
+    'https://localhost',
 ]);
 
 // Check exact match first.

@@ -25,6 +25,8 @@
  *   image      (file,   required — JPEG / PNG / WebP)
  *   model_type (string, optional — 'original' | 'improved_original' | '6_species_proto')
  *              Defaults to 'improved_original'.
+ *   latitude   (number, optional — used only when the image has no GPS EXIF)
+ *   longitude  (number, optional — used only when the image has no GPS EXIF)
  *
  * Colab response (new multi-track format):
  *   {
@@ -49,6 +51,8 @@
  *       "identification_id": 42,              // null for guests
  *       "image_url":         "/api/identifications/image?filename=...", // null for guests
  *       "model_type":        "improved_original",
+ *       "latitude":          14.1234567,        // image EXIF, or permitted native-device fallback
+ *       "longitude":         121.1234567,
  *       "top_result":        "Halophila spinulosa",
  *       "top_confidence":    94.25,           // percent
  *       "scores": [
@@ -67,6 +71,7 @@ require_once __DIR__ . '/../app/models/SessionModel.php';
 require_once __DIR__ . '/../app/models/UserModel.php';
 require_once __DIR__ . '/../app/models/IdentificationModel.php';
 require_once __DIR__ . '/../helpers/identification_image_storage.php';
+require_once __DIR__ . '/../helpers/identification_image_location.php';
 
 requireMethod('POST');
 
@@ -96,15 +101,20 @@ $isGuestCall = !empty($_POST['guest']) && $_POST['guest'] === '1';
 $token       = $isGuestCall ? null : getSessionTokenFromCookie();
 
 if ($token !== null) {
-    $pdo          = getDB();
-    $sessionModel = new SessionModel($pdo);
-    $session      = $sessionModel->find($token);
-    if ($session !== null) {
-        $userModel = new UserModel($pdo);
-        $userRow   = $userModel->findById((int) $session['user_id']);
-        if ($userRow && $userRow['status'] === 'active') {
-            $currentUser = UserModel::sanitise($userRow);
+    try {
+        $pdo          = getDB();
+        $sessionModel = new SessionModel($pdo);
+        $session      = $sessionModel->find($token);
+        if ($session !== null) {
+            $userModel = new UserModel($pdo);
+            $userRow   = $userModel->findById((int) $session['user_id']);
+            if ($userRow && $userRow['status'] === 'active') {
+                $currentUser = UserModel::sanitise($userRow);
+            }
         }
+    } catch (Throwable $e) {
+        error_log('Identification session lookup failed: ' . $e->getMessage());
+        jsonError('Could not verify your account before identification. Please try again later.', 503);
     }
 }
 
@@ -254,8 +264,14 @@ usort($scores, fn($a, $b) => $b['confidence'] <=> $a['confidence']);
 // ── Persist to DB for authenticated users ────────────────────────────────────
 $identificationId = null;
 $imagePath = null;
+$location = ['latitude' => null, 'longitude' => null];
 
 if ($currentUser !== null) {
+    $location = IdentificationImageLocation::preferImageCoordinates(
+        IdentificationImageLocation::fromImage($tempPath),
+        $_POST['latitude'] ?? null,
+        $_POST['longitude'] ?? null
+    );
     try {
         $imagePath = bin2hex(random_bytes(16)) . '.' . $ext;
         $imageDestination = IdentificationImageStorage::path($imagePath);
@@ -268,35 +284,51 @@ if ($currentUser !== null) {
         jsonError('Failed to save identification image to persistent storage.', 500);
     }
 
-    $pdo   = $pdo ?? getDB();
-    $model = new IdentificationModel($pdo);
+    $pdo = $pdo ?? getDB();
+    try {
+        $pdo->beginTransaction();
+        $model = new IdentificationModel($pdo);
 
-    $identificationId = $model->create(
-        (int) $currentUser['id'],
-        1,                // image_count
-        $imageFilename,   // original filename
-        $title,           // optional run title
-        $topLabel,
-        $topConfidence,
-        $activeTrack,     // model_type — stored for history/reporting
-        $imagePath
-    );
-
-    $rank = 1;
-    foreach ($scores as $score) {
-        // Build a URL-safe slug from the label
-        $speciesId = strtolower(preg_replace('/[\s\/()]+/', '-', $score['label']));
-        $speciesId = preg_replace('/-+/', '-', trim($speciesId, '-'));
-
-        $model->addResult(
-            $identificationId,
-            $speciesId,
-            $score['label'],
-            null,
-            $score['confidence'],
-            $rank
+        $identificationId = $model->create(
+            (int) $currentUser['id'],
+            1,                // image_count
+            $imageFilename,   // original filename
+            $title,           // optional run title
+            $topLabel,
+            $topConfidence,
+            $activeTrack,     // model_type — stored for history/reporting
+            $imagePath,
+            'cnn',
+            $location['latitude'],
+            $location['longitude']
         );
-        $rank++;
+
+        $rank = 1;
+        foreach ($scores as $score) {
+            $speciesId = strtolower(preg_replace('/[\s\/()]+/', '-', $score['label']));
+            $speciesId = preg_replace('/-+/', '-', trim($speciesId, '-'));
+
+            $model->addResult(
+                $identificationId,
+                $speciesId,
+                $score['label'],
+                null,
+                $score['confidence'],
+                $rank
+            );
+            $rank++;
+        }
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        if ($imagePath !== null && is_file($imageDestination)) {
+            unlink($imageDestination);
+        }
+        error_log('CNN identification persistence failed: ' . $e->getMessage());
+        jsonError('Identification ran, but could not be saved to your history. '
+            . 'Please contact an administrator.', 500);
     }
 }
 
@@ -309,6 +341,8 @@ jsonSuccess([
         ? IdentificationImageStorage::imageUrl($imagePath)
         : null,
     'identification_method' => 'cnn',
+    'latitude'          => $currentUser !== null ? $location['latitude'] : null,
+    'longitude'         => $currentUser !== null ? $location['longitude'] : null,
     'model_type'        => $activeTrack,
     'top_result'        => $topLabel,
     'top_confidence'    => $topConfidence,

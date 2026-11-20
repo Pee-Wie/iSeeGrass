@@ -9,6 +9,38 @@ class AssessmentModel
 {
     public function __construct(private PDO $pdo) {}
 
+    public static function canView(array $assessment, array $viewer): bool
+    {
+        return ($viewer['role'] ?? null) === 'admin'
+            || (int) $assessment['user_id'] === (int) ($viewer['id'] ?? 0)
+            || (($viewer['position'] ?? null) === 'Researcher'
+                && ($assessment['user_role'] ?? null) === 'user'
+                && ($assessment['user_position'] ?? null) === 'Student');
+    }
+
+    public static function canEdit(array $assessment, array $viewer): bool
+    {
+        return ($viewer['role'] ?? null) === 'admin'
+            || ((int) $assessment['user_id'] === (int) ($viewer['id'] ?? 0)
+                && ($assessment['status'] ?? null) !== 'finalized');
+    }
+
+    public static function canDelete(array $assessment, array $viewer): bool
+    {
+        return ($viewer['role'] ?? null) === 'admin'
+            || ((int) $assessment['user_id'] === (int) ($viewer['id'] ?? 0)
+                && in_array($assessment['status'] ?? null, ['draft', 'in_progress'], true));
+    }
+
+    public static function viewerGroup(array $assessment, array $viewer): string
+    {
+        return ($viewer['role'] ?? null) !== 'admin'
+            && (int) $assessment['user_id'] !== (int) ($viewer['id'] ?? 0)
+            && ($assessment['user_position'] ?? null) === 'Student'
+            ? 'students'
+            : 'mine';
+    }
+
     // ── Read ─────────────────────────────────────────────────────────────────
 
     /**
@@ -17,7 +49,8 @@ class AssessmentModel
     public function findById(int $id): ?array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT a.*, u.first_name, u.last_name, u.username
+            'SELECT a.*, u.first_name, u.last_name, u.username,
+                    u.position AS user_position, u.role AS user_role
                FROM assessments a
                JOIN users u ON u.id = a.user_id
               WHERE a.id = :id
@@ -88,6 +121,49 @@ class AssessmentModel
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll();
+    }
+
+    /**
+     * Return a researcher's own assessments and student assessments, labeled for the UI.
+     */
+    public function getForResearcher(
+        int $userId,
+        array $filters = [],
+        int $limit = 20,
+        int $offset = 0
+    ): array {
+        [$where, $params] = $this->buildResearcherFilters($userId, $filters);
+        $sql = "SELECT a.id, a.user_id, a.title, a.status, a.created_at, a.updated_at,
+                       u.first_name, u.last_name, u.username, u.position AS user_position,
+                       CASE WHEN a.user_id = :viewer_id THEN 'mine' ELSE 'students' END AS viewer_group
+                  FROM assessments a
+                  JOIN users u ON u.id = a.user_id
+                 WHERE {$where}
+                 ORDER BY a.updated_at DESC
+                 LIMIT :limit OFFSET :offset";
+
+        $stmt = $this->pdo->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->bindValue(':viewer_id', $userId, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    public function countForResearcher(int $userId, array $filters = []): int
+    {
+        [$where, $params] = $this->buildResearcherFilters($userId, $filters);
+        $stmt = $this->pdo->prepare(
+            "SELECT COUNT(*)
+               FROM assessments a
+               JOIN users u ON u.id = a.user_id
+              WHERE {$where}"
+        );
+        $stmt->execute($params);
+        return (int) $stmt->fetchColumn();
     }
 
     /**
@@ -249,6 +325,37 @@ class AssessmentModel
         if (!empty($filters['search'])) {
             $clauses[]          = "{$prefix}title LIKE :search";
             $params[':search']  = '%' . $filters['search'] . '%';
+        }
+
+        return [implode(' AND ', $clauses), $params];
+    }
+
+    private function buildResearcherFilters(int $userId, array $filters): array
+    {
+        $clauses = [
+            '(a.user_id = :researcher_id OR (u.role = :student_role AND u.position = :student_position))',
+        ];
+        $params = [
+            ':researcher_id' => $userId,
+            ':student_role' => 'user',
+            ':student_position' => 'Student',
+        ];
+
+        if (!empty($filters['status'])) {
+            $clauses[] = 'a.status = :status';
+            $params[':status'] = $filters['status'];
+        }
+        if (!empty($filters['date_from'])) {
+            $clauses[] = 'DATE(a.created_at) >= :date_from';
+            $params[':date_from'] = $filters['date_from'];
+        }
+        if (!empty($filters['date_to'])) {
+            $clauses[] = 'DATE(a.created_at) <= :date_to';
+            $params[':date_to'] = $filters['date_to'];
+        }
+        if (!empty($filters['search'])) {
+            $clauses[] = 'a.title LIKE :search';
+            $params[':search'] = '%' . $filters['search'] . '%';
         }
 
         return [implode(' AND ', $clauses), $params];

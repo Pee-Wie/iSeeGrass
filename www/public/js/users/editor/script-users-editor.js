@@ -27,6 +27,7 @@ const TRANSECT_HTML = `
     <tr>
       <th>Quadrat</th>
       <th>Seagrass name/code and count</th>
+      <th>Location (latitude, longitude)</th>
       <th>Total seagrass cover (%)<br><small>Estimate from field guide</small></th>
       <th>Species composition (%)<br><small>Calculated from counts</small></th>
       <th>Species cover (%)<br><small>Calculated</small></th>
@@ -35,16 +36,16 @@ const TRANSECT_HTML = `
     </tr>
   </thead>
   <tbody>
-    <tr><td>1 (0m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td>2 (5m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td>3 (10m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td>4 (15m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td>5 (20m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td>6 (25m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td>7 (50m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td>8 (75m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td>9</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
-    <tr><td>10</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>1 (0m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-location contenteditable="false"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>2 (5m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-location contenteditable="false"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>3 (10m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-location contenteditable="false"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>4 (15m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-location contenteditable="false"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>5 (20m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-location contenteditable="false"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>6 (25m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-location contenteditable="false"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>7 (50m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-location contenteditable="false"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>8 (75m)</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-location contenteditable="false"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>9</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-location contenteditable="false"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>10</td><td data-coverage-species-entry data-placeholder="e.g. CR 1"></td><td data-coverage-location contenteditable="false"></td><td data-coverage-total data-placeholder="0–100"></td><td data-coverage-composition contenteditable="false"></td><td data-coverage-species-cover contenteditable="false"></td><td></td><td></td><td></td><td></td><td></td></tr>
   </tbody>
 </table>
 <p data-coverage-summary contenteditable="false" aria-live="polite">Transect summary will appear when quadrat cover values are entered.</p>`;
@@ -96,6 +97,7 @@ const TEMPLATES = {
    ═══════════════════════════════════════════════════════════════════ */
 
 let canvas, titleInput, unsavedBadge, wordCountEl, charCountEl, cursorPosEl;
+let assessmentReadOnly = false;
 
 /* ═══════════════════════════════════════════════════════════════════
    Utility helpers
@@ -234,6 +236,7 @@ function downloadDocument(title, body, status) {
 }
 
 async function clearDraft() {
+  if (assessmentReadOnly) return;
   const ok = await modalConfirm(
     'Clear the current assessment? This cannot be undone.',
     'Clear Assessment',
@@ -270,14 +273,31 @@ function refreshDocList(assessments, activeId = null) {
   if (!Array.isArray(assessments)) assessments = [];
 
   // Show / hide the delete-all button
-  if (deleteAll) deleteAll.hidden = assessments.length === 0;
+  if (deleteAll) deleteAll.hidden = !assessments.some(doc => doc.can_delete !== false);
 
   if (!assessments.length) {
     list.innerHTML = '<p class="doc-empty">No saved assessments yet.</p>';
     return;
   }
 
-  assessments.forEach(doc => {
+  const grouped = assessments.some(doc => doc.viewer_group === 'students');
+  const groups = grouped
+    ? [
+        { label: 'My Assessments', docs: assessments.filter(doc => doc.viewer_group !== 'students') },
+        { label: 'Student Assessments', docs: assessments.filter(doc => doc.viewer_group === 'students') },
+      ]
+    : [{ label: '', docs: assessments }];
+
+  groups.forEach(group => {
+    if (!group.docs.length) return;
+    if (group.label) {
+      const heading = document.createElement('h4');
+      heading.className = 'doc-section-heading';
+      heading.textContent = group.label;
+      list.appendChild(heading);
+    }
+
+    group.docs.forEach(doc => {
     const d       = new Date(doc.updated_at || doc.created_at);
     const dateStr = d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
     const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -301,12 +321,20 @@ function refreshDocList(assessments, activeId = null) {
         <i class="ti ti-trash"></i>
       </button>`;
 
+    if (doc.viewer_group === 'students') {
+      const owner = document.createElement('span');
+      owner.className = 'doc-item__owner';
+      owner.textContent = `By ${[doc.first_name, doc.last_name].filter(Boolean).join(' ') || doc.username || 'student'}`;
+      item.querySelector('.doc-item__info').append(owner);
+    }
+
     // ── Inline rename on .doc-item__name ──────────────────────────
     const nameEl = item.querySelector('.doc-item__name');
-    nameEl.style.cursor = 'pointer';
-    nameEl.title = 'Click to rename';
+    const canRename = doc.can_edit !== false && doc.viewer_group !== 'students';
+    nameEl.style.cursor = canRename ? 'text' : 'pointer';
+    nameEl.title = canRename ? 'Click to rename' : 'View assessment';
 
-    nameEl.addEventListener('click', (e) => {
+    if (canRename) nameEl.addEventListener('click', (e) => {
       e.stopPropagation();
       const currentTitle = doc.title || '';
       const input = document.createElement('input');
@@ -342,7 +370,7 @@ function refreshDocList(assessments, activeId = null) {
     /* Load on row click */
     item.addEventListener('click', (e) => {
       if (e.target.closest('.doc-item__delete')) return;
-      if (e.target.closest('.doc-item__rename-input') || e.target.classList.contains('doc-item__name')) return;
+      if (e.target.closest('.doc-item__rename-input')) return;
       document.dispatchEvent(new CustomEvent('isee:load-assessment', {
         detail: { id: doc.id },
         bubbles: true,
@@ -350,7 +378,9 @@ function refreshDocList(assessments, activeId = null) {
     });
 
     /* Per-item delete */
-    item.querySelector('.doc-item__delete').addEventListener('click', (e) => {
+    const deleteButton = item.querySelector('.doc-item__delete');
+    deleteButton.hidden = doc.can_delete === false;
+    deleteButton.addEventListener('click', (e) => {
       e.stopPropagation();
       document.dispatchEvent(new CustomEvent('isee:delete-assessment', {
         detail: { id: doc.id, title: doc.title },
@@ -359,14 +389,51 @@ function refreshDocList(assessments, activeId = null) {
     });
 
     list.appendChild(item);
+    });
   });
 }
+
+document.addEventListener('isee:assessment-readonly-changed', event => {
+  assessmentReadOnly = Boolean(event.detail?.readOnly);
+  const canvasEl = document.getElementById('editorCanvas');
+  const sourceEl = document.getElementById('editorSource');
+  const notice = document.getElementById('assessmentReadonlyNotice');
+  if (assessmentReadOnly && sourceMode) {
+    sourceMode = false;
+    const wrap = document.getElementById('editorCanvasWrap');
+    const sourceButton = document.getElementById('tbSource');
+    if (wrap) wrap.style.display = '';
+    if (sourceEl) sourceEl.style.display = 'none';
+    sourceButton?.classList.remove('is-active');
+  }
+  if (canvasEl) {
+    canvasEl.contentEditable = String(!assessmentReadOnly);
+    canvasEl.setAttribute('aria-readonly', String(assessmentReadOnly));
+  }
+  if (sourceEl) sourceEl.readOnly = assessmentReadOnly;
+  document.querySelectorAll(
+    '#editorTitle, #btnClear, #btnTransect, #btnImport, #importFileInput, ' +
+    '#btnSaveDraft, #btnInProgress, #btnFinalize, .editor-toolbar button, ' +
+    '.editor-toolbar select, .editor-toolbar input, .template-item'
+  ).forEach(control => {
+    control.disabled = assessmentReadOnly;
+    if (control.classList.contains('template-item')) {
+      control.setAttribute('aria-disabled', String(assessmentReadOnly));
+      control.tabIndex = assessmentReadOnly ? -1 : 0;
+    }
+  });
+  if (notice) {
+    notice.hidden = !assessmentReadOnly;
+    notice.textContent = event.detail?.message || 'This assessment is read-only.';
+  }
+});
 
 /* ═══════════════════════════════════════════════════════════════════
    Template picker
    ═══════════════════════════════════════════════════════════════════ */
 
 async function applyTemplate(key) {
+  if (assessmentReadOnly) return;
   if (state.unsaved && canvas.innerHTML.trim() !== '') {
     const ok = await modalConfirm(
       'Loading a template will replace your current content.\nUnsaved changes will be lost.',
@@ -690,6 +757,7 @@ function wireToolbar() {
 let sourceMode = false;
 
 function toggleSourceView() {
+  if (assessmentReadOnly) return;
   const wrap = document.getElementById('editorCanvasWrap');
   const srcArea = document.getElementById('editorSource');
   const btn = document.getElementById('tbSource');

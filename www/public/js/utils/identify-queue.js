@@ -96,6 +96,8 @@ function idbRequest(req) {
  *   speciesName : string|null,
  *   sourceIdentificationId : number|null,
  *   notes : string|null,
+ *   latitude : number|null,
+ *   longitude : number|null,
  * }} job
  * @returns {Promise<number>}  The IDB auto-generated key.
  */
@@ -117,6 +119,8 @@ export async function enqueue(job) {
     speciesName: job.speciesName ?? null,
     sourceIdentificationId: job.sourceIdentificationId ?? null,
     notes: job.notes ?? null,
+    latitude: job.latitude ?? null,
+    longitude: job.longitude ?? null,
   }));
 }
 
@@ -150,7 +154,7 @@ export async function getQueueCount() {
 /**
  * Drain the queue: retry every pending job in order.
  *
- * @param {function(File|null, string|null, string|null, string, string, string|null, number|null, string|null): Promise<object>} identifyFn
+ * @param {function(File|null, string|null, string|null, string, string, string|null, number|null, string|null, number|null, number|null): Promise<object>} identifyFn
  *   Upload function selected by identification method. The history ID is
  *   forwarded so a retry updates the original queue card.
  *
@@ -186,6 +190,8 @@ export async function drain(identifyFn, onResult) {
         job.speciesName ?? null,
         job.sourceIdentificationId ?? null,
         job.notes ?? null,
+        job.latitude ?? null,
+        job.longitude ?? null,
       );
 
       await dequeue(job.id);

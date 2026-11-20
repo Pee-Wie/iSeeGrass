@@ -23,6 +23,8 @@ class IdentificationModel
      * @param string|null $modelType      Engine track key ('original' | 'improved_original' | '6_species_proto').
      * @param string|null $imagePath      Stored image filename, if available.
      * @param string      $identificationMethod  'cnn' or 'manual_key'.
+     * @param float|null  $latitude       GPS latitude extracted from image EXIF.
+     * @param float|null  $longitude      GPS longitude extracted from image EXIF.
      */
     public function create(
         int     $userId,
@@ -33,21 +35,25 @@ class IdentificationModel
         ?float  $topConfidence = null,
         ?string $modelType     = 'improved_original',
         ?string $imagePath     = null,
-        string  $identificationMethod = 'cnn'
+        string  $identificationMethod = 'cnn',
+        ?float  $latitude = null,
+        ?float  $longitude = null
     ): int {
         $stmt = $this->pdo->prepare(
             'INSERT INTO identifications
-               (user_id, image_count, image_filename, image_path, title, top_result,
-                top_confidence, model_type, identification_method)
+               (user_id, image_count, image_filename, image_path, latitude, longitude,
+                title, top_result, top_confidence, model_type, identification_method)
              VALUES
-               (:user_id, :image_count, :image_filename, :image_path, :title, :top_result,
-                :top_confidence, :model_type, :identification_method)'
+               (:user_id, :image_count, :image_filename, :image_path, :latitude, :longitude,
+                :title, :top_result, :top_confidence, :model_type, :identification_method)'
         );
         $stmt->execute([
             ':user_id'        => $userId,
             ':image_count'    => $imageCount,
             ':image_filename' => $imageFilename,
             ':image_path'     => $imagePath,
+            ':latitude'       => $latitude,
+            ':longitude'      => $longitude,
             ':title'          => $title,
             ':top_result'     => $topResult,
             ':top_confidence' => $topConfidence,

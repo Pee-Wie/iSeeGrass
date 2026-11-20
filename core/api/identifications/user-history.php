@@ -20,6 +20,8 @@
  *           "image_url":      "/api/identifications/image?filename=...", // null if unavailable
  *           "top_result":     "Halodule pinifolia",
  *           "top_confidence": 87.30,
+ *           "latitude":       14.1234567, // null when the image has no GPS EXIF
+ *           "longitude":      121.1234567,
  *           "created_at":     "2025-01-15 10:32:00"
  *         },
  *         ...
@@ -62,6 +64,12 @@ $records = array_map(static function (array $row): array {
                                 ? (float) $row['top_confidence']
                                 : null,
         'identification_method' => $row['identification_method'] ?? 'cnn',
+        'latitude'       => isset($row['latitude']) && $row['latitude'] !== null
+                                ? (float) $row['latitude']
+                                : null,
+        'longitude'      => isset($row['longitude']) && $row['longitude'] !== null
+                                ? (float) $row['longitude']
+                                : null,
         'created_at'     => $row['created_at'],
         'title'          => $row['title'] ?? null,
     ];

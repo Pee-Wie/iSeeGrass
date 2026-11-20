@@ -17,14 +17,20 @@ $existing = $model->findById($id);
 if (!$existing) jsonError('Assessment not found.', 404);
 
 $isAdmin = ($currentUser['role'] === 'admin');
-if (!$isAdmin && (int)$existing['user_id'] !== (int)$currentUser['id']) jsonError('Forbidden.', 403);
+if (!AssessmentModel::canView($existing, $currentUser)
+    || (!$isAdmin && (int) $existing['user_id'] !== (int) $currentUser['id'])) {
+    jsonError('Forbidden.', 403);
+}
+if (!AssessmentModel::canEdit($existing, $currentUser)) {
+    jsonError('Finalized assessments are read-only.', 409);
+}
 
 $body       = getJsonBody();
 $updateData = [];
 if (array_key_exists('title',   $body)) {
     $t = trim((string)$body['title']);
     if (!$t) jsonError('Title cannot be empty.', 422);
-    if ($model->titleExistsForUser((int)$currentUser['id'], $t, $id)) {
+    if ($model->titleExistsForUser((int)$existing['user_id'], $t, $id)) {
         jsonError('An assessment with this title already exists.', 409);
     }
     $updateData['title'] = $t;

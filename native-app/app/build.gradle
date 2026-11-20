@@ -1,29 +1,48 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 
-// ── Version: manual override or auto-incrementing counter ──────────────────
-// Usage:
-//   ./gradlew assembleDebug                    → auto-increments counter
-//   ./gradlew assembleDebug -PappVersion=1.011 → uses exactly "1.011"
+// ── Version: 0.MAJOR.MINOR.PATCH scheme ────────────────────────────────────
+// version.properties holds:
+//   VERSION_MAJOR=8
+//   VERSION_MINOR=20
+//   VERSION_PATCH=0    <- auto-incremented on each assemble
+//
+// Produces versionName 0.8.20.1 on the next automatic build.
+// Manual override: ./gradlew assembleDebug -PappVersion=0.8.20
 //
 def versionPropsFile = rootProject.file('version.properties')
 def versionProps = new Properties()
 if (versionPropsFile.exists()) {
     versionPropsFile.withReader('UTF-8') { reader -> versionProps.load(reader) }
 }
-def buildNumber = (versionProps['BUILD_NUMBER'] ?: '1').toInteger()
+def vMajor = (versionProps['VERSION_MAJOR'] ?: '5').toInteger()
+def vMinor = (versionProps['VERSION_MINOR'] ?: '16').toInteger()
+def vPatch = (versionProps['VERSION_PATCH'] ?: '0').toInteger()
 
 def manualVersion = project.hasProperty('appVersion') ? project.appVersion : null
 
-// Only auto-increment when no manual version is provided
+// Auto-increment the patch number on every assemble (unless manual override).
 gradle.taskGraph.whenReady { taskGraph ->
     if (manualVersion == null && taskGraph.allTasks.any { it.name.startsWith('assemble') }) {
-        versionProps['BUILD_NUMBER'] = (buildNumber + 1).toString()
+        versionProps['VERSION_MAJOR'] = vMajor.toString()
+        versionProps['VERSION_MINOR'] = vMinor.toString()
+        versionProps['VERSION_PATCH'] = (vPatch + 1).toString()
         versionPropsFile.withWriter('UTF-8') { writer -> versionProps.store(writer, null) }
     }
 }
 
-def appVersionName = manualVersion ?: "1.${buildNumber}"
+def appVersionName  = manualVersion ?: "0.${vMajor}.${vMinor}.${vPatch + 1}"
+def versionParts = appVersionName.tokenize('.')
+if (!(versionParts.size() in [3, 4]) || versionParts[0] != '0') {
+    throw new GradleException("App version must use the 0.MAJOR.MINOR or 0.MAJOR.MINOR.PATCH format")
+}
+def appVersionMajor = versionParts[1].toInteger()
+def appVersionMinor = versionParts[2].toInteger()
+def appVersionPatch = versionParts.size() == 4 ? versionParts[3].toInteger() : 0
+def appVersionCode = (
+        appVersionMajor * 100000
+                + appVersionMinor * 1000
+                + appVersionPatch)
 // ───────────────────────────────────────────────────────────────────────────
 
 android {
@@ -34,7 +53,7 @@ android {
         applicationId "com.iseegrass.native_app"
         minSdk 24
         targetSdk 34
-        versionCode buildNumber
+        versionCode appVersionCode
         versionName appVersionName
     }
 
@@ -45,6 +64,24 @@ android {
 
     buildFeatures {
         viewBinding true
+    }
+
+    aaptOptions {
+        // Prevent Gradle from compressing the TFLite model — TFLite needs
+        // random-access reads via MappedByteBuffer from the APK assets.
+        noCompress "tflite"
+    }
+
+    // Split per-ABI so debug builds only include the device's architecture.
+    // The select-tf-ops library ships native .so files for 4 ABIs; without
+    // splits the debug APK bundles all of them (~390 MB extra).
+    splits {
+        abi {
+            enable true
+            reset()
+            include "arm64-v8a"   // covers all modern Android phones
+            universalApk false    // set true if you ever need a fat APK
+        }
     }
 
     buildTypes {
@@ -67,6 +104,7 @@ android {
 
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.exifinterface:exifinterface:1.3.7'
     implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.lifecycle:lifecycle-viewmodel:2.6.2'
@@ -80,4 +118,11 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
     implementation 'com.github.bumptech.glide:glide:4.16.0'
     implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'org.jsoup:jsoup:1.19.1'
+    testImplementation 'junit:junit:4.13.2'
+
+    // TensorFlow Lite — on-device inference
+    implementation 'org.tensorflow:tensorflow-lite:2.14.0'
+    // Select TF Ops — required for VGG16 FlexConv2D ops used in CREYNet
+    implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:2.14.0'
 }

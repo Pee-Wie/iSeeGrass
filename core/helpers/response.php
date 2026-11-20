@@ -76,6 +76,7 @@ function setCorsHeaders(): void
         'http://localhost:3000',
         'http://localhost',
         'capacitor://localhost',
+        'https://localhost',
         'http://127.0.0.1',
         'http://127.0.0.1:3000',
     ];

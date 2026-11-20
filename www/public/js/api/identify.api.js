@@ -6,6 +6,8 @@
  *   {
  *     identification_id: number | null,   // null for guests
  *     image_url:         string | null,   // stored source image URL for authenticated users
+ *     latitude:          number | null,   // from uploaded image GPS EXIF, when present
+ *     longitude:         number | null,
  *     model_type:        string,          // active engine track key
  *     top_result:        string,          // species_name from verdict
  *     top_confidence:    number,          // percent 0–100
@@ -32,7 +34,8 @@
 
 import { get, put, del, upload } from './client.js';
 import { getEngineTrack } from './settings.api.js';
-import { enqueue, isOfflineError, OfflineQueuedError } from '../utils/identify-queue.js?v=4';
+import { enqueue, isOfflineError, OfflineQueuedError } from '../utils/identify-queue.js?v=5';
+import { readImageExifCoordinates } from '../utils/image-location.js?v=1';
 
 /**
  * @typedef {'original'|'improved_original'|'6_species_proto'} ModelType
@@ -56,6 +59,29 @@ async function resolveTrack(explicit) {
   }
 }
 
+async function getImageOrDeviceCoordinates(imageFile) {
+  const imageCoordinates = await readImageExifCoordinates(imageFile);
+  if (imageCoordinates) return imageCoordinates;
+  if (!window.Capacitor?.isNativePlatform?.() || !navigator.geolocation) {
+    return null;
+  }
+
+  return new Promise(resolve => {
+    try {
+      navigator.geolocation.getCurrentPosition(
+        position => resolve({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        }),
+        () => resolve(null),
+        { enableHighAccuracy: true, maximumAge: 60_000, timeout: 5_000 },
+      );
+    } catch {
+      resolve(null);
+    }
+  });
+}
+
 /**
  * Submit a File for CNN species identification.
  * The engine track is fetched live from admin system settings on every call,
@@ -73,17 +99,30 @@ async function resolveTrack(explicit) {
  *                                       being saved under a lingering logged-in session.
  * @param  {string|null}     [histId]    The UI history UUID to attach to the queue entry.
  *                                       Required for offline queueing; ignored for guests.
- * @returns {Promise<{identification_id:number|null, model_type:string, top_result:string, top_confidence:number, scores:Array}>}
+ * @param  {{latitude:number, longitude:number}|null} [queuedCoordinates]
+ *                                       Preserved fallback coordinates during offline sync.
+ * @returns {Promise<{identification_id:number|null, latitude:number|null, longitude:number|null, model_type:string, top_result:string, top_confidence:number, scores:Array}>}
  * @throws  {OfflineQueuedError}  When offline (non-guest only) — job stored in IDB.
  */
-export async function identifyImage(imageFile, title, modelType, guest = false, histId = null) {
+export async function identifyImage(
+  imageFile, title, modelType, guest = false, histId = null, queuedCoordinates,
+) {
   const track = await resolveTrack(modelType ?? null);
+  const coordinates = guest
+    ? null
+    : queuedCoordinates !== undefined
+      ? queuedCoordinates
+      : await getImageOrDeviceCoordinates(imageFile);
 
   const form = new FormData();
   form.append('image', imageFile);
   form.append('model_type', track);
   form.append('image_filename', imageFile.name);   // explicit filename field
   form.append('image_title', title ?? '');
+  if (coordinates) {
+    form.append('latitude', String(coordinates.latitude));
+    form.append('longitude', String(coordinates.longitude));
+  }
   if (guest) form.append('guest', '1');            // tells PHP to skip auth entirely
 
   try {
@@ -98,6 +137,8 @@ export async function identifyImage(imageFile, title, modelType, guest = false, 
         title     : title ?? null,
         modelType : track,
         histId    : resolvedHistId,
+        latitude  : coordinates?.latitude ?? null,
+        longitude : coordinates?.longitude ?? null,
       });
       throw new OfflineQueuedError(resolvedHistId, queueId);
     }
@@ -120,6 +161,8 @@ export async function identifyImage(imageFile, title, modelType, guest = false, 
  *   histId?: string|null,
  *   notes?: string|null,
  *   queueOffline?: boolean,
+ *   latitude?: number|null,
+ *   longitude?: number|null,
  * }} [options]
  */
 export async function manualIdentifyImage(imageFile, scientificName, title, options = {}) {
@@ -128,7 +171,16 @@ export async function manualIdentifyImage(imageFile, scientificName, title, opti
     histId = null,
     notes = null,
     queueOffline = true,
+    latitude,
+    longitude,
   } = options;
+  const coordinatesWereQueued = Object.prototype.hasOwnProperty.call(options, 'latitude')
+    || Object.prototype.hasOwnProperty.call(options, 'longitude');
+  const coordinates = sourceIdentificationId == null && imageFile
+    ? (coordinatesWereQueued
+      ? latitude != null && longitude != null ? { latitude, longitude } : null
+      : await getImageOrDeviceCoordinates(imageFile))
+    : null;
   const form = new FormData();
   form.append('scientific_name', scientificName);
   form.append('image_title', title ?? '');
@@ -139,6 +191,10 @@ export async function manualIdentifyImage(imageFile, scientificName, title, opti
   } else if (imageFile) {
     form.append('image', imageFile);
     form.append('image_filename', imageFile.name);
+    if (coordinates) {
+      form.append('latitude', String(coordinates.latitude));
+      form.append('longitude', String(coordinates.longitude));
+    }
   } else {
     throw new Error('Select a photo before saving a manual identification.');
   }
@@ -160,6 +216,8 @@ export async function manualIdentifyImage(imageFile, scientificName, title, opti
         speciesName: scientificName,
         sourceIdentificationId,
         notes,
+        latitude: coordinates?.latitude ?? null,
+        longitude: coordinates?.longitude ?? null,
       });
       throw new OfflineQueuedError(resolvedHistId, queueId);
     }

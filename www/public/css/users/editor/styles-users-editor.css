@@ -196,6 +196,34 @@
   flex-shrink: 0;
 }
 
+.doc-section-heading {
+  margin: 0.6rem 0 0.1rem;
+  padding: 0.45rem 0.2rem 0.25rem;
+  border-top: 1px solid rgba(142, 214, 85, 0.18);
+  color: #b6efb6;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.doc-item__owner {
+  color: rgba(255,255,255,0.5);
+  font-size: 0.65rem;
+}
+
+.assessment-readonly-notice {
+  margin: 0.5rem 1rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid rgba(142, 214, 85, 0.3);
+  border-radius: 8px;
+  background: rgba(142, 214, 85, 0.1);
+  color: #d6f0b8;
+  font-size: 0.82rem;
+}
+
+.assessment-readonly-notice[hidden] { display: none; }
+
 /* Stacked name + date */
 .doc-item__info {
   flex: 1;
@@ -611,7 +639,7 @@
   width: 100%;
   min-height: 440px;
   max-height: 60vh;
-  overflow-y: auto;
+  overflow: auto;
   /* Word uses 2.54 cm (1 in) margins = ~96px at 96 dpi */
   padding: 1in 1in 1in 1in;
   outline: none;
@@ -746,6 +774,127 @@
 
 .editor-canvas td {
   background: #FFFFFF;
+}
+
+.editor-canvas table[data-assessment-transect] {
+  width: 1730px;
+  min-width: 1730px;
+  table-layout: fixed;
+}
+
+.editor-canvas table[data-assessment-transect] th:nth-child(1),
+.editor-canvas table[data-assessment-transect] td:nth-child(1) { width: 80px; }
+.editor-canvas table[data-assessment-transect] th:nth-child(2),
+.editor-canvas table[data-assessment-transect] td:nth-child(2) { width: 230px; }
+.editor-canvas table[data-assessment-transect] th:nth-child(3),
+.editor-canvas table[data-assessment-transect] td:nth-child(3) { width: 150px; }
+.editor-canvas table[data-assessment-transect] th:nth-child(4),
+.editor-canvas table[data-assessment-transect] td:nth-child(4),
+.editor-canvas table[data-assessment-transect] th:nth-child(5),
+.editor-canvas table[data-assessment-transect] td:nth-child(5) { width: 200px; }
+.editor-canvas table[data-assessment-transect] th:nth-child(6),
+.editor-canvas table[data-assessment-transect] td:nth-child(6) { width: 140px; }
+.editor-canvas table[data-assessment-transect] th:nth-child(7),
+.editor-canvas table[data-assessment-transect] td:nth-child(7) { width: 220px; }
+.editor-canvas table[data-assessment-transect] th:nth-child(8),
+.editor-canvas table[data-assessment-transect] td:nth-child(8) { width: 140px; }
+.editor-canvas table[data-assessment-transect] th:nth-child(9),
+.editor-canvas table[data-assessment-transect] td:nth-child(9) { width: 180px; }
+.editor-canvas table[data-assessment-transect] th:nth-child(10),
+.editor-canvas table[data-assessment-transect] td:nth-child(10) { width: 190px; }
+
+.editor-canvas table[data-assessment-transect] th,
+.editor-canvas table[data-assessment-transect] td {
+  box-sizing: border-box;
+}
+
+.editor-canvas [data-coverage-species-entry],
+.editor-canvas [data-coverage-total] {
+  background: #fffbea;
+}
+
+.editor-canvas [data-coverage-species-entry]:empty::before,
+.editor-canvas [data-coverage-total]:empty::before {
+  content: attr(data-placeholder);
+  color: #888;
+  pointer-events: none;
+  font-size: 0.8em;
+}
+
+.editor-canvas [data-coverage-species-entry][aria-invalid="true"],
+.editor-canvas [data-coverage-total][aria-invalid="true"] {
+  box-shadow: inset 0 0 0 2px #c0392b;
+}
+
+.editor-canvas [data-coverage-composition],
+.editor-canvas [data-coverage-species-cover] {
+  white-space: pre-line;
+}
+
+.editor-canvas [data-coverage-summary] {
+  padding: 0.55rem 0.7rem;
+  border-left: 3px solid #70ad47;
+  background: #f1f7e9;
+  font-size: 0.9rem;
+}
+
+.coverage-suggestions {
+  position: fixed;
+  z-index: 1200;
+  max-height: min(260px, 40dvh);
+  overflow-y: auto;
+  border: 1px solid #9bbd7c;
+  border-radius: 6px;
+  background: #fff;
+  color: #172516;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.coverage-suggestions[hidden] {
+  display: none;
+}
+
+.coverage-suggestions__option {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  gap: 0.1rem 0.55rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.55rem 0.7rem;
+  border: 0;
+  border-bottom: 1px solid #e8eee2;
+  background: #fff;
+  color: #172516;
+  text-align: left;
+  cursor: pointer;
+}
+
+.coverage-suggestions__option:hover,
+.coverage-suggestions__option[aria-selected="true"] {
+  background: #eff8e7;
+}
+
+.coverage-suggestions__option strong {
+  grid-row: span 2;
+  align-self: center;
+  color: #35691f;
+}
+
+.coverage-suggestions__option small {
+  color: #66745f;
+  font-size: 0.7rem;
+}
+
+.coverage-suggestions__empty,
+.coverage-suggestions__status {
+  padding: 0.55rem 0.7rem;
+  color: #52614c;
+  font-size: 0.78rem;
+}
+
+.coverage-suggestions__status {
+  border-top: 1px solid #e8eee2;
+  color: #697765;
 }
 
 /* Alternating row — Excel banded rows */
@@ -1268,6 +1417,21 @@
 }
 
 @media (max-width: 600px) {
+  .assessment-layout,
+  .editor-card,
+  .editor-body,
+  .editor-canvas-wrap {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .editor-body {
+    padding: 0.5rem;
+  }
+  .editor-canvas {
+    box-sizing: border-box;
+    padding: 0.5rem;
+    max-height: 60dvh;
+  }
   .assessment-sidebar {
     grid-template-columns: 1fr;
   }

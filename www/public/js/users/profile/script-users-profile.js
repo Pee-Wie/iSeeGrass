@@ -8,7 +8,7 @@
 import { me }                         from '../../api/auth.api.js';
 import { updateUser, changePassword } from '../../api/users.api.js';
 import { get, upload }                from '../../api/client.js';
-import { apiUrl }                     from '../../config/api.config.js';
+import { apiUrl, assetUrl }            from '../../config/api.config.js';
 
 // ── Current user (set after me()) ─────────────────────────────────────────────
 let currentUser = null;
@@ -88,7 +88,7 @@ $('avatarInput')?.addEventListener('change', async () => {
 
   try {
     const data = await upload('/users/avatar', fd);
-    const url  = data.avatar_url ?? null;
+    const url  = assetUrl(data.avatar_url);
     applyAvatar(url);
     if (currentUser) currentUser.avatar_url = url;
     showToast('Profile picture updated.');
@@ -135,6 +135,11 @@ function populateForm(u) {
   $('fieldEmail').value       = u.email        || '';
   $('fieldUsername').value    = u.username     || '';
   $('fieldRole').value        = u.position     || 'Researcher';
+  $('fieldRole').disabled     = u.role !== 'admin';
+  const roleHint = $('fieldRoleHint');
+  if (roleHint) roleHint.textContent = u.role === 'admin'
+    ? 'Administrators can update this setting.'
+    : 'Only an administrator can change this.';
   $('fieldInstitution').value = u.institution  || '';
   $('fieldBio').value         = u.bio          || '';
   $('fieldPhone').value       = u.phone        || '';
@@ -174,17 +179,18 @@ formPersonal?.addEventListener('submit', async e => {
   if (btn) { btn.disabled = true; const sp = btn.querySelector('span'); if (sp) sp.textContent = 'Saving…'; }
 
   try {
-    const updated = await updateUser(currentUser.id, {
+    const updateData = {
       first_name:  first,
       last_name:   last,
       middle_name: $('fieldMiddleName').value.trim() || null,
       email,
       username:    $('fieldUsername').value.trim() || null,
-      position:    $('fieldRole').value,
       institution: $('fieldInstitution').value.trim() || null,
       phone:       phone || null,
       bio:         $('fieldBio').value.trim() || null,
-    });
+    };
+    if (currentUser.role === 'admin') updateData.position = $('fieldRole').value;
+    const updated = await updateUser(currentUser.id, updateData);
     currentUser = updated;
     updateSidebarCard(updated);
     // Update local cache
@@ -392,7 +398,7 @@ window.addEventListener('offline', () => applyOfflineState(true));
     currentUser = await me();
     populateForm(currentUser);
     renderJoinedSince(currentUser.created_at);
-    applyAvatar(currentUser.avatar_url ?? null);
+    applyAvatar(assetUrl(currentUser.avatar_url));
     loadStats();
   } catch {
     // me() will redirect to login on 401

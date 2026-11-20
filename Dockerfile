@@ -1,7 +1,7 @@
 FROM php:8.2-apache-bullseye
 
 # ── PHP extensions ────────────────────────────────────────────────────────────
-RUN docker-php-ext-install mysqli pdo pdo_mysql
+RUN docker-php-ext-install mysqli pdo pdo_mysql exif
 
 # ── PHP production settings ───────────────────────────────────────────────────
 # Disable display_errors so warnings never corrupt JSON API responses.

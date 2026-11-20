@@ -32,8 +32,12 @@ if ($existing === null) {
 
 $isAdmin = ($currentUser['role'] === 'admin');
 
-if (!$isAdmin && (int) $existing['user_id'] !== (int) $currentUser['id']) {
+if (!AssessmentModel::canView($existing, $currentUser)
+    || (!$isAdmin && (int) $existing['user_id'] !== (int) $currentUser['id'])) {
     jsonError('Forbidden.', 403);
+}
+if (!AssessmentModel::canDelete($existing, $currentUser)) {
+    jsonError('Only draft or in-progress assessments can be deleted.', 409);
 }
 
 $ownerUserId = $isAdmin ? null : (int) $currentUser['id'];

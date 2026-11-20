@@ -46,7 +46,6 @@ function catalogSpecies(name) {
 }
 
 function speciesFromHistory(records) {
-  const seen = new Set();
   return records
     .map(record => {
       const scientificName = String(record.top_result || '').trim();
@@ -56,15 +55,14 @@ function speciesFromHistory(records) {
         scientificName: species?.scientificName || scientificName,
         commonName: species?.commonName || '',
         source: 'history',
+        identificationId: record.id,
+        title: record.title || '',
+        createdAt: record.created_at || '',
+        latitude: record.latitude,
+        longitude: record.longitude,
       };
     })
-    .filter(species => {
-      if (!species) return false;
-      const key = normalize(species.scientificName);
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+    .filter(Boolean);
 }
 
 async function loadHistory() {
@@ -85,17 +83,15 @@ async function loadHistory() {
 }
 
 function allSuggestions() {
-  const byName = new Map();
-  [...historySpecies, ...SEAGRASS_SPECIES.map(species => ({
+  const historyNames = new Set(historySpecies.map(species => normalize(species.scientificName)));
+  const catalogSuggestions = SEAGRASS_SPECIES
+    .filter(species => !historyNames.has(normalize(species.scientificName)))
+    .map(species => ({
     scientificName: species.scientificName,
     commonName: species.commonName,
     source: 'catalog',
-  }))].forEach(species => {
-    const key = normalize(species.scientificName);
-    if (!byName.has(key)) byName.set(key, species);
-  });
-
-  return [...byName.values()].map(species => ({
+  }));
+  return [...historySpecies, ...catalogSuggestions].map(species => ({
     ...species,
     code: speciesCode(species.scientificName),
   }));
@@ -153,9 +149,13 @@ function renderSuggestions(cell) {
       const name = document.createElement('span');
       name.textContent = species.scientificName;
       const source = document.createElement('small');
-      source.textContent = species.source === 'history'
-        ? 'From your identification history'
-        : 'Species catalog';
+      if (species.source === 'history') {
+        const label = species.title
+          || (species.createdAt ? new Date(species.createdAt).toLocaleDateString() : 'Saved identification');
+        source.textContent = `ID #${species.identificationId} · ${label}`;
+      } else {
+        source.textContent = 'Species catalog';
+      }
       option.append(code, name, source);
       option.addEventListener('mousedown', event => event.preventDefault());
       option.addEventListener('click', () => selectSuggestion(index));
@@ -177,10 +177,27 @@ function renderSuggestions(cell) {
 function positionSuggestions(cell) {
   if (suggestionList.hidden || !cell?.isConnected) return;
   const rect = cell.getBoundingClientRect();
-  const width = Math.min(360, Math.max(220, rect.width), Math.max(180, window.innerWidth - 16));
+  const viewport = window.visualViewport;
+  const viewportLeft = viewport?.offsetLeft || 0;
+  const viewportTop = viewport?.offsetTop || 0;
+  const viewportWidth = viewport?.width || window.innerWidth;
+  const viewportHeight = viewport?.height || window.innerHeight;
+  const viewportRight = viewportLeft + viewportWidth;
+  const viewportBottom = viewportTop + viewportHeight;
+  const availableWidth = Math.max(0, viewportWidth - 16);
+  const width = Math.min(360, availableWidth, Math.max(Math.min(220, availableWidth), rect.width));
+  const availableAbove = Math.max(0, rect.top - viewportTop - 8);
+  const availableBelow = Math.max(0, viewportBottom - rect.bottom - 8);
+  const placeAbove = availableAbove > availableBelow;
+
   suggestionList.style.width = `${width}px`;
-  suggestionList.style.left = `${Math.max(8, Math.min(rect.left, window.innerWidth - width - 8))}px`;
-  suggestionList.style.top = `${Math.max(8, Math.min(rect.bottom, window.innerHeight - suggestionList.offsetHeight - 8))}px`;
+  suggestionList.style.left = `${Math.max(viewportLeft + 8, Math.min(rect.left, viewportRight - width - 8))}px`;
+  suggestionList.style.maxHeight = `${Math.min(260, placeAbove ? availableAbove : availableBelow)}px`;
+
+  const listHeight = suggestionList.offsetHeight;
+  suggestionList.style.top = placeAbove
+    ? `${Math.max(viewportTop + 8, rect.top - listHeight - 4)}px`
+    : `${Math.min(viewportBottom - listHeight - 8, rect.bottom + 4)}px`;
 }
 
 function hideSuggestions() {
@@ -205,6 +222,17 @@ function selectSuggestion(index) {
   selection.removeAllRanges();
   selection.addRange(range);
   cell.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
+  const locationCell = cell.closest('tr')?.querySelector('[data-coverage-location]');
+  if (locationCell) {
+    const latitude = Number(species.latitude);
+    const longitude = Number(species.longitude);
+    const hasLocation = species.source === 'history'
+      && Number.isFinite(latitude) && Math.abs(latitude) <= 90
+      && Number.isFinite(longitude) && Math.abs(longitude) <= 180;
+    locationCell.textContent = hasLocation
+      ? `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+      : '';
+  }
   cell.focus();
   hideSuggestions();
 }
@@ -363,9 +391,14 @@ function updateCoverageTables() {
 
 if (canvas) {
   canvas.addEventListener('input', event => {
+    if (canvas.getAttribute('aria-readonly') === 'true') return;
     const cell = event.target.closest?.('[data-coverage-species-entry], [data-coverage-total]')
       || getActiveCoverageCell();
     if (cell) {
+      if (cell.matches('[data-coverage-species-entry]')) {
+        const locationCell = cell.closest('tr')?.querySelector('[data-coverage-location]');
+        if (locationCell) locationCell.textContent = '';
+      }
       updateCoverageTables();
       if (cell.matches('[data-coverage-species-entry]')) renderSuggestions(cell);
       else hideSuggestions();
@@ -373,7 +406,18 @@ if (canvas) {
   });
 
   canvas.addEventListener('click', event => {
+    if (canvas.getAttribute('aria-readonly') === 'true') return;
     const cell = event.target.closest?.('[data-coverage-species-entry]');
+    if (cell) {
+      renderSuggestions(cell);
+      requestAnimationFrame(() => positionSuggestions(cell));
+    }
+  });
+
+  canvas.addEventListener('focusin', event => {
+    if (canvas.getAttribute('aria-readonly') === 'true') return;
+    const cell = event.target.closest?.('[data-coverage-species-entry]')
+      || getActiveCoverageCell();
     if (cell) renderSuggestions(cell);
   });
 
@@ -402,6 +446,8 @@ if (canvas) {
 
   window.addEventListener('resize', () => positionSuggestions(activeCell));
   window.addEventListener('scroll', () => positionSuggestions(activeCell), true);
+  window.visualViewport?.addEventListener('resize', () => positionSuggestions(activeCell));
+  window.visualViewport?.addEventListener('scroll', () => positionSuggestions(activeCell));
 
   new MutationObserver(updateCoverageTables).observe(canvas, { childList: true, subtree: true });
   updateCoverageTables();

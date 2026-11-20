@@ -16,8 +16,8 @@ if (!$isAdmin && (int)$currentUser['id'] !== $targetId) jsonError('Forbidden.', 
 
 $body = getJsonBody();
 
-$editable     = ['first_name','last_name','middle_name','email','username','position','institution','phone','bio','avatar_url'];
-$adminOnly    = ['status','role'];
+$editable     = ['first_name','last_name','middle_name','email','username','institution','phone','bio','avatar_url'];
+$adminOnly    = ['status','role','position'];
 $updateData   = [];
 
 foreach ($editable as $f) {

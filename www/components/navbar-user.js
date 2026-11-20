@@ -1,3 +1,5 @@
+import { assetUrl } from '../public/js/config/api.config.js';
+
 class ISeeNavbar extends HTMLElement {
   connectedCallback() {
     if (this.dataset.ready === 'true') return;
@@ -230,7 +232,7 @@ class ISeeNavbar extends HTMLElement {
     avatarSlot.textContent = '';
     if (user.avatar_url) {
       const img = document.createElement('img');
-      img.src       = user.avatar_url;
+      img.src       = assetUrl(user.avatar_url);
       img.alt       = user.first_name || 'User';
       img.className = 'isee-user-btn__avatar-img';
       avatarSlot.appendChild(img);

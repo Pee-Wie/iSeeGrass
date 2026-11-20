@@ -28,10 +28,7 @@
  *   clearCollectorPhotos(userId)            → Promise<void>
  *   restoreCollectorPhotos(userId)          → Promise<Array>  (sorted by addedAt asc)
  *
- * ── TTL eviction ──────────────────────────────────────────────────────────────
- * Records older than 48 hours are evicted on restoreCollectorPhotos() before
- * the surviving photos are returned. This keeps storage clean without a
- * separate background job.
+ * Photos remain stored until the user removes them or clears the collection.
  */
 
 'use strict';
@@ -39,8 +36,6 @@
 const DB_NAME    = 'iseePhotoCollector';
 const DB_VERSION = 1;
 const STORE_NAME = 'photos';
-
-const TTL_MS = 48 * 60 * 60 * 1000; // 48 hours
 
 // ── IDB helpers ───────────────────────────────────────────────────────────────
 
@@ -81,6 +76,19 @@ function idbRequest(req) {
   });
 }
 
+function transactionDone(store) {
+  return new Promise((resolve, reject) => {
+    const transaction = store.transaction;
+    transaction.addEventListener('complete', resolve, { once: true });
+    transaction.addEventListener('abort', () => {
+      reject(transaction.error || new Error('IndexedDB transaction aborted.'));
+    }, { once: true });
+    transaction.addEventListener('error', () => {
+      reject(transaction.error || new Error('IndexedDB transaction failed.'));
+    }, { once: true });
+  });
+}
+
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /**
@@ -88,7 +96,7 @@ function idbRequest(req) {
  *
  * @param {{
  *   uuid:         string,
- *   userId:       number,
+ *   userId:       number|string,
  *   imageBlob:    Blob,
  *   mimeType:     string,
  *   originalName: string,
@@ -99,8 +107,15 @@ function idbRequest(req) {
  * @returns {Promise<void>}
  */
 export async function saveCollectorPhoto(record) {
+  if (record.userId === null || record.userId === undefined) {
+    throw new Error('A signed-in user is required to save collection photos.');
+  }
+
   const store = await tx('readwrite');
-  await idbRequest(store.put(record));
+  await Promise.all([
+    idbRequest(store.put({ ...record, userId: String(record.userId) })),
+    transactionDone(store),
+  ]);
 }
 
 /**
@@ -112,10 +127,17 @@ export async function saveCollectorPhoto(record) {
  */
 export async function updateCollectorPhotoLabel(uuid, newLabel) {
   const store = await tx('readwrite');
+  const completed = transactionDone(store).then(
+    () => null,
+    error => error,
+  );
   const existing = await idbRequest(store.get(uuid));
-  if (!existing) return;
-  existing.label = newLabel;
-  await idbRequest(store.put(existing));
+  if (existing) {
+    existing.label = newLabel;
+    await idbRequest(store.put(existing));
+  }
+  const transactionError = await completed;
+  if (transactionError) throw transactionError;
 }
 
 /**
@@ -126,57 +148,49 @@ export async function updateCollectorPhotoLabel(uuid, newLabel) {
  */
 export async function removeCollectorPhoto(uuid) {
   const store = await tx('readwrite');
-  await idbRequest(store.delete(uuid));
+  await Promise.all([
+    idbRequest(store.delete(uuid)),
+    transactionDone(store),
+  ]);
 }
 
 /**
  * Delete all records belonging to userId.
  * Uses getAll + filter because the key path is uuid, not userId.
  *
- * @param {number|null} userId
+ * @param {number|string|null} userId
  * @returns {Promise<void>}
  */
 export async function clearCollectorPhotos(userId) {
   if (userId === null || userId === undefined) return;
 
   const store = await tx('readwrite');
-  const all   = await idbRequest(store.getAll());
-
-  const deletes = all
-    .filter(r => r.userId === userId)
-    .map(r => idbRequest(store.delete(r.uuid)));
-
-  await Promise.all(deletes);
+  const completed = transactionDone(store);
+  const allRequest = store.getAll();
+  allRequest.addEventListener('success', () => {
+    allRequest.result
+      .filter(record => String(record.userId) === String(userId))
+      .forEach(record => store.delete(record.uuid));
+  }, { once: true });
+  await Promise.all([idbRequest(allRequest), completed]);
 }
 
 /**
  * Return all records for userId sorted by addedAt ascending.
- * Before returning, evict any records older than 48 hours.
  *
- * @param {number|null} userId
+ * @param {number|string|null} userId
  * @returns {Promise<Array>}
  */
 export async function restoreCollectorPhotos(userId) {
   if (userId === null || userId === undefined) return [];
 
-  const cutoff = Date.now() - TTL_MS;
-
-  // Evict stale records for this user first
-  const storeW = await tx('readwrite');
-  const allW   = await idbRequest(storeW.getAll());
-
-  const stale = allW.filter(r => r.userId === userId && r.addedAt < cutoff);
-  if (stale.length) {
-    // Open a fresh readwrite transaction for deletes (prior tx may have closed)
-    const storeD = await tx('readwrite');
-    await Promise.all(stale.map(r => idbRequest(storeD.delete(r.uuid))));
-  }
-
-  // Read surviving records
-  const storeR  = await tx('readonly');
-  const current = await idbRequest(storeR.getAll());
+  const store = await tx('readonly');
+  const [current] = await Promise.all([
+    idbRequest(store.getAll()),
+    transactionDone(store),
+  ]);
 
   return current
-    .filter(r => r.userId === userId)
+    .filter(r => String(r.userId) === String(userId))
     .sort((a, b) => a.addedAt - b.addedAt);
 }
