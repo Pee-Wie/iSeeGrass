@@ -127,12 +127,16 @@ CREATE TABLE IF NOT EXISTS identifications (
     image_count     TINYINT UNSIGNED    NOT NULL DEFAULT 1,
     image_filename  VARCHAR(255)        DEFAULT NULL
                     COMMENT 'Original filename of the uploaded image',
+    image_path      VARCHAR(255)        DEFAULT NULL
+                    COMMENT 'Stored identification image filename in persistent uploads',
     title           VARCHAR(120)        DEFAULT NULL,
     top_result      VARCHAR(120)        DEFAULT NULL,
     top_confidence  DECIMAL(5,2)        DEFAULT NULL,
     model_type      ENUM('original','improved_original','6_species_proto')
-                                        NOT NULL DEFAULT 'improved_original'
-                    COMMENT 'CREYNet taxonomy engine track used for this run',
+                                        NULL DEFAULT 'improved_original'
+                    COMMENT 'CREYNet taxonomy engine track; NULL for manual IDs',
+    identification_method ENUM('cnn','manual_key')
+                                        NOT NULL DEFAULT 'cnn',
     created_at      TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_identifications_user       (user_id),
     INDEX idx_identifications_date       (created_at),
@@ -151,7 +155,7 @@ CREATE TABLE IF NOT EXISTS identification_results (
     species_id          VARCHAR(80)     NOT NULL,
     scientific_name     VARCHAR(120)    NOT NULL,
     common_name         VARCHAR(120)    DEFAULT NULL,
-    confidence          DECIMAL(5,2)    NOT NULL,
+    confidence          DECIMAL(5,2)    NULL DEFAULT NULL,
     `rank`              TINYINT UNSIGNED NOT NULL DEFAULT 1,
     INDEX idx_id_results_species (species_id),
     INDEX idx_id_results_rank    (`rank`),

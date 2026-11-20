@@ -53,6 +53,8 @@ AddType application/javascript .js .mjs
     RewriteRule ^api/identify$                          core/api/identify.php [QSA,L]
 
     # Identifications (user history / delete / rename)
+    RewriteRule ^api/identifications/manual$            core/api/identifications/manual.php [QSA,L]
+    RewriteRule ^api/identifications/image$             core/api/identifications/image.php [QSA,L]
     RewriteRule ^api/identifications/user-history$      core/api/identifications/user-history.php [QSA,L]
     RewriteRule ^api/identifications/user-delete-all$   core/api/identifications/user-delete-all.php [QSA,L]
     RewriteRule ^api/identifications/user-delete$       core/api/identifications/user-delete.php [QSA,L]

@@ -27,3 +27,15 @@ export function apiUrl(path) {
 
   return `${BASE_URL}/core/api/${filePart}.php${queryPart}`;
 }
+
+/**
+ * Resolve a public asset path against the backend origin.
+ * Uploaded files are served by the API host, which may differ from the
+ * origin serving the web client.
+ *
+ * @param {string|null|undefined} path
+ * @returns {string|null}
+ */
+export function assetUrl(path) {
+  return path ? new URL(path, `${BASE_URL}/`).href : null;
+}

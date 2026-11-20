@@ -19,9 +19,11 @@
 
 'use strict';
 
-import { identifyImage, findCatalogMatch } from '../../api/identify.api.js';
-import { drain, OfflineQueuedError } from '../../utils/identify-queue.js';
+import { identifyImage, manualIdentifyImage, findCatalogMatch } from '../../api/identify.api.js?v=3';
+import { drain, OfflineQueuedError } from '../../utils/identify-queue.js?v=3';
 import { saveCollectorPhoto, updateCollectorPhotoLabel, removeCollectorPhoto, clearCollectorPhotos, restoreCollectorPhotos } from '../../utils/photo-collector-store.js';
+import { assetUrl } from '../../config/api.config.js?v=3';
+import { openManualIdentificationDialog } from './manual-identification-key.js';
 
 function getCollectorUserId() {
   try {
@@ -43,6 +45,7 @@ const photoGrid    = document.getElementById('photoGrid');
 const photoCount   = document.getElementById('photoCount');
 const photoActions = document.getElementById('photoActions');
 const identifyBtn  = document.getElementById('identifyBtn');
+const manualIdentifyBtn = document.getElementById('manualIdentifyBtn');
 const clearBtn     = document.getElementById('clearBtn');
 const mainBody     = document.getElementById('speciesResults');
 
@@ -90,17 +93,102 @@ function updateUI() {
     ? `Identify "${selected[0].label}"`
     : 'Select a photo to identify';
   identifyBtn.disabled = !hasOne;
+  manualIdentifyBtn.disabled = !hasOne;
 }
 
 function getEntry(url) {
   return photos.find(p => p.url === url);
 }
 
+function getSelectedCollectorPhoto() {
+  const selected = photos.filter(photo => photo.selected);
+  return selected.length === 1 ? selected[0].file : null;
+}
+
+function openManualKeyForImage(file) {
+  if (!file) return;
+  openManualIdentificationDialog({
+    onSelect: outcome => runManualIdentification(file, outcome.scientificName),
+  });
+}
+
+async function runManualIdentification(imageFile, scientificName, options = {}) {
+  const histId = crypto.randomUUID();
+  const thumbUrl = imageFile ? URL.createObjectURL(imageFile) : null;
+  const isCorrection = options.sourceIdentificationId != null;
+  const entry = {
+    id: histId,
+    timestamp: Date.now(),
+    fileName: imageFile?.name ?? '(manual correction)',
+    thumbUrl,
+    topSpecies: scientificName,
+    confidence: null,
+    identificationMethod: 'manual_key',
+    title: isCorrection ? null : (idTitleInput?.value.trim() || null),
+    status: 'pending',
+    errorMsg: null,
+  };
+  window.identifyHistory?.push(entry);
+
+  try {
+    const result = await manualIdentifyImage(
+      imageFile,
+      scientificName,
+      entry.title,
+      { ...options, histId },
+    );
+    renderManualResult(result);
+    window.identifyHistory?.update(histId, {
+      dbId: result.identification_id ?? null,
+      ...(result.image_url ? { thumbUrl: assetUrl(result.image_url) } : {}),
+      topSpecies: result.top_result || scientificName,
+      confidence: null,
+      identificationMethod: 'manual_key',
+      title: result.title ?? entry.title,
+      status: 'done',
+    });
+    window.identifyHistory?._loadHistory().catch(error => {
+      console.error('Could not refresh identification history.', error);
+    });
+    if (imageFile) usePersistedImage(result.image_url);
+    if (isCorrection) {
+      showToastMessage('Manual correction saved and linked to the flagged prediction.', 4500);
+    }
+    return 'saved';
+  } catch (error) {
+    if (error instanceof OfflineQueuedError) {
+      showQueuedToast(entry.fileName);
+      window.identifyHistory?.update(histId, {
+        status: 'queued',
+        identificationMethod: 'manual_key',
+        confidence: null,
+      });
+      if (isCorrection) {
+        showToastMessage('Manual correction queued and will sync when online.', 4500);
+      }
+      return 'queued';
+    }
+    window.identifyHistory?.update(histId, {
+      status: 'error',
+      errorMsg: error.message || 'Manual identification failed.',
+    });
+    modalAlert(error.message || 'Manual identification failed. Please try again.',
+      'Manual Identification', 'error');
+    return false;
+  }
+}
+
 // ─── Add photos to the collector ─────────────────────────────────
 
-function addPhotos(files) {
+async function addPhotos(files) {
   const remaining = MAX_PHOTOS - photos.length;
   const accepted  = Array.from(files).slice(0, remaining);
+  const userId = getCollectorUserId();
+
+  if (userId === null) {
+    showToastMessage('Your photo could not be saved. Sign in again and retry.', 4500);
+    return;
+  }
 
   for (const file of accepted) {
     if (!file.type.startsWith('image/')) continue;
@@ -371,6 +459,10 @@ dropzone.addEventListener('keydown', e => {
 
 clearBtn.addEventListener('click', clearAll);
 
+manualIdentifyBtn.addEventListener('click', () => {
+  openManualKeyForImage(getSelectedCollectorPhoto());
+});
+
 identifyBtn.addEventListener('click', async () => {
   const selected = photos.filter(p => p.selected);
   if (selected.length !== 1) return;
@@ -402,17 +494,21 @@ identifyBtn.addEventListener('click', async () => {
 
   try {
     const result = await identifyImage(target.file, idTitle, null, false, histId);
+    usePersistedImage(result.image_url);
     renderIdentifyResults(result);
     if (window.identifyHistory) {
       window.identifyHistory.update(histId, {
         dbId:       result.identification_id ?? null,
+        ...(result.image_url ? { thumbUrl: assetUrl(result.image_url) } : {}),
         topSpecies: result.top_result  || '—',
-        confidence: result.top_confidence ?? (result.scores?.[0]?.confidence ?? 0),
+        confidence: result.identification_method === 'manual_key'
+          ? null
+          : result.top_confidence ?? (result.scores?.[0]?.confidence ?? 0),
+        identificationMethod: result.identification_method ?? 'cnn',
         title:      result.title ?? idTitle,
         status:     'done',
       });
     }
-    clearCollectorPhotos(getCollectorUserId()).catch(() => {});
   } catch (err) {
     if (err instanceof OfflineQueuedError) {
       // Offline — job is queued, update history entry to show queued state
@@ -478,6 +574,19 @@ function loadDirectPhoto(file) {
   renderDirectPreview();
 }
 
+function usePersistedImage(imageUrl) {
+  const image = document.querySelector('#directPreview .direct-preview__img');
+  const remoteUrl = assetUrl(imageUrl);
+  if (!image || !remoteUrl || !directPhoto) return;
+
+  const localUrl = directPhoto.url;
+  image.onerror = () => {
+    image.onerror = null;
+    image.src = localUrl;
+  };
+  image.src = remoteUrl;
+}
+
 function renderDirectPreview() {
   const prompt  = document.getElementById('uploadPrompt');
   let   preview = document.getElementById('directPreview');
@@ -535,12 +644,17 @@ function renderDirectPreview() {
 
       try {
         const result = await identifyImage(directPhoto.file, idTitle, null, false, histId);
+        usePersistedImage(result.image_url);
         renderIdentifyResults(result);
         if (window.identifyHistory) {
           window.identifyHistory.update(histId, {
             dbId:       result.identification_id ?? null,
+            ...(result.image_url ? { thumbUrl: assetUrl(result.image_url) } : {}),
             topSpecies: result.top_result  || '—',
-            confidence: result.top_confidence ?? (result.scores?.[0]?.confidence ?? 0),
+            confidence: result.identification_method === 'manual_key'
+              ? null
+              : result.top_confidence ?? (result.scores?.[0]?.confidence ?? 0),
+            identificationMethod: result.identification_method ?? 'cnn',
             title:      result.title ?? idTitle,
             status:     'done',
           });
@@ -587,8 +701,17 @@ function renderDirectPreview() {
     clearDirectBtn.textContent = 'Clear';
     clearDirectBtn.addEventListener('click', clearDirect);
 
+    const manualButton = document.createElement('button');
+    manualButton.className = 'btn btn-secondary direct-preview__manual';
+    manualButton.type = 'button';
+    manualButton.textContent = 'Use manual key';
+    manualButton.addEventListener('click', () => {
+      if (directPhoto) openManualKeyForImage(directPhoto.file);
+    });
+
     aside.appendChild(reuploadBtn);
     aside.appendChild(nameEl);
+    aside.appendChild(manualButton);
     aside.appendChild(changeBtn);
     aside.appendChild(clearDirectBtn);
 
@@ -930,8 +1053,12 @@ function onDrainResult(histId, result, err, file) {
     if (result) {
       window.identifyHistory.update(histId, {
         dbId:       result.identification_id ?? null,
+        ...(result.image_url ? { thumbUrl: assetUrl(result.image_url) } : {}),
         topSpecies: result.top_result  || '—',
-        confidence: result.top_confidence ?? (result.scores?.[0]?.confidence ?? 0),
+        confidence: result.identification_method === 'manual_key'
+          ? null
+          : result.top_confidence ?? (result.scores?.[0]?.confidence ?? 0),
+        identificationMethod: result.identification_method ?? 'cnn',
         title:      result.title ?? null,
         status:     'done',
       });
@@ -948,15 +1075,16 @@ function onDrainResult(histId, result, err, file) {
     window.identifyHistory._loadHistory().catch(() => {});
   }
 
-  // Load the image into the 75% panel and render the result below it.
-  // Only when the identification succeeded and a file is available.
-  if (result && file) {
-    // loadDirectPhoto shows the image in the preview panel
-    loadDirectPhoto(file);
-    // renderIdentifyResults inserts the result panel after mainBody
-    renderIdentifyResults(result);
-    // Catalog lookup deferred so the result panel paints first
-    setTimeout(() => fetchAndRenderCatalogMatch(result.top_result || ''), 0);
+  if (result) {
+    if (file) {
+      loadDirectPhoto(file);
+      usePersistedImage(result.image_url);
+    }
+    if (result.identification_method === 'manual_key') {
+      renderManualResult(result);
+    } else if (file) {
+      renderIdentifyResults(result);
+    }
   }
 }
 
@@ -969,7 +1097,17 @@ function tryDrainQueue() {
   drain(
     // Pass histId through so that if identifyImage re-queues on a mid-drain
     // disconnect, it reuses the same UUID instead of creating an orphan entry.
-    (file, title, modelType, histId) => identifyImage(file, title, modelType, false, histId),
+    (file, title, modelType, histId, method, speciesName, sourceId, notes) => {
+      if (method === 'manual_key') {
+        return manualIdentifyImage(file, speciesName, title, {
+          histId,
+          sourceIdentificationId: sourceId,
+          notes,
+          queueOffline: false,
+        });
+      }
+      return identifyImage(file, title, modelType, false, histId);
+    },
     onDrainResult,
   ).catch(() => {
     // Drain failures are non-fatal — will retry on next online event
@@ -1138,6 +1276,7 @@ document.addEventListener('isee:load-hist-result', (e) => {
     scores            : entry.topSpecies
       ? [{ label: entry.topSpecies, confidence: entry.confidence ?? 0 }]
       : [],
+    identification_method: entry.identificationMethod ?? 'cnn',
     title             : entry.title,
   };
   renderIdentifyResults(syntheticResult);
@@ -1192,13 +1331,19 @@ function capConfidence(pct) {
  * @param {object} result  API response data object
  */
 function renderIdentifyResults(result) {
+  if (result.identification_method === 'manual_key') {
+    renderManualResult(result);
+    return;
+  }
+
   let container = document.getElementById('identifyResultsPanel');
   if (!container) {
     container = document.createElement('div');
     container.id = 'identifyResultsPanel';
-    container.style.cssText = 'margin-top:1.5rem;padding:1rem 1.25rem;background:rgba(30,60,20,.55);border:1px solid rgba(124,203,77,.25);border-radius:10px;';
     mainBody.after(container);
   }
+  container.className = '';
+  container.style.cssText = 'margin-top:1.5rem;padding:1rem 1.25rem;background:rgba(30,60,20,.55);border:1px solid rgba(124,203,77,.25);border-radius:10px;';
 
   const topResult    = result.top_result || 'Unknown';
   const isBackground = BACKGROUND_RE.test(topResult);
@@ -1242,6 +1387,7 @@ function renderIdentifyResults(result) {
       <div id="flagResultForm" class="flag-result-form" hidden>
         <div class="flag-result-form__title">Flag this result</div>
         <p class="flag-result-form__desc">Tell us what you actually observed (optional). This helps improve the model.</p>
+        <button id="btnFlagManualKey" class="flag-result-form__manual-key" type="button">Use manual identification key</button>
         <div class="flag-result-form__row">
           <label class="flag-result-form__label" for="flagCorrection">What species did you see?</label>
           <input id="flagCorrection" class="flag-result-form__input" type="text"
@@ -1360,6 +1506,7 @@ function renderIdentifyResults(result) {
     <div id="flagResultForm" class="flag-result-form" hidden>
       <div class="flag-result-form__title">Flag this result</div>
       <p class="flag-result-form__desc">Tell us what you actually observed (optional). This helps improve the model.</p>
+      <button id="btnFlagManualKey" class="flag-result-form__manual-key" type="button">Use manual identification key</button>
       <div class="flag-result-form__row">
         <label class="flag-result-form__label" for="flagCorrection">What species did you see?</label>
         <input id="flagCorrection" class="flag-result-form__input" type="text"
@@ -1388,6 +1535,41 @@ function renderIdentifyResults(result) {
 
   // Defer the catalog lookup so the result panel paints first
   setTimeout(() => fetchAndRenderCatalogMatch(topResult), 0);
+}
+
+function renderManualResult(result) {
+  let container = document.getElementById('identifyResultsPanel');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'identifyResultsPanel';
+    mainBody.after(container);
+  }
+  container.className = 'manual-key-result-panel';
+  container.style.cssText = '';
+  container.replaceChildren();
+
+  const eyebrow = document.createElement('p');
+  eyebrow.className = 'manual-key-result-panel__eyebrow';
+  eyebrow.textContent = 'MANUAL KEY IDENTIFICATION';
+  const heading = document.createElement('h3');
+  heading.textContent = result.top_result || 'Unknown';
+  const provenance = document.createElement('p');
+  provenance.className = 'manual-key-result-panel__provenance';
+  provenance.textContent = 'Manual key result · no CNN confidence score';
+  const note = document.createElement('p');
+  note.textContent = 'Confirm this candidate with a regional field guide or a specialist.';
+  container.append(eyebrow, heading, provenance, note);
+
+  if (result.identification_id) {
+    const saved = document.createElement('p');
+    saved.className = 'manual-key-result-panel__saved';
+    saved.textContent = `Saved to history · ID #${result.identification_id}`;
+    container.append(saved);
+  }
+
+  if (result.top_result) {
+    setTimeout(() => fetchAndRenderCatalogMatch(result.top_result), 0);
+  }
 }
 
 // ─── Species catalog match card ────────────────────────────────────────────────
@@ -1516,10 +1698,22 @@ function _wireResultFlag({ identificationId, modelPrediction, modelConfidence })
   const btnSubmit = document.getElementById('btnFlagSubmit');
   const btnCancel = document.getElementById('btnFlagCancel');
   const msgEl     = document.getElementById('flagFormMsg');
+  const manualKeyButton = document.getElementById('btnFlagManualKey');
+  const correctionInput = document.getElementById('flagCorrection');
 
   if (!btn || !form) return;
 
   let flagged = false;
+  let selectedManualSpecies = null;
+
+  manualKeyButton?.addEventListener('click', () => {
+    openManualIdentificationDialog({
+      onSelect: outcome => {
+        selectedManualSpecies = outcome.scientificName;
+        correctionInput.value = selectedManualSpecies;
+      },
+    });
+  });
 
   // Toggle form open/close
   btn.addEventListener('click', () => {
@@ -1546,6 +1740,31 @@ function _wireResultFlag({ identificationId, modelPrediction, modelConfidence })
     btnSubmit.disabled = true;
     btnSubmit.textContent = 'Submitting…';
     msgEl.hidden = true;
+
+    if (selectedManualSpecies && correction === selectedManualSpecies) {
+      const state = await runManualIdentification(null, selectedManualSpecies, {
+        sourceIdentificationId: identificationId,
+        notes: notes || null,
+      });
+      if (state === 'saved' || state === 'queued') {
+        flagged = true;
+        btn.classList.add('flag-result-btn--flagged');
+        btn.title = state === 'saved'
+          ? 'Flagged — manual correction saved'
+          : 'Correction queued for sync';
+        btn.querySelector('svg')?.setAttribute('fill', 'currentColor');
+        form.hidden = true;
+        _showFlagMsg(msgEl, 'success', state === 'saved'
+          ? '✓ Manual correction saved and linked to this prediction.'
+          : 'Manual correction queued; it will be linked when online.');
+        form.hidden = false;
+        setTimeout(() => { form.hidden = true; }, 4500);
+      } else {
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = 'Submit flag';
+      }
+      return;
+    }
 
     try {
       const res = await fetch('/api/identifications/flag', {

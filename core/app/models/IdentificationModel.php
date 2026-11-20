@@ -21,6 +21,8 @@ class IdentificationModel
      * @param string|null $topResult      Scientific name of the top prediction.
      * @param float|null  $topConfidence  Confidence percent (e.g. 94.75).
      * @param string|null $modelType      Engine track key ('original' | 'improved_original' | '6_species_proto').
+     * @param string|null $imagePath      Stored image filename, if available.
+     * @param string      $identificationMethod  'cnn' or 'manual_key'.
      */
     public function create(
         int     $userId,
@@ -29,22 +31,28 @@ class IdentificationModel
         ?string $title         = null,
         ?string $topResult     = null,
         ?float  $topConfidence = null,
-        ?string $modelType     = 'improved_original'
+        ?string $modelType     = 'improved_original',
+        ?string $imagePath     = null,
+        string  $identificationMethod = 'cnn'
     ): int {
         $stmt = $this->pdo->prepare(
             'INSERT INTO identifications
-               (user_id, image_count, image_filename, title, top_result, top_confidence, model_type)
+               (user_id, image_count, image_filename, image_path, title, top_result,
+                top_confidence, model_type, identification_method)
              VALUES
-               (:user_id, :image_count, :image_filename, :title, :top_result, :top_confidence, :model_type)'
+               (:user_id, :image_count, :image_filename, :image_path, :title, :top_result,
+                :top_confidence, :model_type, :identification_method)'
         );
         $stmt->execute([
             ':user_id'        => $userId,
             ':image_count'    => $imageCount,
             ':image_filename' => $imageFilename,
+            ':image_path'     => $imagePath,
             ':title'          => $title,
             ':top_result'     => $topResult,
             ':top_confidence' => $topConfidence,
             ':model_type'     => $modelType,
+            ':identification_method' => $identificationMethod,
         ]);
         return (int) $this->pdo->lastInsertId();
     }
@@ -152,7 +160,7 @@ class IdentificationModel
      * @param string $speciesId         Slug matching seagrass_catalog.slug
      * @param string $scientificName
      * @param string|null $commonName
-     * @param float  $confidence        Percent (e.g. 87.30)
+     * @param float|null $confidence    Percent (e.g. 87.30), or null for a manual result.
      * @param int    $rank              1 = top
      */
     public function addResult(
@@ -160,7 +168,7 @@ class IdentificationModel
         string  $speciesId,
         string  $scientificName,
         ?string $commonName,
-        float   $confidence,
+        ?float  $confidence,
         int     $rank = 1
     ): int {
         $stmt = $this->pdo->prepare(

@@ -17,6 +17,7 @@
  *         {
  *           "id":             42,
  *           "image_filename": "seagrass_sample.jpg",
+ *           "image_url":      "/api/identifications/image?filename=...", // null if unavailable
  *           "top_result":     "Halodule pinifolia",
  *           "top_confidence": 87.30,
  *           "created_at":     "2025-01-15 10:32:00"
@@ -53,10 +54,14 @@ $records = array_map(static function (array $row): array {
         'image_filename' => isset($row['image_filename']) && $row['image_filename'] !== ''
                                 ? $row['image_filename']
                                 : null,
+        'image_url'      => !empty($row['image_path'])
+                                ? '/api/identifications/image?filename=' . rawurlencode(basename($row['image_path']))
+                                : null,
         'top_result'     => $row['top_result']     ?? null,
         'top_confidence' => $row['top_confidence'] !== null
                                 ? (float) $row['top_confidence']
                                 : null,
+        'identification_method' => $row['identification_method'] ?? 'cnn',
         'created_at'     => $row['created_at'],
         'title'          => $row['title'] ?? null,
     ];

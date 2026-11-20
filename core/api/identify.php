@@ -47,6 +47,7 @@
  *     "success": true,
  *     "data": {
  *       "identification_id": 42,              // null for guests
+ *       "image_url":         "/api/identifications/image?filename=...", // null for guests
  *       "model_type":        "improved_original",
  *       "top_result":        "Halophila spinulosa",
  *       "top_confidence":    94.25,           // percent
@@ -65,6 +66,7 @@ require_once __DIR__ . '/../helpers/auth.php';
 require_once __DIR__ . '/../app/models/SessionModel.php';
 require_once __DIR__ . '/../app/models/UserModel.php';
 require_once __DIR__ . '/../app/models/IdentificationModel.php';
+require_once __DIR__ . '/../helpers/identification_image_storage.php';
 
 requireMethod('POST');
 
@@ -147,6 +149,12 @@ if (!move_uploaded_file($_FILES['image']['tmp_name'], $tempPath)) {
     jsonError('Failed to save uploaded image.', 500);
 }
 
+register_shutdown_function(static function () use ($tempPath): void {
+    if (is_file($tempPath)) {
+        @unlink($tempPath);
+    }
+});
+
 // ── Check CNN_API_URL is configured ──────────────────────────────────────────
 $cnnapiUrl = rtrim((string) env('CNN_API_URL', ''), '/');
 
@@ -180,9 +188,6 @@ $rawResponse = curl_exec($ch);
 $httpCode    = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 $curlError   = curl_error($ch);
 curl_close($ch);
-
-// Clean up temp file regardless of outcome
-@unlink($tempPath);
 
 // ── Handle cURL / HTTP errors ─────────────────────────────────────────────────
 if ($rawResponse === false || $curlError) {
@@ -248,8 +253,21 @@ usort($scores, fn($a, $b) => $b['confidence'] <=> $a['confidence']);
 
 // ── Persist to DB for authenticated users ────────────────────────────────────
 $identificationId = null;
+$imagePath = null;
 
 if ($currentUser !== null) {
+    try {
+        $imagePath = bin2hex(random_bytes(16)) . '.' . $ext;
+        $imageDestination = IdentificationImageStorage::path($imagePath);
+    } catch (Throwable $e) {
+        error_log('Identification image storage unavailable: ' . $e->getMessage());
+        jsonError('Persistent identification image storage is unavailable.', 503);
+    }
+
+    if (!copy($tempPath, $imageDestination)) {
+        jsonError('Failed to save identification image to persistent storage.', 500);
+    }
+
     $pdo   = $pdo ?? getDB();
     $model = new IdentificationModel($pdo);
 
@@ -260,7 +278,8 @@ if ($currentUser !== null) {
         $title,           // optional run title
         $topLabel,
         $topConfidence,
-        $activeTrack      // model_type — stored for history/reporting
+        $activeTrack,     // model_type — stored for history/reporting
+        $imagePath
     );
 
     $rank = 1;
@@ -282,8 +301,14 @@ if ($currentUser !== null) {
 }
 
 // ── Return result ─────────────────────────────────────────────────────────────
+@unlink($tempPath);
+
 jsonSuccess([
     'identification_id' => $identificationId,
+    'image_url'         => $imagePath !== null
+        ? IdentificationImageStorage::imageUrl($imagePath)
+        : null,
+    'identification_method' => 'cnn',
     'model_type'        => $activeTrack,
     'top_result'        => $topLabel,
     'top_confidence'    => $topConfidence,

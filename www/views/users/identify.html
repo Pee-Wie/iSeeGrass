@@ -18,7 +18,7 @@
     <!-- iSeeGrass Default Theme -->
     <link rel="stylesheet" href="../../public/css/styles.css">
     <link rel="stylesheet" href="../../public/css/users/styles-users.css">
-    <link rel="stylesheet" href="../../public/css/users/identify/styles-users-identify.css?v=2">
+    <link rel="stylesheet" href="../../public/css/users/identify/styles-users-identify.css?v=3">
 </head>
 
 <body>
@@ -193,6 +193,10 @@
                                         id="identifyBtn" type="button">
                                         Identify Species
                                     </button>
+                                    <button class="btn btn-secondary collector-manual-btn"
+                                        id="manualIdentifyBtn" type="button" disabled>
+                                        Use manual key
+                                    </button>
                                     <button class="btn btn-secondary collector-clear-btn"
                                         id="clearBtn" type="button" aria-label="Clear all photos">
                                         Clear all
@@ -294,10 +298,10 @@
 
     <!-- iSeeGrass Default Scripts -->
     <script type="module" src="../../components/navbar-user.js"></script>
-    <script type="module" src="../../components/sidebar-users-identify.js"></script>
+    <script type="module" src="../../components/sidebar-users-identify.js?v=3"></script>
     <!-- Custom modal utility — must load before page script -->
     <script type="module" src="../../components/modal-utils.js"></script>
-    <script type="module" src="../../public/js/users/identify/script-users-identify.js"></script>
+    <script type="module" src="../../public/js/users/identify/script-users-identify.js?v=3"></script>
 
     <!-- Tabler -->
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js"></script>

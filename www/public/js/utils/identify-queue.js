@@ -22,6 +22,9 @@
  *   enqueuedAt  : number       (Date.now())
  *   retries     : number       (incremented on each failed drain attempt)
  *   histId      : string       (the crypto.randomUUID() used in the history UI)
+ *   identificationMethod : string  ('cnn' or 'manual_key'; omitted means 'cnn')
+ *   speciesName : string|null      (manual-key result)
+ *   sourceIdentificationId : number|null  (manual flag correction)
  * }
  *
  * ── Exports ───────────────────────────────────────────────────────────────────
@@ -84,11 +87,15 @@ function idbRequest(req) {
  * Add an identification job to the offline queue.
  *
  * @param {{
- *   imageBlob  : Blob,
- *   fileName   : string,
+ *   imageBlob  : Blob|null,
+ *   fileName   : string|null,
  *   title      : string|null,
  *   modelType  : string|null,
  *   histId     : string,
+ *   identificationMethod : string,
+ *   speciesName : string|null,
+ *   sourceIdentificationId : number|null,
+ *   notes : string|null,
  * }} job
  * @returns {Promise<number>}  The IDB auto-generated key.
  */
@@ -106,6 +113,10 @@ export async function enqueue(job) {
     enqueuedAt : Date.now(),
     retries    : 0,
     histId     : job.histId,
+    identificationMethod: job.identificationMethod ?? 'cnn',
+    speciesName: job.speciesName ?? null,
+    sourceIdentificationId: job.sourceIdentificationId ?? null,
+    notes: job.notes ?? null,
   }));
 }
 
@@ -139,14 +150,14 @@ export async function getQueueCount() {
 /**
  * Drain the queue: retry every pending job in order.
  *
- * @param {function(Blob, string|null, string|null, string): Promise<object>} identifyFn
- *   The real identifyImage(file, title, modelType, histId) function — passed in to
- *   avoid a circular import. histId is forwarded so re-queues reuse the same UUID.
+ * @param {function(File|null, string|null, string|null, string, string, string|null, number|null, string|null): Promise<object>} identifyFn
+ *   Upload function selected by identification method. The history ID is
+ *   forwarded so a retry updates the original queue card.
  *
  * @param {function(string, object|null, Error|null, File|null): void} onResult
  *   Called after each job attempt with (histId, result|null, error|null, file|null).
  *   file is the reconstructed File object — pass it to loadDirectPhoto() so the
- *   image appears in the 75% panel when the result arrives.
+ *   image appears in the 75% panel when available.
  */
 export async function drain(identifyFn, onResult) {
   let jobs;
@@ -163,10 +174,19 @@ export async function drain(identifyFn, onResult) {
     if (!navigator.onLine) break;
 
     try {
-      const file   = new File([job.imageBlob], job.fileName, { type: job.imageBlob.type });
-      // Pass job.histId as 4th arg so identifyImage can reuse the same UUID
-      // if the network drops again mid-drain (prevents orphaned queue entries).
-      const result = await identifyFn(file, job.title, job.modelType, job.histId);
+      const file = job.imageBlob
+        ? new File([job.imageBlob], job.fileName, { type: job.imageBlob.type })
+        : null;
+      const result = await identifyFn(
+        file,
+        job.title,
+        job.modelType,
+        job.histId,
+        job.identificationMethod ?? 'cnn',
+        job.speciesName ?? null,
+        job.sourceIdentificationId ?? null,
+        job.notes ?? null,
+      );
 
       await dequeue(job.id);
       // Pass file as 4th arg so the caller can load it into the preview panel

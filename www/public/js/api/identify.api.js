@@ -5,6 +5,7 @@
  * response normalised to our internal shape:
  *   {
  *     identification_id: number | null,   // null for guests
+ *     image_url:         string | null,   // stored source image URL for authenticated users
  *     model_type:        string,          // active engine track key
  *     top_result:        string,          // species_name from verdict
  *     top_confidence:    number,          // percent 0–100
@@ -31,7 +32,7 @@
 
 import { get, put, del, upload } from './client.js';
 import { getEngineTrack } from './settings.api.js';
-import { enqueue, isOfflineError, OfflineQueuedError } from '../utils/identify-queue.js';
+import { enqueue, isOfflineError, OfflineQueuedError } from '../utils/identify-queue.js?v=3';
 
 /**
  * @typedef {'original'|'improved_original'|'6_species_proto'} ModelType
@@ -97,6 +98,68 @@ export async function identifyImage(imageFile, title, modelType, guest = false, 
         title     : title ?? null,
         modelType : track,
         histId    : resolvedHistId,
+      });
+      throw new OfflineQueuedError(resolvedHistId, queueId);
+    }
+    throw err;
+  }
+}
+
+/**
+ * Save a result selected from the Indo-Pacific manual key.
+ *
+ * A normal manual identification includes its image. A correction launched
+ * from Flag Wrong Prediction references the previously saved CNN record and
+ * therefore does not need to upload the image again.
+ *
+ * @param {File|null} imageFile
+ * @param {string} scientificName
+ * @param {string|null} title
+ * @param {{
+ *   sourceIdentificationId?: number|null,
+ *   histId?: string|null,
+ *   notes?: string|null,
+ *   queueOffline?: boolean,
+ * }} [options]
+ */
+export async function manualIdentifyImage(imageFile, scientificName, title, options = {}) {
+  const {
+    sourceIdentificationId = null,
+    histId = null,
+    notes = null,
+    queueOffline = true,
+  } = options;
+  const form = new FormData();
+  form.append('scientific_name', scientificName);
+  form.append('image_title', title ?? '');
+  if (notes) form.append('notes', notes);
+
+  if (sourceIdentificationId != null) {
+    form.append('source_identification_id', String(sourceIdentificationId));
+  } else if (imageFile) {
+    form.append('image', imageFile);
+    form.append('image_filename', imageFile.name);
+  } else {
+    throw new Error('Select a photo before saving a manual identification.');
+  }
+
+  try {
+    return await upload('/identifications/manual', form);
+  } catch (err) {
+    if (queueOffline && isOfflineError(err)) {
+      const resolvedHistId = histId ?? crypto.randomUUID();
+      const queueId = await enqueue({
+        ...(imageFile ? {
+          imageBlob: new Blob([await imageFile.arrayBuffer()], { type: imageFile.type }),
+          fileName: imageFile.name,
+        } : {}),
+        title: title ?? null,
+        modelType: null,
+        histId: resolvedHistId,
+        identificationMethod: 'manual_key',
+        speciesName: scientificName,
+        sourceIdentificationId,
+        notes,
       });
       throw new OfflineQueuedError(resolvedHistId, queueId);
     }

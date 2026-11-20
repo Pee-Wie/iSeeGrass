@@ -1,3 +1,5 @@
+import { assetUrl } from '../public/js/config/api.config.js?v=3';
+
 /**
  * <isee-identify-history> — Identification History Sidebar
  *
@@ -13,7 +15,7 @@
  *     id:         string,          // unique run ID  (e.g. crypto.randomUUID())
  *     timestamp:  number,          // Date.now()
  *     fileName:   string,          // original filename
- *     thumbUrl:   string,          // object URL for the thumbnail
+ *     thumbUrl:   string|null,     // object URL or persisted image URL
  *     topSpecies: string,          // top predicted species name
  *     confidence: number,          // 0–100 confidence %
  *     status:     'pending'        // | 'done' | 'error'
@@ -236,8 +238,10 @@ class ISeeIdentifyHistory extends HTMLElement {
         if (existing) {
           // Refresh the card in place — e.g. title may have changed
           Object.assign(existing, {
+            thumbUrl:   assetUrl(rec.image_url),
             topSpecies: rec.top_result    ?? '—',
             confidence: rec.top_confidence ?? 0,
+            identificationMethod: rec.identification_method ?? 'cnn',
             title:      rec.title ?? null,
             status:     'done',
           });
@@ -279,10 +283,10 @@ class ISeeIdentifyHistory extends HTMLElement {
   }
 
   /**
-   * Insert a history card sourced from a DB record (no live thumbnail).
+   * Insert a history card sourced from a DB record.
    * Uses the DB row `id` as `_seq` so the number is stable across reloads.
    *
-   * @param {{ id:number, image_filename:string|null, top_result:string|null,
+   * @param {{ id:number, image_filename:string|null, image_url:string|null, top_result:string|null,
    *           top_confidence:number|null, created_at:string }} rec
    */
   _pushPersisted(rec) {
@@ -294,9 +298,10 @@ class ISeeIdentifyHistory extends HTMLElement {
                     ? new Date(rec.created_at).getTime()
                     : Date.now(),
       fileName:   rec.image_filename ?? '(unknown)',
-      thumbUrl:   null,                    // no thumbnail for persisted records
+      thumbUrl:   assetUrl(rec.image_url),
       topSpecies: rec.top_result    ?? '—',
-      confidence: rec.top_confidence ?? 0,
+      confidence: rec.top_confidence,
+      identificationMethod: rec.identification_method ?? 'cnn',
       title:      rec.title ?? null,
       status:     'done',
       errorMsg:   null,
@@ -474,6 +479,10 @@ class ISeeIdentifyHistory extends HTMLElement {
 
     // Confidence bar width (clamped 0–100)
     const pct = Math.min(100, Math.max(0, entry.confidence ?? 0));
+    const isManual = entry.identificationMethod === 'manual_key';
+    const manualLabel = entry.status === 'done'
+      ? 'Manual key · no confidence score'
+      : 'Manual key';
 
     // Status badge
     const statusLabel = { pending: 'Pending…', done: 'Done', error: 'Error', queued: 'Queued' }[entry.status] ?? entry.status;
@@ -582,7 +591,10 @@ class ISeeIdentifyHistory extends HTMLElement {
           <span class="hist-card__species">${species}</span>
         </p>
 
-        ${entry.status === 'done' ? `
+        ${isManual ? `
+        <span class="hist-card__manual-tag">${manualLabel}</span>` : ''}
+
+        ${entry.status === 'done' && !isManual ? `
         <div class="hist-card__conf-row" aria-label="Confidence ${pct}%">
           <div class="hist-card__conf-bar">
             <div class="hist-card__conf-fill" style="width:${pct}%"
